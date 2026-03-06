@@ -1,7 +1,7 @@
 import { Command } from "commander";
 import { getClient } from "../api/client.js";
 import { listContainers, listProcesses, getEdgeLogs, getEdgeMetadata, getEdgeEvents, getEdgeFile, listEdgeFiles, getEdgeKubeLogs } from "../api/endpoints/edge.js";
-import { listEdgeNodes, findEdgeNode, getEdgeNodeSystemInfo, getEdgeNodeInputs, getEdgeNodeOutputs, getNodeMetrics, getEdgeNodeFileInspect, listEdgeNodeFiles } from "../api/endpoints/edge-nodes.js";
+import { listEdgeNodes, findEdgeNode, getEdgeNodeSystemInfo, getEdgeNodeInputs, getEdgeNodeOutputs, getNodeMetrics, getEdgeNodeFileInspect, listEdgeNodeFiles, searchEdgeNodeFile } from "../api/endpoints/edge-nodes.js";
 import { formatOutput } from "../output/formatter.js";
 import { handleError } from "../utils/errors.js";
 
@@ -325,6 +325,42 @@ export function registerEdgeCommand(program: Command): void {
         }
         const data = await listEdgeNodeFiles(client, found.id, dirPath, opts.stats);
         console.log(formatOutput(data, { table: opts.table }));
+      } catch (err) {
+        handleError(err);
+      }
+    });
+
+  cmd
+    .command("file-search")
+    .description("Search or read file contents on an edge node")
+    .argument("<node>", "Node hostname or ID")
+    .argument("<path>", "File path on the node")
+    .option("-q, --query <query>", "Search string (omit to read all lines)")
+    .option("-l, --limit <n>", "Max lines to return", "50")
+    .option("-o, --offset <n>", "Offset (for pagination)", "0")
+    .option("--raw", "Print only _raw lines (file content)")
+    .option("--table", "Table output")
+    .action(async (node: string, filePath: string, opts) => {
+      try {
+        const client = getClient();
+        const found = await findEdgeNode(client, node);
+        if (!found) {
+          console.error(`Node "${node}" not found.`);
+          process.exit(1);
+        }
+        const data = await searchEdgeNodeFile(
+          client, found.id, filePath, opts.query,
+          parseInt(opts.limit, 10), parseInt(opts.offset, 10)
+        );
+        if (opts.raw) {
+          const items = (data as Record<string, unknown>).items as Record<string, unknown>[] ?? [];
+          const events = (items[0]?.items as Record<string, unknown>[]) ?? [];
+          for (const e of events) {
+            console.log(e._raw);
+          }
+        } else {
+          console.log(formatOutput(data, { table: opts.table }));
+        }
       } catch (err) {
         handleError(err);
       }

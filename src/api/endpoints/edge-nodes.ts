@@ -134,6 +134,21 @@ export async function listEdgeNodeFiles(
   return resp.data;
 }
 
+export async function searchEdgeNodeFile(
+  client: AxiosInstance,
+  nodeId: string,
+  filePath: string,
+  query?: string,
+  limit = 50,
+  offset = 0
+): Promise<unknown> {
+  const resp = await client.post(
+    `/api/v1/w/${encodeURIComponent(nodeId)}/edge/search/file`,
+    { file: filePath, offset, limit, et: 0, query: query ?? "", rulesets: [] }
+  );
+  return resp.data;
+}
+
 export async function getNodeMetrics(
   client: AxiosInstance,
   nodeId: string,
