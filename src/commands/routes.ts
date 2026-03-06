@@ -1,6 +1,6 @@
 import { Command } from "commander";
 import { getClient } from "../api/client.js";
-import { listRoutes, getRoute, createRoute, updateRoute, deleteRoute } from "../api/endpoints/routes.js";
+import { listRoutes, getRoute, updateRoute, deleteRoute } from "../api/endpoints/routes.js";
 import { resolveGroup } from "../utils/group-resolver.js";
 import { formatOutput } from "../output/formatter.js";
 import { handleError } from "../utils/errors.js";
@@ -45,14 +45,21 @@ export function registerRoutesCommand(program: Command): void {
 
   cmd
     .command("create")
-    .description("Create a route from JSON")
+    .description("Create a route (appends to existing route table)")
     .argument("<json>", "Route JSON config")
     .option("-g, --group <name>", "Worker group name")
     .action(async (json: string, opts) => {
       try {
         const client = getClient();
         const group = await resolveGroup(client, opts.group);
-        const data = await createRoute(client, group, JSON.parse(json));
+        const newRoute = JSON.parse(json);
+
+        // Fetch existing route table and append the new route
+        const existing = await listRoutes(client, group) as Record<string, unknown>;
+        const existingRoutes = (existing.routes ?? []) as Record<string, unknown>[];
+        existingRoutes.push(newRoute);
+
+        const data = await updateRoute(client, group, "default", { routes: existingRoutes });
         console.log(formatOutput(data));
       } catch (err) {
         handleError(err);
