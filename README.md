@@ -4,7 +4,7 @@ A command-line interface for the Cribl Cloud REST API. Manage worker groups, pip
 
 ## Why a CLI Instead of MCP?
 
-Cribl ships an [MCP server](https://docs.cribl.io/copilot/cribl-mcp-server/) for AI assistants. MCP is great for discovery — an agent can browse available tools and figure out what to call. But once you know *what* you need, a CLI is simpler, faster, and more useful.
+Cribl publishes an [MCP server](https://docs.cribl.io/copilot/cribl-mcp-server/) you can set up for AI assistants. MCP is great for discovery — an agent can browse available tools and figure out what to call. But once you know *what* you need, a CLI is simpler, faster, and more useful.
 
 **A CLI is just a shell command.** Any AI agent with terminal access (Claude Code, Cursor, Windsurf, etc.) can call it directly — no protocol layer, no JSON-RPC, no server to run. The agent runs `cribl sources list -g prod`, gets JSON back, and moves on. That's it. No handshake, no tool registration, no schema negotiation.
 
