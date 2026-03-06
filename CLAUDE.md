@@ -72,6 +72,49 @@ src/utils/group-resolver.ts   → resolveGroup() — defaults to first worker gr
 - Test fixtures in `test/fixtures/`
 - Nock interceptors match against `https://test.cribl.cloud` base URL
 
+## Answering Questions About Nodes
+
+When the user asks about CPU, memory, disk, load, or network for a Cribl node (Edge or hybrid worker), use the CLI to fetch live data. These commands work for **any managed node** — Edge nodes, hybrid workers, etc.
+
+```bash
+# List all managed nodes (Edge + hybrid workers)
+npx tsx bin/cribl.ts edge nodes
+
+# Filter to a specific fleet
+npx tsx bin/cribl.ts edge nodes -f pi
+
+# Get system summary (CPU%, memory, disk, load avg, uptime) by hostname
+npx tsx bin/cribl.ts edge system-info <hostname>
+
+# Get full raw JSON (per-CPU times, network interfaces, all details)
+npx tsx bin/cribl.ts edge system-info-raw <hostname>
+
+# Get sources/inputs running on a node
+npx tsx bin/cribl.ts edge inputs <hostname>
+
+# Get destinations/outputs on a node
+npx tsx bin/cribl.ts edge outputs <hostname>
+
+# Historical metrics (CPU, memory, disk, load) — time series
+npx tsx bin/cribl.ts edge metrics <hostname> -d 1h        # last hour (default)
+npx tsx bin/cribl.ts edge metrics <hostname> -d 15m       # last 15 min
+npx tsx bin/cribl.ts edge metrics <hostname> -d 4h        # last 4 hours
+# Durations: 5m, 10m, 15m, 30m, 1h, 4h, 12h, 1d
+
+# Summary (min/max/avg) instead of full time series
+npx tsx bin/cribl.ts edge metrics <hostname> -d 1h --summary
+```
+
+**How to answer node questions:**
+
+1. If the user names a host, run `edge system-info <hostname>` for a current snapshot
+2. If unclear which node, run `edge nodes` to list them and ask or infer
+3. For trend/spike questions ("any CPU spikes?", "memory usage over time"), use `edge metrics <hostname> -d <duration> --summary` to get min/max/avg, or without `--summary` for the full minute-by-minute time series
+4. The `--summary` output shows min/max/avg for CPU%, memory%, disk%, and load avg — a max CPU much higher than avg indicates spikes
+5. For deeper analysis (per-core breakdown, network interface details), use `system-info-raw`
+6. Hostnames are case-insensitive — `pi5-cribl` and `Pi5-Cribl` both work
+7. Data resolution is 1 minute. Available history depends on node uptime and metrics retention
+
 ## Workflow Skills
 
 Agent workflow guides are in `skills/` — each `SKILL.md` teaches how to compose commands for common tasks. See `skills/cribl-shared/SKILL.md` for the base skill (auth, flags, output).
