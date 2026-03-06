@@ -5,6 +5,7 @@ import {
   commitVersion, pushVersion, syncVersion,
   listBranches, getCurrentBranch,
 } from "../api/endpoints/version.js";
+import { deployGroup } from "../api/endpoints/workers.js";
 import { resolveGroup } from "../utils/group-resolver.js";
 import { formatOutput } from "../output/formatter.js";
 import { handleError } from "../utils/errors.js";
@@ -123,7 +124,7 @@ export function registerVersionCommand(program: Command): void {
 
   cmd
     .command("deploy")
-    .description("Commit and push changes in one step")
+    .description("Commit and deploy config to workers in one step")
     .argument("<message>", "Commit message")
     .option("-g, --group <name>", "Worker group name")
     .action(async (message: string, opts) => {
@@ -131,8 +132,8 @@ export function registerVersionCommand(program: Command): void {
         const client = getClient();
         const group = await resolveGroup(client, opts.group);
         const commitResult = await commitVersion(client, group, message);
-        const pushResult = await pushVersion(client, group);
-        console.log(formatOutput({ commit: commitResult, push: pushResult, message: "Deploy complete: committed and pushed." }));
+        await deployGroup(client, group);
+        console.log(formatOutput({ commit: commitResult, message: `Deploy complete: committed and deployed to '${group}'.` }));
       } catch (err) {
         handleError(err);
       }

@@ -17,3 +17,13 @@ export async function getWorkerGroup(
   );
   return resp.data.items?.[0] ?? resp.data;
 }
+
+export async function deployGroup(
+  client: AxiosInstance,
+  group: string
+): Promise<unknown> {
+  const resp = await client.patch(
+    `/api/v1/master/groups/${encodeURIComponent(group)}/deploy`
+  );
+  return resp.data;
+}

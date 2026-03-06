@@ -7,7 +7,7 @@ import { createRoute, updateRoute, deleteRoute } from "../../src/api/endpoints/r
 import { createLookup } from "../../src/api/endpoints/lookups.js";
 import { createDashboard } from "../../src/api/endpoints/dashboards.js";
 import { createCredential, updateCredential, deleteCredential } from "../../src/api/endpoints/credentials.js";
-import { getWorkerGroup } from "../../src/api/endpoints/workers.js";
+import { getWorkerGroup, deployGroup } from "../../src/api/endpoints/workers.js";
 import { getNotebook, deleteNotebook } from "../../src/api/endpoints/notebooks.js";
 
 const BASE = "https://mock.cribl.cloud";
@@ -132,6 +132,12 @@ describe("CRUD API endpoints", () => {
       nock(BASE).get("/api/v1/master/groups/default").reply(200, { items: [{ id: "default", workerCount: 3 }] });
       const data = await getWorkerGroup(client(), "default");
       expect(data.id).toBe("default");
+    });
+
+    it("deployGroup", async () => {
+      nock(BASE).patch("/api/v1/master/groups/default/deploy").reply(200, {});
+      const data = await deployGroup(client(), "default");
+      expect(data).toEqual({});
     });
   });
 

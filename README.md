@@ -129,6 +129,7 @@ Config priority: CLI flags > environment variables > `~/.criblrc` profile.
 |---|---|
 | `cribl workers list` | List all worker groups |
 | `cribl workers get <id>` | Get a worker group by ID |
+| `cribl workers deploy [-g group]` | Deploy committed config to workers |
 
 ### Sources
 
@@ -282,7 +283,7 @@ Config priority: CLI flags > environment variables > `~/.criblrc` profile.
 | `cribl version push [-g group]` | Push committed changes |
 | `cribl version sync [-g group]` | Sync with remote |
 | `cribl version branches [-g group]` | List branches |
-| `cribl version deploy <message> [-g group]` | Commit and push in one step |
+| `cribl version deploy <message> [-g group]` | Commit and deploy to workers in one step |
 | `cribl version current-branch [-g group]` | Get current branch |
 
 ### System

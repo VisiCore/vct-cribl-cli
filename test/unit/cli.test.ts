@@ -208,13 +208,14 @@ describe("CLI program", () => {
     expect(subNames).toContain("clone");
   });
 
-  it("workers should have get subcommand", () => {
+  it("workers should have get and deploy subcommands", () => {
     const program = buildProgram();
     const cmd = program.commands.find((c) => c.name() === "workers")!;
     const subNames = cmd.commands.map((c) => c.name());
 
     expect(subNames).toContain("list");
     expect(subNames).toContain("get");
+    expect(subNames).toContain("deploy");
   });
 
   it("notebooks should have get and delete subcommands", () => {
