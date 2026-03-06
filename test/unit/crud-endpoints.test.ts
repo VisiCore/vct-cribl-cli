@@ -135,9 +135,10 @@ describe("CRUD API endpoints", () => {
     });
 
     it("deployGroup", async () => {
-      nock(BASE).patch("/api/v1/master/groups/default/deploy").reply(200, {});
+      nock(BASE).get("/api/v1/master/groups/default").reply(200, { items: [{ id: "default", configVersion: "abc123" }] });
+      nock(BASE).patch("/api/v1/master/groups/default/deploy", { version: "abc123" }).reply(200, { id: "default", configVersion: "abc123" });
       const data = await deployGroup(client(), "default");
-      expect(data).toEqual({});
+      expect((data as Record<string, unknown>).configVersion).toBe("abc123");
     });
   });
 

@@ -22,8 +22,15 @@ export async function deployGroup(
   client: AxiosInstance,
   group: string
 ): Promise<unknown> {
+  const groupResp = await client.get<{ items: WorkerGroup[] }>(
+    `/api/v1/master/groups/${encodeURIComponent(group)}`
+  );
+  const groupData = groupResp.data.items?.[0] ?? groupResp.data;
+  const version = (groupData as Record<string, unknown>).configVersion;
+
   const resp = await client.patch(
-    `/api/v1/master/groups/${encodeURIComponent(group)}/deploy`
+    `/api/v1/master/groups/${encodeURIComponent(group)}/deploy`,
+    { version }
   );
   return resp.data;
 }
