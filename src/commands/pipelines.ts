@@ -75,6 +75,26 @@ export function registerPipelinesCommand(program: Command): void {
     });
 
   cmd
+    .command("clone")
+    .description("Clone a pipeline from one worker group to another")
+    .argument("<id>", "Pipeline ID to clone")
+    .requiredOption("--from <group>", "Source worker group")
+    .requiredOption("--to <group>", "Target worker group")
+    .option("--new-id <id>", "New pipeline ID (defaults to original)")
+    .action(async (id: string, opts) => {
+      try {
+        const client = getClient();
+        const pipeline = await getPipeline(client, opts.from, id);
+        const pipelineData = { ...pipeline } as Record<string, unknown>;
+        if (opts.newId) pipelineData.id = opts.newId;
+        const result = await createPipeline(client, opts.to, pipelineData);
+        console.log(formatOutput(result));
+      } catch (err) {
+        handleError(err);
+      }
+    });
+
+  cmd
     .command("delete")
     .description("Delete a pipeline")
     .argument("<id>", "Pipeline ID")

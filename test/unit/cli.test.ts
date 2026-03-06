@@ -115,7 +115,7 @@ describe("CLI program", () => {
     expect(subNames).toContain("kube-logs");
   });
 
-  it("version should have info, status, diff, commit, push, sync, branches", () => {
+  it("version should have info, status, diff, commit, push, sync, branches, deploy", () => {
     const program = buildProgram();
     const cmd = program.commands.find((c) => c.name() === "version")!;
     const subNames = cmd.commands.map((c) => c.name());
@@ -127,5 +127,104 @@ describe("CLI program", () => {
     expect(subNames).toContain("push");
     expect(subNames).toContain("sync");
     expect(subNames).toContain("branches");
+    expect(subNames).toContain("deploy");
+  });
+
+  it("sources should have full CRUD subcommands", () => {
+    const program = buildProgram();
+    const cmd = program.commands.find((c) => c.name() === "sources")!;
+    const subNames = cmd.commands.map((c) => c.name());
+
+    expect(subNames).toContain("list");
+    expect(subNames).toContain("get");
+    expect(subNames).toContain("create");
+    expect(subNames).toContain("update");
+    expect(subNames).toContain("delete");
+  });
+
+  it("destinations should have full CRUD subcommands", () => {
+    const program = buildProgram();
+    const cmd = program.commands.find((c) => c.name() === "destinations")!;
+    const subNames = cmd.commands.map((c) => c.name());
+
+    expect(subNames).toContain("list");
+    expect(subNames).toContain("get");
+    expect(subNames).toContain("create");
+    expect(subNames).toContain("update");
+    expect(subNames).toContain("delete");
+  });
+
+  it("routes should have full CRUD subcommands", () => {
+    const program = buildProgram();
+    const cmd = program.commands.find((c) => c.name() === "routes")!;
+    const subNames = cmd.commands.map((c) => c.name());
+
+    expect(subNames).toContain("list");
+    expect(subNames).toContain("get");
+    expect(subNames).toContain("create");
+    expect(subNames).toContain("update");
+    expect(subNames).toContain("delete");
+  });
+
+  it("credentials should have full CRUD subcommands", () => {
+    const program = buildProgram();
+    const cmd = program.commands.find((c) => c.name() === "credentials")!;
+    const subNames = cmd.commands.map((c) => c.name());
+
+    expect(subNames).toContain("list");
+    expect(subNames).toContain("get");
+    expect(subNames).toContain("create");
+    expect(subNames).toContain("update");
+    expect(subNames).toContain("delete");
+  });
+
+  it("lookups should have create subcommand", () => {
+    const program = buildProgram();
+    const cmd = program.commands.find((c) => c.name() === "lookups")!;
+    const subNames = cmd.commands.map((c) => c.name());
+
+    expect(subNames).toContain("list");
+    expect(subNames).toContain("get");
+    expect(subNames).toContain("create");
+    expect(subNames).toContain("delete");
+  });
+
+  it("dashboards should have create subcommand", () => {
+    const program = buildProgram();
+    const cmd = program.commands.find((c) => c.name() === "dashboards")!;
+    const subNames = cmd.commands.map((c) => c.name());
+
+    expect(subNames).toContain("list");
+    expect(subNames).toContain("get");
+    expect(subNames).toContain("create");
+    expect(subNames).toContain("delete");
+  });
+
+  it("pipelines should have clone subcommand", () => {
+    const program = buildProgram();
+    const cmd = program.commands.find((c) => c.name() === "pipelines")!;
+    const subNames = cmd.commands.map((c) => c.name());
+
+    expect(subNames).toContain("clone");
+  });
+
+  it("workers should have get subcommand", () => {
+    const program = buildProgram();
+    const cmd = program.commands.find((c) => c.name() === "workers")!;
+    const subNames = cmd.commands.map((c) => c.name());
+
+    expect(subNames).toContain("list");
+    expect(subNames).toContain("get");
+  });
+
+  it("notebooks should have get and delete subcommands", () => {
+    const program = buildProgram();
+    const cmd = program.commands.find((c) => c.name() === "notebooks")!;
+    const subNames = cmd.commands.map((c) => c.name());
+
+    expect(subNames).toContain("list");
+    expect(subNames).toContain("get");
+    expect(subNames).toContain("add");
+    expect(subNames).toContain("delete");
   });
 });

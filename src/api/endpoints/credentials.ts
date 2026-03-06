@@ -14,3 +14,17 @@ export async function getCredential(client: AxiosInstance, group: string, id: st
   const resp = await client.get<{ items: Credential[] }>(`${groupPath(group)}/system/credentials/${encodeURIComponent(id)}`);
   return resp.data.items?.[0] ?? resp.data;
 }
+
+export async function createCredential(client: AxiosInstance, group: string, credential: Record<string, unknown>): Promise<Credential> {
+  const resp = await client.post<Credential>(`${groupPath(group)}/system/credentials`, credential);
+  return resp.data;
+}
+
+export async function updateCredential(client: AxiosInstance, group: string, id: string, credential: Record<string, unknown>): Promise<Credential> {
+  const resp = await client.patch<Credential>(`${groupPath(group)}/system/credentials/${encodeURIComponent(id)}`, credential);
+  return resp.data;
+}
+
+export async function deleteCredential(client: AxiosInstance, group: string, id: string): Promise<void> {
+  await client.delete(`${groupPath(group)}/system/credentials/${encodeURIComponent(id)}`);
+}

@@ -128,13 +128,27 @@ Config priority: CLI flags > environment variables > `~/.criblrc` profile.
 | Command | Description |
 |---|---|
 | `cribl workers list` | List all worker groups |
+| `cribl workers get <id>` | Get a worker group by ID |
 
-### Sources & Destinations
+### Sources
 
 | Command | Description |
 |---|---|
-| `cribl sources get [-g group]` | Get source configurations |
-| `cribl destinations get [-g group]` | Get destination configurations |
+| `cribl sources list [-g group]` | List source configurations |
+| `cribl sources get <id> [-g group]` | Get a source by ID |
+| `cribl sources create [options] [-g group]` | Create a source (`--type`, `--id`, `--json-config`) |
+| `cribl sources update <id> <json> [-g group]` | Update a source |
+| `cribl sources delete <id> [-g group]` | Delete a source |
+
+### Destinations
+
+| Command | Description |
+|---|---|
+| `cribl destinations list [-g group]` | List destination configurations |
+| `cribl destinations get <id> [-g group]` | Get a destination by ID |
+| `cribl destinations create [options] [-g group]` | Create a destination (`--type`, `--id`, `--json-config`) |
+| `cribl destinations update <id> <json> [-g group]` | Update a destination |
+| `cribl destinations delete <id> [-g group]` | Delete a destination |
 
 ### Pipelines
 
@@ -144,6 +158,7 @@ Config priority: CLI flags > environment variables > `~/.criblrc` profile.
 | `cribl pipelines get <id> [-g group]` | Get a pipeline by ID |
 | `cribl pipelines create <json> [-g group]` | Create a pipeline from JSON |
 | `cribl pipelines update <id> <json> [-g group]` | Update a pipeline |
+| `cribl pipelines clone <id> --from <group> --to <group>` | Clone a pipeline between groups |
 | `cribl pipelines delete <id> [-g group]` | Delete a pipeline |
 
 ### Routes
@@ -152,6 +167,9 @@ Config priority: CLI flags > environment variables > `~/.criblrc` profile.
 |---|---|
 | `cribl routes list [-g group]` | List routes |
 | `cribl routes get <id> [-g group]` | Get a route by ID |
+| `cribl routes create <json> [-g group]` | Create a route |
+| `cribl routes update <id> <json> [-g group]` | Update a route |
+| `cribl routes delete <id> [-g group]` | Delete a route |
 
 ### Packs
 
@@ -169,6 +187,7 @@ Config priority: CLI flags > environment variables > `~/.criblrc` profile.
 |---|---|
 | `cribl lookups list [-g group]` | List lookup tables |
 | `cribl lookups get <id> [-g group]` | Get a lookup by ID |
+| `cribl lookups create <json> [-g group]` | Create a lookup |
 | `cribl lookups delete <id> [-g group]` | Delete a lookup |
 
 ### Search
@@ -179,6 +198,11 @@ Config priority: CLI flags > environment variables > `~/.criblrc` profile.
 | `cribl search jobs [-g group]` | List search jobs |
 | `cribl search results <job-id>` | Get search job results |
 | `cribl search saved [-g group]` | List saved searches |
+| `cribl search timeline <job-id>` | Get search job timeline |
+| `cribl search field-summary <job-id>` | Get search job field summary |
+| `cribl search job-logs <job-id>` | Get search job logs |
+| `cribl search job-metrics <job-id>` | Get search job metrics |
+| `cribl search job-diag <job-id>` | Get search job diagnostics |
 
 ### Datasets
 
@@ -191,7 +215,9 @@ Config priority: CLI flags > environment variables > `~/.criblrc` profile.
 | Command | Description |
 |---|---|
 | `cribl notebooks list [-g group]` | List search notebooks |
+| `cribl notebooks get <id> [-g group]` | Get a notebook by ID |
 | `cribl notebooks add --notebook-id <id> --query <q>` | Add query to a notebook |
+| `cribl notebooks delete <id> [-g group]` | Delete a notebook |
 
 ### Dashboards
 
@@ -199,6 +225,7 @@ Config priority: CLI flags > environment variables > `~/.criblrc` profile.
 |---|---|
 | `cribl dashboards list [-g group]` | List dashboards |
 | `cribl dashboards get <id> [-g group]` | Get a dashboard by ID |
+| `cribl dashboards create <json> [-g group]` | Create a dashboard |
 | `cribl dashboards delete <id> [-g group]` | Delete a dashboard |
 
 ### Alerts
@@ -255,6 +282,7 @@ Config priority: CLI flags > environment variables > `~/.criblrc` profile.
 | `cribl version push [-g group]` | Push committed changes |
 | `cribl version sync [-g group]` | Sync with remote |
 | `cribl version branches [-g group]` | List branches |
+| `cribl version deploy <message> [-g group]` | Commit and push in one step |
 | `cribl version current-branch [-g group]` | Get current branch |
 
 ### System
@@ -359,6 +387,9 @@ Config priority: CLI flags > environment variables > `~/.criblrc` profile.
 |---|---|
 | `cribl credentials list [-g group]` | List credentials |
 | `cribl credentials get <id> [-g group]` | Get a credential |
+| `cribl credentials create <json> [-g group]` | Create a credential |
+| `cribl credentials update <id> <json> [-g group]` | Update a credential |
+| `cribl credentials delete <id> [-g group]` | Delete a credential |
 
 ### Samples
 

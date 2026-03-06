@@ -7,3 +7,13 @@ export async function listWorkerGroups(
   const resp = await client.get<ApiListResponse<WorkerGroup>>("/api/v1/master/groups");
   return resp.data;
 }
+
+export async function getWorkerGroup(
+  client: AxiosInstance,
+  id: string
+): Promise<WorkerGroup> {
+  const resp = await client.get<{ items: WorkerGroup[] }>(
+    `/api/v1/master/groups/${encodeURIComponent(id)}`
+  );
+  return resp.data.items?.[0] ?? resp.data;
+}

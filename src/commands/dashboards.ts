@@ -1,6 +1,6 @@
 import { Command } from "commander";
 import { getClient } from "../api/client.js";
-import { listDashboards, getDashboard, deleteDashboard } from "../api/endpoints/dashboards.js";
+import { listDashboards, getDashboard, createDashboard, deleteDashboard } from "../api/endpoints/dashboards.js";
 import { formatOutput } from "../output/formatter.js";
 import { handleError } from "../utils/errors.js";
 
@@ -31,6 +31,20 @@ export function registerDashboardsCommand(program: Command): void {
       try {
         const data = await getDashboard(getClient(), id, opts.group);
         console.log(formatOutput(data, { table: opts.table }));
+      } catch (err) {
+        handleError(err);
+      }
+    });
+
+  cmd
+    .command("create")
+    .description("Create a dashboard from JSON")
+    .argument("<json>", "Dashboard JSON config")
+    .option("-g, --group <name>", "Worker group name")
+    .action(async (json: string, opts) => {
+      try {
+        const data = await createDashboard(getClient(), JSON.parse(json), opts.group);
+        console.log(formatOutput(data));
       } catch (err) {
         handleError(err);
       }

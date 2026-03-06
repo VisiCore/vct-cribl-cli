@@ -122,6 +122,25 @@ export function registerVersionCommand(program: Command): void {
     });
 
   cmd
+    .command("deploy")
+    .description("Commit and push changes in one step")
+    .argument("<message>", "Commit message")
+    .option("-g, --group <name>", "Worker group name")
+    .action(async (message: string, opts) => {
+      try {
+        const client = getClient();
+        const group = await resolveGroup(client, opts.group);
+        const commitResult = await commitVersion(client, group, message);
+        console.log(formatOutput({ step: "commit", result: commitResult }));
+        const pushResult = await pushVersion(client, group);
+        console.log(formatOutput({ step: "push", result: pushResult }));
+        console.log(formatOutput({ message: "Deploy complete: committed and pushed." }));
+      } catch (err) {
+        handleError(err);
+      }
+    });
+
+  cmd
     .command("current-branch")
     .description("Get current branch")
     .option("-g, --group <name>", "Worker group name")
