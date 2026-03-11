@@ -174,6 +174,33 @@ tests/
 | [Architecture](docs/architecture.md) | Codebase structure, design patterns, developer guide |
 | [Examples](docs/examples.md) | Common workflows and scripting patterns |
 
+## Contributing
+
+Contributions are welcome! Here's how to get started:
+
+1. **Fork** the repo and clone your fork
+2. Create a feature branch: `git checkout -b my-feature`
+3. Install dev dependencies: `pip install -e ".[dev]"`
+4. Make your changes
+5. Run the tests: `pytest`
+6. Commit and push to your fork
+7. Open a **pull request** against `main`
+
+### Guidelines
+
+- All new commands should have corresponding unit tests
+- Follow existing code patterns — use the command factory for standard CRUD, hand-written commands for anything with special logic
+- Keep `--table` output support for any command that returns lists
+- Run `pytest` before submitting — all 71 tests must pass
+- Do not commit credentials, `.env` files, or `~/.criblrc` profiles
+
+### Reporting issues
+
+Open an issue at [github.com/VisiCore/vct-cribl-cli/issues](https://github.com/VisiCore/vct-cribl-cli/issues) with:
+- What you expected vs what happened
+- CLI command you ran
+- Cribl version and deployment type (cloud/on-prem/hybrid)
+
 ## License
 
 MIT
