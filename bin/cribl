@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Stable wrapper — bypasses pip's entrypoint script which can break
+# with setuptools editable installs.
+REAL="$(realpath "${BASH_SOURCE[0]}")"
+DIR="$(cd "$(dirname "$REAL")/.." && pwd)"
+exec "${DIR}/.venv/bin/python" -m cribl_cli "$@"
