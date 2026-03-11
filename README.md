@@ -165,6 +165,15 @@ tests/
   integration/     # Integration tests (gated)
 ```
 
+## Documentation
+
+| Doc | Description |
+|---|---|
+| [Configuration](docs/configuration.md) | Profiles, environment variables, authentication, global flags |
+| [Command Reference](docs/commands.md) | Every command, subcommand, option, and argument |
+| [Architecture](docs/architecture.md) | Codebase structure, design patterns, developer guide |
+| [Examples](docs/examples.md) | Common workflows and scripting patterns |
+
 ## License
 
 MIT
