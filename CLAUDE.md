@@ -32,6 +32,14 @@ Key modules:
 | `search` | `/api/v1/m/{group}/search/{path}`                   |
 | `lake`   | `/api/v1/products/lake/lakes/{lakeId}/{path}`       |
 
+## CLI Commands
+
+Worker groups are managed via `workers`, not `groups`.
+
+**Hand-written commands:** collectors, config, credentials, destinations, edge, health, jobs, kms, lookups, metrics, outposts, overview, packs, pipelines, preview, profiler, routes, search, sources, system, version, workers, workspaces
+
+**Factory-generated commands (standard CRUD):** ai-settings, alerts, appscope, auth-settings, banners, certificates, conditions, dashboard-categories, dashboards, dataset-providers, datasets, datatypes, db-connections, encryption-keys, event-breakers, executors, feature-flags, functions, git-settings, global-vars, grok, hmac-functions, lake-datasets, licenses, logger, macros, messages, notebooks, notification-targets, parquet-schemas, parsers, policies, protobuf-libs, regex, roles, samples, schemas, scripts, sds-rules, sds-rulesets, secrets, storage-locations, subscriptions, teams, trust-policies, usage-groups, users
+
 ## Safety Rules
 
 - **Never replace the route table wholesale.** `routes create` fetches existing routes, inserts before the catch-all, then updates.

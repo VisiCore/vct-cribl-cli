@@ -22,6 +22,30 @@ class DryRunAbort(Exception):
     pass
 
 
+def _extract_http_error_detail(err: Exception) -> dict | None:
+    """Extract the response body from an httpx.HTTPStatusError."""
+    try:
+        import httpx
+        if isinstance(err, httpx.HTTPStatusError) and err.response is not None:
+            try:
+                body = err.response.json()
+                # Cribl API often nests a JSON string inside "message"
+                msg = body.get("message", "")
+                if isinstance(msg, str):
+                    try:
+                        body["message"] = json.loads(msg)
+                    except (json.JSONDecodeError, TypeError):
+                        pass
+                return {"status": err.response.status_code, **body}
+            except (json.JSONDecodeError, ValueError):
+                text = err.response.text
+                if text:
+                    return {"status": err.response.status_code, "detail": text}
+    except ImportError:
+        pass
+    return None
+
+
 def handle_error(err: Exception) -> None:
     if isinstance(err, DryRunAbort):
         sys.exit(0)
@@ -33,7 +57,11 @@ def handle_error(err: Exception) -> None:
     elif isinstance(err, AuthenticationError):
         payload = {"error": str(err), "type": "AuthenticationError"}
     else:
-        payload = {"error": str(err)}
+        detail = _extract_http_error_detail(err)
+        if detail:
+            payload = {"error": str(err), **detail}
+        else:
+            payload = {"error": str(err)}
 
     sys.stderr.write(json.dumps(payload, indent=2) + "\n")
     sys.exit(1)

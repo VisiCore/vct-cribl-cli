@@ -26,7 +26,7 @@ def search_group():
 
 
 @search_group.command("run")
-@click.option("-q", "--query", required=True, help="Search query string.")
+@click.option("-q", "--query", required=True, help="Search query string (Kusto/KQL syntax, e.g. 'dataset=\"logs\" | where level == \"error\" | summarize count() by channel').")
 @click.option("--earliest", default=None, help="Earliest time bound.")
 @click.option("--latest", default=None, help="Latest time bound.")
 @click.option("-g", "--group", default="default_search", help="Search group.")
