@@ -447,7 +447,6 @@ cribl overview destinations -g <group> [--table]
 | `licenses` | list, get | `system/licenses` |
 | `subscriptions` | list, get | `system/subscriptions` |
 | `outposts` | list, get | `system/outposts` |
-| `alerts` | list | `system/notifications` |
 | `feature-flags` | list, get, update, delete | `system/feature-flags` |
 | `ai-settings` | list, get, update, delete | `system/ai-settings` |
 | `auth-settings` | get, update | `system/auth` (singleton) |
@@ -465,6 +464,7 @@ cribl overview destinations -g <group> [--table]
 | `datasets` | all | `datasets` |
 | `dashboards` | list, get, create, delete | `dashboards` |
 | `usage-groups` | list, get | `usage-groups` |
+| `alerts` | list | `notifications` |
 
 ### Lake-scoped (use `--lake`)
 

@@ -74,13 +74,14 @@ def _register_commands() -> None:
     from cribl_cli.commands.profiler import profiler_group
     from cribl_cli.commands.health import health_group
     from cribl_cli.commands.overview import overview_group
+    from cribl_cli.commands.alerts import alerts_group
 
     for group in [
         config_group, workers_group, sources_group, destinations_group,
         metrics_group, search_group, notebooks_group, pipelines_group,
         routes_group, jobs_group, version_group, system_group, edge_group,
         kms_group, preview_group, logger_group, profiler_group, health_group,
-        overview_group,
+        overview_group, alerts_group,
     ]:
         cli.add_command(group)
 

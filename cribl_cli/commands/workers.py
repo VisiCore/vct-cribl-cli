@@ -210,8 +210,34 @@ def workers_rm(container_name):
     """Stop and remove a Cribl worker Docker container."""
     try:
         click.echo(f"Stopping container '{container_name}'...", err=True)
-        subprocess.run(["docker", "stop", container_name], capture_output=True, text=True)
-        subprocess.run(["docker", "rm", container_name], capture_output=True, text=True)
+
+        # Stop the container — tolerate "not running" / "No such container"
+        stop_result = subprocess.run(
+            ["docker", "stop", container_name], capture_output=True, text=True,
+        )
+        if stop_result.returncode != 0:
+            stderr = stop_result.stderr.strip().lower()
+            if "no such container" not in stderr and "not running" not in stderr:
+                click.echo(f"Warning: docker stop failed: {stop_result.stderr.strip()}", err=True)
+
+        # Remove the container
+        rm_result = subprocess.run(
+            ["docker", "rm", container_name], capture_output=True, text=True,
+        )
+        if rm_result.returncode != 0:
+            stderr = rm_result.stderr.strip().lower()
+            if "no such container" in stderr:
+                click.echo(f"Container '{container_name}' does not exist.", err=True)
+                raise SystemExit(1)
+            else:
+                click.echo(f"Error: docker rm failed: {rm_result.stderr.strip()}", err=True)
+                raise SystemExit(1)
+
         click.echo(format_output({"status": "removed", "container": container_name}))
+    except FileNotFoundError:
+        click.echo("Error: Docker is not installed or not in PATH.", err=True)
+        raise SystemExit(1)
+    except SystemExit:
+        raise
     except Exception as e:
         handle_error(e)

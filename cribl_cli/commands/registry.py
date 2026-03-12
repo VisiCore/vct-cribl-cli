@@ -59,7 +59,7 @@ REGISTRY: list[CommandRegistration] = [
     CommandRegistration("licenses", EndpointConfig("global", "system/licenses"), ["list", "get"]),
     CommandRegistration("subscriptions", EndpointConfig("global", "system/subscriptions"), ["list", "get"]),
     CommandRegistration("outposts", EndpointConfig("global", "system/outposts"), ["list", "get"]),
-    CommandRegistration("alerts", EndpointConfig("global", "system/notifications"), ["list"]),
+    # alerts: hand-written command in commands/alerts.py (filters saved searches to scheduled ones)
     CommandRegistration("feature-flags", EndpointConfig("global", "system/feature-flags"), ["list", "get", "update", "delete"]),
     CommandRegistration("ai-settings", EndpointConfig("global", "system/ai-settings"), ["list", "get", "update", "delete"]),
     CommandRegistration("auth-settings", EndpointConfig("global", "system/auth", singleton=True), ["get", "update"]),

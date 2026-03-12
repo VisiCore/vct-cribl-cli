@@ -1,9 +1,10 @@
-"""HTTP client with auth interceptor and dry-run support."""
+"""HTTP client with auth interceptor, retry logic, and dry-run support."""
 
 from __future__ import annotations
 
 import json
 import sys
+import time
 from typing import Any
 
 import httpx
@@ -12,8 +13,34 @@ from cribl_cli.auth.oauth import get_access_token
 from cribl_cli.config.types import CriblConfig
 from cribl_cli.utils.errors import DryRunAbort
 
+_IDEMPOTENT_METHODS = frozenset({"GET", "HEAD", "PUT", "DELETE", "OPTIONS"})
+_RETRY_STATUS_CODES = frozenset({502, 503, 504})
+_MAX_RETRIES = 3
+_BACKOFF_BASE = 1  # seconds
+
 _client: httpx.Client | None = None
 _config_error: str | None = None
+
+
+class RetryTransport(httpx.BaseTransport):
+    """Transport that retries idempotent requests on 502/503/504 with exponential backoff."""
+
+    def __init__(self, transport: httpx.BaseTransport) -> None:
+        self._transport = transport
+
+    def handle_request(self, request: httpx.Request) -> httpx.Response:
+        response = self._transport.handle_request(request)
+        if request.method not in _IDEMPOTENT_METHODS:
+            return response
+
+        for attempt in range(_MAX_RETRIES):
+            if response.status_code not in _RETRY_STATUS_CODES:
+                return response
+            delay = _BACKOFF_BASE * (2 ** attempt)
+            time.sleep(delay)
+            response = self._transport.handle_request(request)
+
+        return response
 
 
 class AuthTransport(httpx.BaseTransport):
@@ -60,7 +87,8 @@ def create_client(
     dry_run: bool = False,
     verbose: bool = False,
 ) -> httpx.Client:
-    transport: httpx.BaseTransport = httpx.HTTPTransport()
+    transport: httpx.BaseTransport = httpx.HTTPTransport(retries=3)
+    transport = RetryTransport(transport)
     transport = AuthTransport(transport, config)
     if dry_run:
         transport = DryRunTransport(transport)
