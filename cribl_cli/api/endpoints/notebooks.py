@@ -46,10 +46,35 @@ def add_notebook_query(
     notebook_id: str,
     query_data: dict[str, Any],
 ) -> Any:
-    """Add a query to an existing notebook."""
-    resp = client.post(
-        f"{_base(group)}/{notebook_id}/queries", json=query_data
-    )
+    """Add a query section to an existing notebook.
+
+    Fetches the notebook, appends a new query section, and PATCHes it back.
+    """
+    # Get existing notebook
+    resp = client.get(f"{_base(group)}/{notebook_id}")
+    resp.raise_for_status()
+    notebook = resp.json()
+
+    # Unwrap if wrapped in items
+    if "items" in notebook and isinstance(notebook["items"], list):
+        notebook = notebook["items"][0]
+
+    # Build a query section
+    import time as _time
+    now = int(_time.time() * 1000)
+    section = {
+        "id": f"section-{uuid.uuid4()}",
+        "type": "query.default",
+        "variant": "query",
+        "info": {"created": now, "modified": now},
+        "config": query_data,
+    }
+
+    sections = notebook.get("sections", [])
+    sections.append(section)
+    notebook["sections"] = sections
+
+    resp = client.patch(f"{_base(group)}/{notebook_id}", json=notebook)
     resp.raise_for_status()
     return resp.json()
 

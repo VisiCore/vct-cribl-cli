@@ -568,7 +568,7 @@ def edge_errors(fleet, limit, query, use_table):
                 })
 
         if not all_errors:
-            click.echo(f"No errors found across {len(nodes)} node(s).")
+            click.echo(f"No errors found across {len(nodes)} node(s).", err=True)
             return
 
         click.echo(format_output(all_errors, table=use_table))

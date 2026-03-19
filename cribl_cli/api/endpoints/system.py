@@ -35,10 +35,14 @@ def get_instance_info(client: httpx.Client) -> Any:
 
 
 def get_worker_health(client: httpx.Client, group: str) -> Any:
-    """Get health status for a worker group."""
-    resp = client.get(f"/api/v1/m/{group}/system/health")
+    """Get health status for workers, optionally filtered by group."""
+    resp = client.get("/api/v1/master/workers")
     resp.raise_for_status()
-    return resp.json()
+    data = resp.json()
+    if group:
+        items = [w for w in data.get("items", []) if w.get("group") == group]
+        data = {**data, "items": items, "count": len(items)}
+    return data
 
 
 def get_system_logs(client: httpx.Client, limit: int | None = None) -> Any:

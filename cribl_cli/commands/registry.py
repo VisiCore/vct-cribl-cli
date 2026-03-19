@@ -41,7 +41,7 @@ REGISTRY: list[CommandRegistration] = [
     CommandRegistration("samples", EndpointConfig("group", "system/samples"), ["list", "get", "create", "delete"]),
     CommandRegistration("scripts", EndpointConfig("group", "system/scripts"), ["list", "get", "create", "delete"]),
     CommandRegistration("lookups", EndpointConfig("group", "system/lookups")),
-    CommandRegistration("packs", EndpointConfig("group", "packs"), ["list", "get", "create", "update"]),
+    # packs: hand-written command in commands/packs.py (export, install, upgrade)
     CommandRegistration("executors", EndpointConfig("group", "executors"), ["list", "get"]),
     CommandRegistration("hmac-functions", EndpointConfig("group", "lib/hmac"), ["list", "get"]),
     CommandRegistration("functions", EndpointConfig("group", "system/functions"), ["list", "get"]),
