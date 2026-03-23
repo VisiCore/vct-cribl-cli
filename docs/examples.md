@@ -164,6 +164,15 @@ cribl overview destinations -g pi --table
 ## Health checks
 
 ```bash
+# Comprehensive health report (nodes, alerts, versions, errors)
+cribl health report
+
+# JSON output for scripting
+cribl health report --json
+
+# Scope to one group, skip error scanning for speed
+cribl health report -g default --skip-errors
+
 # Show unhealthy sources and destinations
 cribl health check -g pi --table
 
