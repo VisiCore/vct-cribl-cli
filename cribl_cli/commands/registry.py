@@ -52,7 +52,7 @@ REGISTRY: list[CommandRegistration] = [
     CommandRegistration("policies", EndpointConfig("global", "system/policies")),
     CommandRegistration("banners", EndpointConfig("global", "system/banners")),
     CommandRegistration("encryption-keys", EndpointConfig("global", "system/encryption-keys")),
-    CommandRegistration("notification-targets", EndpointConfig("global", "system/notification-targets")),
+    CommandRegistration("notification-targets", EndpointConfig("global", "notification-targets")),
     CommandRegistration("workspaces", EndpointConfig("global", "workspaces")),
     # Global-scoped (limited)
     CommandRegistration("messages", EndpointConfig("global", "system/messages"), ["list", "get", "create", "delete"]),
