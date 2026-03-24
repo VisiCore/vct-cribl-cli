@@ -55,7 +55,7 @@ cribl --base-url https://your-org.cribl.cloud --client-id ... --client-secret ..
 cribl <command> <subcommand> [options]
 ```
 
-### Hand-written commands (19)
+### Hand-written commands (20)
 
 | Command | Description |
 |---|---|
@@ -76,10 +76,12 @@ cribl <command> <subcommand> [options]
 | `preview` | Pipeline preview |
 | `logger` | Logger configuration |
 | `profiler` | Profiler management |
-| `health` | Health checks |
+| `health` | Health checks and reports |
 | `overview` | Environment summary |
+| `alerts` | Alerts (scheduled saved searches) |
+| `packs` | Pack export, install, upgrade, delete |
 
-### Factory-generated commands (~49)
+### Factory-generated commands (~51)
 
 Standard CRUD operations (list, get, create, update, delete) are auto-generated for resources like `parsers`, `schemas`, `lookups`, `users`, `roles`, `datasets`, `dashboards`, and many more. Run `cribl -h` for the full list.
 
@@ -191,7 +193,7 @@ Contributions are welcome! Here's how to get started:
 - All new commands should have corresponding unit tests
 - Follow existing code patterns — use the command factory for standard CRUD, hand-written commands for anything with special logic
 - Keep `--table` output support for any command that returns lists
-- Run `pytest` before submitting — all 71 tests must pass
+- Run `pytest` before submitting — all 109 tests must pass
 - Do not commit credentials, `.env` files, or `~/.criblrc` profiles
 
 ### Reporting issues
