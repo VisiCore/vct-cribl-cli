@@ -20,3 +20,18 @@ def parse_json(value: str, label: str = "JSON") -> dict:
         return json_mod.loads(value)
     except json_mod.JSONDecodeError as e:
         raise ValueError(f"Invalid {label}: {e}")
+
+
+def deep_merge(base: dict, updates: dict) -> dict:
+    """Recursively merge *updates* into *base*, returning a new dict.
+
+    For nested dicts, values are merged rather than replaced.
+    All other types (lists, scalars) are taken from *updates*.
+    """
+    merged = dict(base)
+    for key, value in updates.items():
+        if key in merged and isinstance(merged[key], dict) and isinstance(value, dict):
+            merged[key] = deep_merge(merged[key], value)
+        else:
+            merged[key] = value
+    return merged

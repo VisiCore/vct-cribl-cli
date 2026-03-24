@@ -124,22 +124,6 @@ def search_results(job_id, group, use_table):
         handle_error(e)
 
 
-@search_group.command("saved")
-@click.option("-g", "--group", default="default_search", help="Search group.")
-@click.option("--table", "use_table", is_flag=True, help="Output as table.")
-def search_saved(group, use_table):
-    """List saved searches."""
-    try:
-        client = get_client()
-        g = group
-        resp = client.get(f"/api/v1/m/{g}/search/saved")
-        resp.raise_for_status()
-        data = resp.json()
-        click.echo(format_output(data, table=use_table))
-    except Exception as e:
-        handle_error(e)
-
-
 @search_group.command("timeline")
 @click.argument("job_id")
 @click.option("-g", "--group", default="default_search", help="Search group.")

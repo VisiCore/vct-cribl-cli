@@ -12,13 +12,13 @@ from cribl_cli.commands.registry import CommandRegistration
 from cribl_cli.output.formatter import format_output
 from cribl_cli.utils.errors import handle_error
 from cribl_cli.utils.unwrap import unwrap_item
-from cribl_cli.utils.validation import parse_json
+from cribl_cli.utils.validation import deep_merge, parse_json
 
 
 def _singular(name: str) -> str:
     if name.endswith("ies"):
         return name[:-3] + "y"
-    if name.endswith("ses"):
+    if name.endswith("ches") or name.endswith("shes") or name.endswith("ses"):
         return name[:-2]
     if name.endswith("s"):
         return name[:-1]
@@ -102,7 +102,7 @@ def register_crud_command(parent: click.Group, reg: CommandRegistration) -> None
                     existing.pop("status", None)
                     existing.pop("notifications", None)
                 updates = parse_json(json_config, label)
-                merged = {**existing, **updates}
+                merged = deep_merge(existing, updates)
                 data = endpoints.update(client, group, id, merged)
                 click.echo(format_output(data))
             except Exception as e:

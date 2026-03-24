@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from cribl_cli.utils.validation import parse_json, parse_port
+from cribl_cli.utils.validation import deep_merge, parse_json, parse_port
 
 
 # ---------------------------------------------------------------------------
@@ -53,3 +53,56 @@ def test_parse_json_invalid():
     """Invalid JSON string raises ValueError."""
     with pytest.raises(ValueError, match="Invalid JSON"):
         parse_json("{bad json}")
+
+
+# ---------------------------------------------------------------------------
+# deep_merge
+# ---------------------------------------------------------------------------
+
+
+def test_deep_merge_shallow_keys():
+    """Top-level keys from updates overwrite base."""
+    assert deep_merge({"a": 1, "b": 2}, {"b": 3}) == {"a": 1, "b": 3}
+
+
+def test_deep_merge_nested_dicts():
+    """Nested dicts are merged recursively, not replaced."""
+    base = {"schedule": {"cronSchedule": "0 * * * *", "enabled": True, "tz": "UTC"}}
+    updates = {"schedule": {"cronSchedule": "*/5 * * * *"}}
+    result = deep_merge(base, updates)
+
+    assert result["schedule"]["cronSchedule"] == "*/5 * * * *"
+    assert result["schedule"]["enabled"] is True
+    assert result["schedule"]["tz"] == "UTC"
+
+
+def test_deep_merge_deeply_nested():
+    """Merge works at multiple nesting levels."""
+    base = {"a": {"b": {"c": 1, "d": 2}, "e": 3}}
+    updates = {"a": {"b": {"c": 99}}}
+    result = deep_merge(base, updates)
+
+    assert result == {"a": {"b": {"c": 99, "d": 2}, "e": 3}}
+
+
+def test_deep_merge_new_keys():
+    """Keys in updates that don't exist in base are added."""
+    assert deep_merge({"a": 1}, {"b": 2}) == {"a": 1, "b": 2}
+
+
+def test_deep_merge_list_replaced():
+    """Lists are replaced, not merged."""
+    base = {"tags": ["a", "b"]}
+    updates = {"tags": ["c"]}
+    assert deep_merge(base, updates) == {"tags": ["c"]}
+
+
+def test_deep_merge_does_not_mutate():
+    """Original dicts are not modified."""
+    base = {"a": {"b": 1}}
+    updates = {"a": {"c": 2}}
+    result = deep_merge(base, updates)
+
+    assert result == {"a": {"b": 1, "c": 2}}
+    assert base == {"a": {"b": 1}}
+    assert updates == {"a": {"c": 2}}
