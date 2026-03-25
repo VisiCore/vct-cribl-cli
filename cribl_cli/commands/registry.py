@@ -74,6 +74,7 @@ REGISTRY: list[CommandRegistration] = [
     CommandRegistration("dashboards", EndpointConfig("search", "dashboards"), ["list", "get", "create", "delete"]),
     CommandRegistration("saved-searches", EndpointConfig("search", "saved")),
     CommandRegistration("notifications", EndpointConfig("group", "notifications")),
+    CommandRegistration("alert-monitors", EndpointConfig("group", "alert/monitors")),
     CommandRegistration("usage-groups", EndpointConfig("search", "usage-groups"), ["list", "get"]),
     # Lake-scoped
     CommandRegistration("lake-datasets", EndpointConfig("lake", "datasets")),
