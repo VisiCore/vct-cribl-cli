@@ -9,6 +9,7 @@ import click
 
 from cribl_cli.api.client import get_client
 from cribl_cli.api.endpoints.edge_nodes import (
+    get_node_metrics,
     list_edge_nodes,
     list_worker_logs,
     search_worker_log,
@@ -187,9 +188,25 @@ def _fetch_all_nodes(client, group=None) -> list[dict]:
             total_mem = info.get("totalmem", 0)
             free_mem = info.get("freemem")
             if free_mem is None or free_mem == 0:
-                # freemem not reported — don't assume 100% used
-                mem_pct = None
-                free_mem = 0
+                # freemem not in worker info — fetch from system/metrics
+                try:
+                    metrics = get_node_metrics(client, wid, duration_seconds=300)
+                    if metrics:
+                        latest = metrics[-1]
+                        total_mem = latest.get("mem_total_bytes") or total_mem
+                        mem_used = latest.get("mem_used_bytes")
+                        if mem_used is not None and total_mem and total_mem > 0:
+                            free_mem = total_mem - mem_used
+                            mem_pct = mem_used / total_mem * 100
+                        else:
+                            free_mem = 0
+                            mem_pct = None
+                    else:
+                        free_mem = 0
+                        mem_pct = None
+                except Exception:
+                    free_mem = 0
+                    mem_pct = None
             else:
                 mem_pct = ((total_mem - free_mem) / total_mem * 100) if total_mem > 0 else None
 
