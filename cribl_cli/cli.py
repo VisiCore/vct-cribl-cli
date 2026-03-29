@@ -6,7 +6,13 @@ from typing import Any
 
 import click
 
-from cribl_cli.api.client import create_client, set_client, set_config_error
+from cribl_cli.api.client import (
+    create_client,
+    create_management_client,
+    set_client,
+    set_management_client,
+    set_config_error,
+)
 from cribl_cli.config.loader import load_config
 
 
@@ -26,12 +32,14 @@ class CriblCLI(click.Group):
                     client_id=ctx.params.get("client_id"),
                     client_secret=ctx.params.get("client_secret"),
                 )
-                client = create_client(
-                    cfg,
-                    dry_run=ctx.params.get("dry_run", False),
-                    verbose=ctx.params.get("verbose", False),
-                )
+                dry_run = ctx.params.get("dry_run", False)
+                verbose = ctx.params.get("verbose", False)
+                client = create_client(cfg, dry_run=dry_run, verbose=verbose)
                 set_client(client)
+                mgmt_client = create_management_client(cfg, dry_run=dry_run, verbose=verbose)
+                set_management_client(mgmt_client)
+                ctx.ensure_object(dict)
+                ctx.obj["_config"] = cfg
             except Exception as exc:
                 set_config_error(str(exc))
 
@@ -76,13 +84,16 @@ def _register_commands() -> None:
     from cribl_cli.commands.overview import overview_group
     from cribl_cli.commands.alerts import alerts_group
     from cribl_cli.commands.packs import packs_group
+    from cribl_cli.commands.license_usage import license_usage_group
+    from cribl_cli.commands.billing import billing_group
 
     for group in [
         config_group, workers_group, sources_group, destinations_group,
         metrics_group, search_group, notebooks_group, pipelines_group,
         routes_group, jobs_group, version_group, system_group, edge_group,
         kms_group, preview_group, logger_group, profiler_group, health_group,
-        overview_group, alerts_group, packs_group,
+        overview_group, alerts_group, packs_group, license_usage_group,
+        billing_group,
     ]:
         cli.add_command(group)
 

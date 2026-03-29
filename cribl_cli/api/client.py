@@ -19,6 +19,7 @@ _MAX_RETRIES = 3
 _BACKOFF_BASE = 1  # seconds
 
 _client: httpx.Client | None = None
+_mgmt_client: httpx.Client | None = None
 _config_error: str | None = None
 
 
@@ -104,6 +105,30 @@ def create_client(
     return client
 
 
+def create_management_client(
+    config: CriblConfig,
+    *,
+    dry_run: bool = False,
+    verbose: bool = False,
+) -> httpx.Client:
+    """Create a client for the Cribl Cloud management plane (api.cribl.cloud)."""
+    transport: httpx.BaseTransport = httpx.HTTPTransport(retries=3)
+    transport = RetryTransport(transport)
+    transport = AuthTransport(transport, config)
+    if dry_run:
+        transport = DryRunTransport(transport)
+
+    client = httpx.Client(
+        base_url="https://api.cribl.cloud",
+        transport=transport,
+        timeout=30.0,
+        event_hooks={
+            "request": [_log_request] if verbose else [],
+        },
+    )
+    return client
+
+
 def _log_request(request: httpx.Request) -> None:
     sys.stderr.write(f">> {request.method} {request.url}\n")
 
@@ -119,6 +144,19 @@ def get_client() -> httpx.Client:
 def set_client(client: httpx.Client) -> None:
     global _client
     _client = client
+
+
+def get_management_client() -> httpx.Client:
+    if _mgmt_client is None:
+        if _config_error:
+            raise RuntimeError(_config_error)
+        raise RuntimeError("Management API client not initialized")
+    return _mgmt_client
+
+
+def set_management_client(client: httpx.Client) -> None:
+    global _mgmt_client
+    _mgmt_client = client
 
 
 def set_config_error(msg: str) -> None:

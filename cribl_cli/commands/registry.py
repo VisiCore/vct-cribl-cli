@@ -57,7 +57,7 @@ REGISTRY: list[CommandRegistration] = [
     # Global-scoped (limited)
     CommandRegistration("messages", EndpointConfig("global", "system/messages"), ["list", "get", "create", "delete"]),
     CommandRegistration("licenses", EndpointConfig("global", "system/licenses"), ["list", "get"]),
-    CommandRegistration("subscriptions", EndpointConfig("global", "system/subscriptions"), ["list", "get"]),
+    CommandRegistration("subscriptions", EndpointConfig("global", "system/subscriptions"), ["list", "get", "create", "update"]),
     CommandRegistration("outposts", EndpointConfig("global", "system/outposts"), ["list", "get"]),
     # alerts: hand-written command in commands/alerts.py (filters saved searches to scheduled ones)
     CommandRegistration("feature-flags", EndpointConfig("global", "system/feature-flags"), ["list", "get", "update", "delete"]),
@@ -75,7 +75,7 @@ REGISTRY: list[CommandRegistration] = [
     CommandRegistration("saved-searches", EndpointConfig("search", "saved")),
     CommandRegistration("notifications", EndpointConfig("group", "notifications")),
     CommandRegistration("alert-monitors", EndpointConfig("group", "alert/monitors")),
-    CommandRegistration("usage-groups", EndpointConfig("search", "usage-groups"), ["list", "get"]),
+    CommandRegistration("usage-groups", EndpointConfig("search", "usage-groups")),
     # Lake-scoped
     CommandRegistration("lake-datasets", EndpointConfig("lake", "datasets")),
     CommandRegistration("storage-locations", EndpointConfig("lake", "storage-locations")),
