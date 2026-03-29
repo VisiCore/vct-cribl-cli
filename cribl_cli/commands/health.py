@@ -8,12 +8,15 @@ from datetime import datetime, timezone
 import click
 
 from cribl_cli.api.client import get_client
+from cribl_cli.api.endpoint_factory import EndpointConfig, create_endpoints
 from cribl_cli.api.endpoints.edge_nodes import (
     get_node_metrics,
     list_edge_nodes,
     list_worker_logs,
     search_worker_log,
 )
+from cribl_cli.api.endpoints.system import get_system_info
+from cribl_cli.api.endpoints.version import get_version_status
 from cribl_cli.api.endpoints.workers import list_worker_groups
 from cribl_cli.output.formatter import format_output
 from cribl_cli.utils.errors import handle_error
@@ -467,6 +470,156 @@ def _format_text_report(report: dict) -> str:
     return "\n".join(lines)
 
 
+def _fetch_leader_info(client) -> dict:
+    """Fetch leader node system info: version, uptime, resources, notifications."""
+    try:
+        data = get_system_info(client)
+        # API returns {items: [info_obj]} — unwrap it
+        if isinstance(data, dict) and "items" in data:
+            items = data.get("items", [])
+            info = items[0] if items else {}
+        else:
+            info = data if isinstance(data, dict) else {}
+
+        build = info.get("BUILD", info.get("build", {}))
+        uptime_secs = info.get("uptime", 0)
+        memory = info.get("memory", {})
+        disk = info.get("diskUsage", {})
+
+        # Extract notification messages (active alerts from the system)
+        messages = info.get("messages", [])
+        notifications = []
+        for msg in messages:
+            if isinstance(msg, dict):
+                notifications.append({
+                    "severity": msg.get("severity", "info"),
+                    "text": (msg.get("text", msg.get("message", "")) or "")[:200],
+                    "id": msg.get("id", ""),
+                })
+
+        return {
+            "hostname": info.get("hostname", ""),
+            "version": build.get("VERSION", build.get("version", "?")),
+            "branch": build.get("BRANCH", ""),
+            "build_timestamp": build.get("TIMESTAMP", ""),
+            "uptime_seconds": uptime_secs,
+            "uptime_days": round(uptime_secs / 86400, 1) if uptime_secs else 0,
+            "total_mem": memory.get("total", 0),
+            "free_mem": memory.get("free", 0),
+            "mem_pct": round((1 - memory["free"] / memory["total"]) * 100, 1) if memory.get("total") else None,
+            "total_disk": disk.get("totalDiskSize", 0),
+            "free_disk": disk.get("bytesAvailable", 0),
+            "disk_pct": round(disk["bytesUsed"] / disk["totalDiskSize"] * 100, 1) if disk.get("totalDiskSize") else None,
+            "load_avg": info.get("loadavg", []),
+            "cpus": len(info.get("cpus", [])),
+            "worker_processes": info.get("workerProcesses", 0),
+            "notifications": notifications,
+        }
+    except Exception:
+        return {}
+
+
+def _fetch_license_info(client) -> dict:
+    """Fetch license quota and expiration."""
+    try:
+        config = EndpointConfig(scope="global", path="system/licenses")
+        endpoints = create_endpoints(config)
+        data = endpoints.list(client, group="_global_")
+        items = data.get("items", []) if isinstance(data, dict) else []
+        if not items:
+            return {}
+        lic = items[0] if isinstance(items[0], dict) else {}
+        exp = lic.get("exp", lic.get("expiration", 0))
+        exp_date = ""
+        if exp:
+            try:
+                exp_date = datetime.fromtimestamp(exp, tz=timezone.utc).strftime("%Y-%m-%d")
+            except Exception:
+                pass
+        return {
+            "quota_gb_per_day": lic.get("quota", 0),
+            "license_class": lic.get("cls", lic.get("class", "?")),
+            "expiration_epoch": exp,
+            "expiration_date": exp_date,
+        }
+    except Exception:
+        return {}
+
+
+def _fetch_io_summary(client, groups, node_groups) -> dict:
+    """Fetch source/destination health counts per active group."""
+    summary = {}
+    for g in groups:
+        gid = g.get("id", "")
+        gtype = g.get("type", "")
+        if gtype in ("search", "outpost") or gid not in node_groups:
+            continue
+        group_summary = {"sources": {"total": 0, "active": 0, "disabled": 0, "green": 0, "red": 0, "yellow": 0},
+                         "destinations": {"total": 0, "active": 0, "disabled": 0, "green": 0, "red": 0, "yellow": 0}}
+        for kind, path in [("sources", "system/inputs"), ("destinations", "system/outputs")]:
+            try:
+                resp = client.get(f"/api/v1/m/{gid}/{path}")
+                resp.raise_for_status()
+                items = resp.json().get("items", [])
+                for item in items:
+                    group_summary[kind]["total"] += 1
+                    if item.get("disabled"):
+                        group_summary[kind]["disabled"] += 1
+                        continue
+                    group_summary[kind]["active"] += 1
+                    status = item.get("status", {})
+                    health = status.get("health", "") if isinstance(status, dict) else ""
+                    if health == "Green":
+                        group_summary[kind]["green"] += 1
+                    elif health == "Red":
+                        group_summary[kind]["red"] += 1
+                    elif health == "Yellow":
+                        group_summary[kind]["yellow"] += 1
+            except Exception:
+                continue
+        summary[gid] = group_summary
+    return summary
+
+
+def _fetch_config_status(client, groups, node_groups) -> list[dict]:
+    """Check for uncommitted config changes in active groups."""
+    results = []
+    for g in groups:
+        gid = g.get("id", "")
+        gtype = g.get("type", "")
+        if gtype in ("search", "outpost") or gid not in node_groups:
+            continue
+        try:
+            data = get_version_status(client, gid)
+            if not isinstance(data, dict):
+                continue
+            # API returns {items: [status_obj]} — unwrap
+            if "items" in data:
+                items = data.get("items", [])
+                status = items[0] if items else {}
+            else:
+                status = data
+            modified = status.get("modified", [])
+            not_added = status.get("not_added", [])
+            created = status.get("created", [])
+            deleted = status.get("deleted", [])
+            conflicted = status.get("conflicted", [])
+            total = len(modified) + len(not_added) + len(created) + len(deleted)
+            if total > 0:
+                results.append({
+                    "group": gid,
+                    "modified": len(modified),
+                    "not_added": len(not_added),
+                    "created": len(created),
+                    "deleted": len(deleted),
+                    "conflicted": len(conflicted),
+                    "total_uncommitted": total,
+                })
+        except Exception:
+            continue
+    return results
+
+
 @health_group.command("report", help="Comprehensive environment health report.")
 @click.option("-g", "--group", default=None, help="Scope to a specific worker group.")
 @click.option("--json", "as_json", is_flag=True, help="Output as structured JSON.")
@@ -483,12 +636,34 @@ def health_report(group, as_json, skip_errors, error_limit):
         if group:
             groups = [g for g in groups if g.get("id") == group]
 
+        # Build group metadata lookup (infra tier, type)
+        group_meta = {}
+        for g in groups:
+            gid = g.get("id", "")
+            on_prem = g.get("onPrem", False)
+            gtype = g.get("type", "stream")
+            group_meta[gid] = {
+                "id": gid,
+                "type": gtype,
+                "infra": "on-prem" if on_prem else "cloud",
+                "description": g.get("description", ""),
+                "isFleet": g.get("isFleet", False),
+            }
+
         # 2. Fetch all nodes
         nodes = _fetch_all_nodes(client, group)
+        # Enrich nodes with infra tier from group metadata
+        for n in nodes:
+            meta = group_meta.get(n.get("group", ""), {})
+            n["infra"] = meta.get("infra", "unknown")
         healthy_nodes = sum(1 for n in nodes if n["status"] == "healthy" and n["heartbeat"] == "OK")
 
         # 3. Unhealthy sources & destinations
         unhealthy_io = _fetch_unhealthy_io(client, groups)
+        # Enrich IO entries with infra tier
+        for io in unhealthy_io:
+            meta = group_meta.get(io.get("group", ""), {})
+            io["infra"] = meta.get("infra", "unknown")
         unhealthy_sources = sum(1 for i in unhealthy_io if i["kind"] == "source")
         unhealthy_dests = sum(1 for i in unhealthy_io if i["kind"] == "destination")
 
@@ -503,10 +678,30 @@ def health_report(group, as_json, skip_errors, error_limit):
         if not skip_errors:
             errors = _fetch_error_summary(client, nodes, error_limit)
 
+        # Compute active vs inactive group counts (exclude search/outpost defaults)
+        ignored_groups = {"default_search", "default_fleet", "default_outpost"}
+        node_groups = {n["group"] for n in nodes}
+        active_groups = [g for g in groups if g["id"] in node_groups and g["id"] not in ignored_groups]
+        inactive_groups = [g for g in groups if g["id"] not in node_groups and g["id"] not in ignored_groups]
+
+        # 7. Leader node info
+        leader_info = _fetch_leader_info(client)
+
+        # 8. License info
+        license_info = _fetch_license_info(client)
+
+        # 9. IO health summary for active groups
+        io_summary = _fetch_io_summary(client, groups, node_groups)
+
+        # 10. Config drift detection for active groups
+        config_status = _fetch_config_status(client, groups, node_groups)
+
         report = {
             "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"),
             "summary": {
                 "total_groups": len(groups),
+                "active_groups": len(active_groups),
+                "inactive_groups": len(inactive_groups),
                 "total_nodes": len(nodes),
                 "healthy_nodes": healthy_nodes,
                 "unhealthy_sources": unhealthy_sources,
@@ -514,10 +709,15 @@ def health_report(group, as_json, skip_errors, error_limit):
                 "capacity_alerts": len(capacity_alerts),
                 "version_mismatch": version_summary["mismatch"],
             },
+            "leader": leader_info,
+            "license": license_info,
+            "group_metadata": group_meta,
             "nodes": nodes,
             "capacity_alerts": capacity_alerts,
             "version_summary": version_summary,
             "unhealthy_io": unhealthy_io,
+            "io_summary": io_summary,
+            "config_status": config_status,
         }
         if errors is not None:
             report["errors"] = errors
