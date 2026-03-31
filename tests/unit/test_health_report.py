@@ -301,3 +301,114 @@ def test_report_disconnected_node(mock_get_client):
     disconnect_alerts = [a for a in data["capacity_alerts"] if a["alert"] == "disconnected"]
     assert len(disconnect_alerts) == 1
     assert disconnect_alerts[0]["severity"] == "CRITICAL"
+
+
+# ---------------------------------------------------------------------------
+# health cpu tests
+# ---------------------------------------------------------------------------
+
+_METRICS_SPIKE = {
+    "results": {
+        "metrics": [
+            {
+                "_time": [{"val": 1774288000}],
+                "system.cpu_perc": [{"val": 92.5}],
+                "system.free_mem": [{"val": 2000000000}],
+                "system.total_mem": [{"val": 8000000000}],
+                "system.disk_used": [{"val": 20000000000}],
+                "system.total_disk": [{"val": 50000000000}],
+                "system.load_avg": [{"val": 3.2}],
+            },
+            {
+                "_time": [{"val": 1774288300}],
+                "system.cpu_perc": [{"val": 45.0}],
+                "system.free_mem": [{"val": 4000000000}],
+                "system.total_mem": [{"val": 8000000000}],
+                "system.disk_used": [{"val": 20000000000}],
+                "system.total_disk": [{"val": 50000000000}],
+                "system.load_avg": [{"val": 1.5}],
+            },
+        ]
+    }
+}
+
+_METRICS_NORMAL = {
+    "results": {
+        "metrics": [
+            {
+                "_time": [{"val": 1774288000}],
+                "system.cpu_perc": [{"val": 25.0}],
+                "system.free_mem": [{"val": 6000000000}],
+                "system.total_mem": [{"val": 8000000000}],
+                "system.disk_used": [{"val": 10000000000}],
+                "system.total_disk": [{"val": 50000000000}],
+                "system.load_avg": [{"val": 0.5}],
+            },
+        ]
+    }
+}
+
+
+def _build_cpu_mock_client(metrics_data=None):
+    """Build a mock client for health cpu tests."""
+    client = MagicMock()
+    metrics_data = metrics_data or _METRICS_NORMAL
+
+    def fake_get(url, **kwargs):
+        params = kwargs.get("params", {})
+        if url == "/api/v1/master/workers":
+            if params.get("product") == "edge":
+                return _mock_response(_WORKERS_EDGE)
+            return _mock_response(_WORKERS_ALL)
+        if "system/metrics" in url:
+            return _mock_response(metrics_data)
+        return _mock_response({})
+
+    client.get = MagicMock(side_effect=fake_get)
+    return client
+
+
+@patch("cribl_cli.commands.health.get_client")
+def test_cpu_no_spikes(mock_get_client):
+    """Normal CPU — no spikes flagged."""
+    mock_get_client.return_value = _build_cpu_mock_client(_METRICS_NORMAL)
+    runner = CliRunner()
+    result = runner.invoke(cli, ["health", "cpu"], catch_exceptions=False)
+    assert result.exit_code == 0
+    assert "No nodes exceeded" in result.output
+
+
+@patch("cribl_cli.commands.health.get_client")
+def test_cpu_with_spike(mock_get_client):
+    """Node spiking above threshold is flagged."""
+    mock_get_client.return_value = _build_cpu_mock_client(_METRICS_SPIKE)
+    runner = CliRunner()
+    result = runner.invoke(cli, ["health", "cpu", "--threshold", "80"], catch_exceptions=False)
+    assert result.exit_code == 0
+    assert "1 node(s) spiking" in result.output
+    assert "node1.example.com" in result.output
+
+
+@patch("cribl_cli.commands.health.get_client")
+def test_cpu_json_output(mock_get_client):
+    """--json produces valid JSON with expected fields."""
+    mock_get_client.return_value = _build_cpu_mock_client(_METRICS_SPIKE)
+    runner = CliRunner()
+    result = runner.invoke(cli, ["health", "cpu", "--json"], catch_exceptions=False)
+    assert result.exit_code == 0
+    data = json.loads(result.output)
+    assert len(data) == 1
+    assert data[0]["hostname"] == "node1.example.com"
+    assert data[0]["status"] == "spike"
+    assert data[0]["max_cpu"] == 92.5
+    assert data[0]["spikes"] == 1
+
+
+@patch("cribl_cli.commands.health.get_client")
+def test_cpu_custom_threshold(mock_get_client):
+    """Low threshold flags even moderate CPU."""
+    mock_get_client.return_value = _build_cpu_mock_client(_METRICS_NORMAL)
+    runner = CliRunner()
+    result = runner.invoke(cli, ["health", "cpu", "--threshold", "20"], catch_exceptions=False)
+    assert result.exit_code == 0
+    assert "1 node(s) spiking" in result.output

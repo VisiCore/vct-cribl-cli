@@ -728,3 +728,139 @@ def health_report(group, as_json, skip_errors, error_limit):
             click.echo(_format_text_report(report))
     except Exception as e:
         handle_error(e)
+
+
+# ---------------------------------------------------------------------------
+# health cpu — per-node CPU spike detection over a time window
+# ---------------------------------------------------------------------------
+
+@health_group.command("cpu", help="Show nodes with CPU spikes over a time window.")
+@click.option("-g", "--group", default=None, help="Scope to a specific worker group.")
+@click.option("--hours", default=24, type=int, help="Lookback window in hours (default: 24).")
+@click.option("--threshold", default=80, type=int, help="CPU %% threshold to flag (default: 80).")
+@click.option("--json", "as_json", is_flag=True, help="Output as structured JSON.")
+@click.option("--table", "use_table", is_flag=True, help="Output as table.")
+def health_cpu(group, hours, threshold, as_json, use_table):
+    """Detect nodes with CPU spikes above a threshold."""
+    try:
+        client = get_client()
+        nodes = _fetch_all_nodes(client, group)
+
+        if not nodes:
+            click.echo("No nodes found.")
+            return
+
+        duration = hours * 3600
+        results = []
+
+        for node in nodes:
+            nid = node["id"]
+            hostname = node["hostname"] or nid
+            try:
+                points = get_node_metrics(client, nid, duration_seconds=duration)
+            except Exception:
+                results.append({
+                    "hostname": hostname,
+                    "group": node["group"],
+                    "status": "error",
+                    "samples": 0,
+                    "avg_cpu": None,
+                    "max_cpu": None,
+                    "spikes": 0,
+                    "spike_times": [],
+                })
+                continue
+
+            if not points:
+                results.append({
+                    "hostname": hostname,
+                    "group": node["group"],
+                    "status": "no_data",
+                    "samples": 0,
+                    "avg_cpu": None,
+                    "max_cpu": None,
+                    "spikes": 0,
+                    "spike_times": [],
+                })
+                continue
+
+            cpus = [p["cpu_perc"] for p in points if p.get("cpu_perc") is not None]
+            spike_points = [p for p in points if (p.get("cpu_perc") or 0) >= threshold]
+
+            avg_cpu = sum(cpus) / len(cpus) if cpus else None
+            max_cpu = max(cpus) if cpus else None
+
+            results.append({
+                "hostname": hostname,
+                "group": node["group"],
+                "status": "spike" if spike_points else "ok",
+                "samples": len(cpus),
+                "avg_cpu": round(avg_cpu, 1) if avg_cpu is not None else None,
+                "max_cpu": round(max_cpu, 1) if max_cpu is not None else None,
+                "spikes": len(spike_points),
+                "spike_times": [p["time"] for p in spike_points[:10]],
+            })
+
+        # Sort: spikes first (descending), then by max_cpu descending
+        results.sort(key=lambda r: (r["status"] != "spike", -(r["max_cpu"] or 0)))
+
+        if as_json:
+            click.echo(_json.dumps(results, indent=2))
+            return
+
+        spiking = [r for r in results if r["status"] == "spike"]
+        ok_nodes = [r for r in results if r["status"] == "ok"]
+        problem_nodes = [r for r in results if r["status"] in ("error", "no_data")]
+
+        lines: list[str] = []
+        lines.append(f"CPU Report — last {hours}h | threshold: {threshold}%")
+        lines.append("=" * 70)
+        lines.append(
+            f"  {len(spiking)} node(s) spiking | "
+            f"{len(ok_nodes)} OK | "
+            f"{len(problem_nodes)} no data/error"
+        )
+
+        if spiking:
+            lines.append("")
+            lines.append("--- Nodes Above Threshold " + "-" * 44)
+            hdr = f"  {'HOSTNAME':<38} {'GROUP':<18} {'AVG':>5} {'MAX':>5} {'SPIKES':>6}"
+            lines.append(hdr)
+            for r in spiking:
+                avg_s = f"{r['avg_cpu']:.0f}%" if r["avg_cpu"] is not None else "?"
+                max_s = f"{r['max_cpu']:.0f}%" if r["max_cpu"] is not None else "?"
+                lines.append(
+                    f"  {r['hostname']:<38} {r['group']:<18} {avg_s:>5} {max_s:>5} {r['spikes']:>6}"
+                )
+                if r["spike_times"]:
+                    times_str = ", ".join(t[11:19] for t in r["spike_times"][:5])
+                    if r["spikes"] > 5:
+                        times_str += f" (+{r['spikes'] - 5} more)"
+                    lines.append(f"    spike times: {times_str}")
+        else:
+            lines.append("")
+            lines.append(f"  No nodes exceeded {threshold}% CPU in the last {hours}h.")
+
+        if ok_nodes and not use_table:
+            lines.append("")
+            lines.append("--- All Nodes " + "-" * 56)
+            hdr = f"  {'HOSTNAME':<38} {'GROUP':<18} {'AVG':>5} {'MAX':>5}"
+            lines.append(hdr)
+            for r in ok_nodes:
+                avg_s = f"{r['avg_cpu']:.0f}%" if r["avg_cpu"] is not None else "?"
+                max_s = f"{r['max_cpu']:.0f}%" if r["max_cpu"] is not None else "?"
+                lines.append(
+                    f"  {r['hostname']:<38} {r['group']:<18} {avg_s:>5} {max_s:>5}"
+                )
+
+        if problem_nodes:
+            lines.append("")
+            lines.append("--- No Data / Errors " + "-" * 49)
+            for r in problem_nodes:
+                lines.append(f"  {r['hostname']:<38} {r['group']:<18} ({r['status']})")
+
+        lines.append("")
+        click.echo("\n".join(lines))
+
+    except Exception as e:
+        handle_error(e)
