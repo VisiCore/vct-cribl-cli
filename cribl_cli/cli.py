@@ -53,6 +53,7 @@ class CriblCLI(click.Group):
 @click.option("--client-secret", default=None, help="OAuth client secret override.")
 @click.option("--verbose", is_flag=True, help="Log HTTP requests to stderr.")
 @click.option("--dry-run", is_flag=True, help="Preview mode — log requests without sending.")
+@click.option("--fields", default=None, help="Comma-separated list of fields to include in output.")
 @click.pass_context
 def cli(ctx: click.Context, **kwargs: Any) -> None:
     """Cribl CLI — command-line interface for the Cribl Cloud REST API."""

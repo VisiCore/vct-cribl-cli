@@ -5,8 +5,46 @@ from __future__ import annotations
 import json
 from typing import Any
 
+import click
+
+
+def _get_fields_from_context() -> list[str] | None:
+    """Read --fields from the Click context if available."""
+    try:
+        ctx = click.get_current_context(silent=True)
+        if ctx:
+            obj = ctx.find_root().params.get("fields") or (ctx.obj or {}).get("fields")
+            if obj:
+                return [f.strip() for f in obj.split(",")]
+    except RuntimeError:
+        pass
+    return None
+
+
+def _filter_fields(data: Any, fields: list[str]) -> Any:
+    """Filter data to only include the specified fields."""
+    if isinstance(data, dict) and "items" in data:
+        return {
+            "items": [_filter_dict(item, fields) for item in data["items"] if isinstance(item, dict)],
+            "count": data.get("count", len(data["items"])),
+        }
+    if isinstance(data, list):
+        return [_filter_dict(item, fields) if isinstance(item, dict) else item for item in data]
+    if isinstance(data, dict):
+        return _filter_dict(data, fields)
+    return data
+
+
+def _filter_dict(d: dict, fields: list[str]) -> dict:
+    return {k: v for k, v in d.items() if k in fields}
+
 
 def format_output(data: Any, *, table: bool = False, columns: list[str] | None = None) -> str:
+    fields = _get_fields_from_context()
+    if fields:
+        data = _filter_fields(data, fields)
+        if not columns:
+            columns = fields
     if not table:
         return json.dumps(data, indent=2)
     return format_table(data, columns)
