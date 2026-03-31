@@ -53,3 +53,4 @@ Worker groups are managed via `workers`, not `groups`.
 - `--dry-run` logs request details to stderr and raises `DryRunAbort` (caught by error handler, exits 0).
 - Config tests mock the filesystem to avoid touching real `~/.criblrc`.
 - `health report` aggregates nodes, capacity alerts, versions, unhealthy IO, and error logs into a single command. Supports `--json`, `--skip-errors`, and `-g` group filter.
+- When running CLI commands to read data, use default JSON output (no `--table`). JSON is structured and easier to parse. Only use `--table` if the user explicitly asks for it.
