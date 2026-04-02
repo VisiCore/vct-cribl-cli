@@ -55,5 +55,5 @@ Worker groups are managed via `workers`, not `groups`.
 - `health report` aggregates nodes, capacity alerts, versions, unhealthy IO, and error logs into a single command. Supports `--json`, `--skip-errors`, and `-g` group filter.
 - `ingest dashboard` shows daily ingest totals (events/bytes in/out) by source (Stream, Edge, Search). Supports `--json`, `--table`, and `--hours`.
 - `ingest query` runs a raw metric query — accepts a JSON payload as argument.
-- `dashboards/daily-ingest.json` is a Cribl Search dashboard definition replicating the Workspace Home "Daily Ingest" panels. Deploy with `cribl dashboards create "$(cat dashboards/daily-ingest.json)"`.
+- `dashboards/` contains Cribl Search dashboard definitions for Daily Ingest (overview, by source, by route). Deploy with `cribl dashboards create "$(cat dashboards/<file>.json)"`.
 - When running CLI commands to read data, use default JSON output (no `--table`). JSON is structured and easier to parse. Only use `--table` if the user explicitly asks for it.

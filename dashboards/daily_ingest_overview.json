@@ -1,27 +1,17 @@
 {
-  "id": "daily_ingest",
-  "name": "Daily Ingest",
-  "description": "Replicates the Workspace Home Daily Ingest panels — events/bytes in/out by source (Stream, Edge, Search) with breakdown and time series.",
+  "id": "daily_ingest_overview",
+  "name": "Daily Ingest - Overview",
+  "category": "cat_daily_ingest",
+  "description": "Replicates the Workspace Home Daily Ingest panels — events/bytes in/out counters with Stream/Edge/Search breakdown.",
   "layout": {},
-  "schedule": {
-    "enabled": false,
-    "cronSchedule": "0 0 * * *",
-    "tz": "UTC",
-    "keepLastN": 2
-  },
+  "schedule": { "enabled": false, "cronSchedule": "0 0 * * *", "tz": "UTC", "keepLastN": 2 },
   "elements": [
     {
       "id": "di_timerange",
       "inputId": "timepick",
       "type": "input.timerange",
       "title": "Time Range",
-      "config": {
-        "defaultValue": {
-          "earliest": "-24h",
-          "latest": "now",
-          "timezone": "local"
-        }
-      },
+      "config": { "defaultValue": { "earliest": "-24h", "latest": "now", "timezone": "local" } },
       "layout": { "x": 0, "y": 0, "w": 3, "h": 2 }
     },
     {
@@ -50,12 +40,7 @@
       "title": "Total Daily Ingest (by hour)",
       "config": {
         "colorPalette": 0,
-        "customData": {
-          "trellis": false,
-          "connectNulls": "Leave gaps",
-          "stack": true,
-          "dataFields": []
-        },
+        "customData": { "trellis": false, "connectNulls": "Leave gaps", "stack": true, "dataFields": [] },
         "xAxis": { "labelOrientation": 0, "position": "Bottom" },
         "yAxis": { "position": "Left", "scale": "Linear", "splitLine": true, "label": "$byte_unit" },
         "legend": { "position": "Bottom", "truncate": true },
@@ -77,18 +62,14 @@
       "type": "counter.single",
       "title": "Events In (daily)",
       "config": {
-        "style": false,
-        "applyThreshold": false,
+        "style": false, "applyThreshold": false,
         "customData": { "trellis": false, "dataFields": ["total_events_in"], "seriesCount": 1 },
-        "axis": {},
-        "onClickAction": { "type": "None" }
+        "axis": {}, "onClickAction": { "type": "None" }
       },
       "search": {
         "type": "inline",
         "query": "dataset=\"cribl_metrics\" metric=\"total.in_events\" dist_mode=\"worker\"\n| where isnull(input)\n| summarize total_events_in=sum(value)",
-        "earliest": "$timepick.earliest",
-        "latest": "$timepick.latest",
-        "timezone": "$timepick.timezone"
+        "earliest": "$timepick.earliest", "latest": "$timepick.latest", "timezone": "$timepick.timezone"
       },
       "layout": { "x": 6, "y": 2, "w": 2, "h": 2 }
     },
@@ -97,18 +78,14 @@
       "type": "counter.single",
       "title": "Events Out (daily)",
       "config": {
-        "style": false,
-        "applyThreshold": false,
+        "style": false, "applyThreshold": false,
         "customData": { "trellis": false, "dataFields": ["total_events_out"], "seriesCount": 1 },
-        "axis": {},
-        "onClickAction": { "type": "None" }
+        "axis": {}, "onClickAction": { "type": "None" }
       },
       "search": {
         "type": "inline",
         "query": "dataset=\"cribl_metrics\" metric=\"total.out_events\" dist_mode=\"worker\"\n| where isnull(output)\n| summarize total_events_out=sum(value)",
-        "earliest": "$timepick.earliest",
-        "latest": "$timepick.latest",
-        "timezone": "$timepick.timezone"
+        "earliest": "$timepick.earliest", "latest": "$timepick.latest", "timezone": "$timepick.timezone"
       },
       "layout": { "x": 8, "y": 2, "w": 2, "h": 2 }
     },
@@ -117,18 +94,14 @@
       "type": "counter.single",
       "title": "Events Diff (%)",
       "config": {
-        "style": false,
-        "applyThreshold": false,
+        "style": false, "applyThreshold": false,
         "customData": { "trellis": false, "dataFields": ["events_diff_pct"], "seriesCount": 1 },
-        "axis": {},
-        "onClickAction": { "type": "None" }
+        "axis": {}, "onClickAction": { "type": "None" }
       },
       "search": {
         "type": "inline",
         "query": "dataset=\"cribl_metrics\" metric in (\"total.in_events\",\"total.out_events\") dist_mode=\"worker\"\n| where isnull(input) and isnull(output)\n| summarize events_in=sum(iff(metric==\"total.in_events\",value,0)), events_out=sum(iff(metric==\"total.out_events\",value,0))\n| extend events_diff_pct=round(((events_out - events_in) / events_in) * 100, 2)\n| project events_diff_pct",
-        "earliest": "$timepick.earliest",
-        "latest": "$timepick.latest",
-        "timezone": "$timepick.timezone"
+        "earliest": "$timepick.earliest", "latest": "$timepick.latest", "timezone": "$timepick.timezone"
       },
       "layout": { "x": 10, "y": 2, "w": 2, "h": 2 }
     },
@@ -137,18 +110,14 @@
       "type": "counter.single",
       "title": "Bytes In ($byte_unit)",
       "config": {
-        "style": false,
-        "applyThreshold": false,
+        "style": false, "applyThreshold": false,
         "customData": { "trellis": false, "dataFields": ["bytes_in"], "seriesCount": 1 },
-        "axis": {},
-        "onClickAction": { "type": "None" }
+        "axis": {}, "onClickAction": { "type": "None" }
       },
       "search": {
         "type": "inline",
         "query": "dataset=\"cribl_metrics\" metric=\"total.in_bytes\" dist_mode=\"worker\"\n| where isnull(input)\n| summarize total=sum(value)\n| extend divisor=case(\"$byte_unit\"==\"MB\", 1048576, \"$byte_unit\"==\"TB\", 1099511627776, 1073741824)\n| extend bytes_in=round(total / divisor, 2)\n| project bytes_in",
-        "earliest": "$timepick.earliest",
-        "latest": "$timepick.latest",
-        "timezone": "$timepick.timezone"
+        "earliest": "$timepick.earliest", "latest": "$timepick.latest", "timezone": "$timepick.timezone"
       },
       "layout": { "x": 6, "y": 4, "w": 2, "h": 2 }
     },
@@ -157,18 +126,14 @@
       "type": "counter.single",
       "title": "Bytes Out ($byte_unit)",
       "config": {
-        "style": false,
-        "applyThreshold": false,
+        "style": false, "applyThreshold": false,
         "customData": { "trellis": false, "dataFields": ["bytes_out"], "seriesCount": 1 },
-        "axis": {},
-        "onClickAction": { "type": "None" }
+        "axis": {}, "onClickAction": { "type": "None" }
       },
       "search": {
         "type": "inline",
         "query": "dataset=\"cribl_metrics\" metric=\"total.out_bytes\" dist_mode=\"worker\"\n| where isnull(output)\n| summarize total=sum(value)\n| extend divisor=case(\"$byte_unit\"==\"MB\", 1048576, \"$byte_unit\"==\"TB\", 1099511627776, 1073741824)\n| extend bytes_out=round(total / divisor, 2)\n| project bytes_out",
-        "earliest": "$timepick.earliest",
-        "latest": "$timepick.latest",
-        "timezone": "$timepick.timezone"
+        "earliest": "$timepick.earliest", "latest": "$timepick.latest", "timezone": "$timepick.timezone"
       },
       "layout": { "x": 8, "y": 4, "w": 2, "h": 2 }
     },
@@ -177,18 +142,14 @@
       "type": "counter.single",
       "title": "Bytes Diff (%)",
       "config": {
-        "style": false,
-        "applyThreshold": false,
+        "style": false, "applyThreshold": false,
         "customData": { "trellis": false, "dataFields": ["bytes_diff_pct"], "seriesCount": 1 },
-        "axis": {},
-        "onClickAction": { "type": "None" }
+        "axis": {}, "onClickAction": { "type": "None" }
       },
       "search": {
         "type": "inline",
         "query": "dataset=\"cribl_metrics\" metric in (\"total.in_bytes\",\"total.out_bytes\") dist_mode=\"worker\"\n| where isnull(input) and isnull(output)\n| summarize bytes_in=sum(iff(metric==\"total.in_bytes\",value,0)), bytes_out=sum(iff(metric==\"total.out_bytes\",value,0))\n| extend divisor=case(\"$byte_unit\"==\"MB\", 1048576, \"$byte_unit\"==\"TB\", 1099511627776, 1073741824)\n| extend bytes_diff_pct=round(((bytes_out - bytes_in) / bytes_in) * 100, 2)\n| project bytes_diff_pct",
-        "earliest": "$timepick.earliest",
-        "latest": "$timepick.latest",
-        "timezone": "$timepick.timezone"
+        "earliest": "$timepick.earliest", "latest": "$timepick.latest", "timezone": "$timepick.timezone"
       },
       "layout": { "x": 10, "y": 4, "w": 2, "h": 2 }
     },
@@ -198,25 +159,16 @@
       "title": "Events by Source (over time)",
       "config": {
         "colorPalette": 0,
-        "customData": {
-          "trellis": false,
-          "connectNulls": "Leave gaps",
-          "stack": true,
-          "dataFields": []
-        },
+        "customData": { "trellis": false, "connectNulls": "Leave gaps", "stack": true, "dataFields": [] },
         "xAxis": { "labelOrientation": 0, "position": "Bottom" },
         "yAxis": { "position": "Left", "scale": "Linear", "splitLine": true, "label": "Events" },
         "legend": { "position": "Bottom", "truncate": true },
-        "onClickAction": { "type": "None" },
-        "timestats": true,
-        "axis": {}
+        "onClickAction": { "type": "None" }, "timestats": true, "axis": {}
       },
       "search": {
         "type": "inline",
         "query": "dataset=\"cribl_metrics\" metric in (\"total.in_events\") dist_mode in (\"worker\",\"managed-edge\")\n| where isnull(input)\n| extend source=case(dist_mode==\"managed-edge\", \"Edge\", worker_group has \"search\", \"Search\", \"Stream\")\n| summarize events_in=sum(value) by _time=bin(_time, 1h), source\n| timestats sum(events_in) by source",
-        "earliest": "$timepick.earliest",
-        "latest": "$timepick.latest",
-        "timezone": "$timepick.timezone"
+        "earliest": "$timepick.earliest", "latest": "$timepick.latest", "timezone": "$timepick.timezone"
       },
       "layout": { "x": 0, "y": 6, "w": 6, "h": 4 }
     },
@@ -226,25 +178,16 @@
       "title": "Bytes by Source (over time)",
       "config": {
         "colorPalette": 0,
-        "customData": {
-          "trellis": false,
-          "connectNulls": "Leave gaps",
-          "stack": true,
-          "dataFields": []
-        },
+        "customData": { "trellis": false, "connectNulls": "Leave gaps", "stack": true, "dataFields": [] },
         "xAxis": { "labelOrientation": 0, "position": "Bottom" },
         "yAxis": { "position": "Left", "scale": "Linear", "splitLine": true, "label": "$byte_unit" },
         "legend": { "position": "Bottom", "truncate": true },
-        "onClickAction": { "type": "None" },
-        "timestats": true,
-        "axis": {}
+        "onClickAction": { "type": "None" }, "timestats": true, "axis": {}
       },
       "search": {
         "type": "inline",
         "query": "dataset=\"cribl_metrics\" metric in (\"total.in_bytes\") dist_mode in (\"worker\",\"managed-edge\")\n| where isnull(input)\n| extend source=case(dist_mode==\"managed-edge\", \"Edge\", worker_group has \"search\", \"Search\", \"Stream\")\n| extend divisor=case(\"$byte_unit\"==\"MB\", 1048576, \"$byte_unit\"==\"TB\", 1099511627776, 1073741824)\n| summarize bytes_in=sum(value / divisor) by _time=bin(_time, 1h), source\n| timestats sum(bytes_in) by source",
-        "earliest": "$timepick.earliest",
-        "latest": "$timepick.latest",
-        "timezone": "$timepick.timezone"
+        "earliest": "$timepick.earliest", "latest": "$timepick.latest", "timezone": "$timepick.timezone"
       },
       "layout": { "x": 6, "y": 6, "w": 6, "h": 4 }
     },
@@ -252,93 +195,13 @@
       "id": "di_breakdown_table",
       "type": "list.table",
       "title": "Ingest Breakdown by Source",
-      "config": {
-        "showRowNumbers": false,
-        "onClickAction": { "type": "None" },
-        "axis": {}
-      },
+      "config": { "showRowNumbers": false, "onClickAction": { "type": "None" }, "axis": {} },
       "search": {
         "type": "inline",
         "query": "dataset=\"cribl_metrics\" metric in (\"total.in_bytes\",\"total.out_bytes\",\"total.in_events\",\"total.out_events\") dist_mode in (\"worker\",\"managed-edge\")\n| where isnull(input) and isnull(output)\n| extend source=case(dist_mode==\"managed-edge\", \"Edge\", worker_group has \"search\", \"Search\", \"Stream\")\n| summarize events_in=sum(iff(metric==\"total.in_events\",value,0)), events_out=sum(iff(metric==\"total.out_events\",value,0)), bytes_in=sum(iff(metric==\"total.in_bytes\",value,0)), bytes_out=sum(iff(metric==\"total.out_bytes\",value,0)) by source\n| extend divisor=case(\"$byte_unit\"==\"MB\", 1048576, \"$byte_unit\"==\"TB\", 1099511627776, 1073741824)\n| extend bytes_in_scaled=round(bytes_in/divisor, 1), bytes_out_scaled=round(bytes_out/divisor, 1), events_diff=events_out - events_in, bytes_diff=round((bytes_out - bytes_in)/divisor, 1)\n| project source, events_in, events_out, events_diff, bytes_in_scaled, bytes_out_scaled, bytes_diff\n| sort by events_in desc",
-        "earliest": "$timepick.earliest",
-        "latest": "$timepick.latest",
-        "timezone": "$timepick.timezone"
+        "earliest": "$timepick.earliest", "latest": "$timepick.latest", "timezone": "$timepick.timezone"
       },
       "layout": { "x": 0, "y": 10, "w": 12, "h": 3 }
-    },
-    {
-      "id": "di_top_sources_table",
-      "type": "list.table",
-      "title": "Top Sources by Ingest",
-      "config": {
-        "showRowNumbers": false,
-        "onClickAction": { "type": "None" },
-        "axis": {}
-      },
-      "search": {
-        "type": "inline",
-        "query": "dataset=\"cribl_metrics\" metric in (\"total.in_bytes\",\"total.in_events\") dist_mode in (\"worker\",\"managed-edge\")\n| where isnotnull(input)\n| summarize events_in=sum(iff(metric==\"total.in_events\",value,0)), bytes_in=sum(iff(metric==\"total.in_bytes\",value,0)) by input, worker_group\n| extend divisor=case(\"$byte_unit\"==\"MB\", 1048576, \"$byte_unit\"==\"TB\", 1099511627776, 1073741824)\n| extend bytes_in_scaled=round(bytes_in / divisor, 2)\n| project input, worker_group, events_in, bytes_in_scaled\n| sort by bytes_in_scaled desc\n| limit 20",
-        "earliest": "$timepick.earliest",
-        "latest": "$timepick.latest",
-        "timezone": "$timepick.timezone"
-      },
-      "layout": { "x": 0, "y": 13, "w": 12, "h": 4 }
-    },
-    {
-      "id": "di_ingest_by_input_chart",
-      "type": "chart.column",
-      "title": "Ingest by Source (over time)",
-      "config": {
-        "colorPalette": 0,
-        "customData": {
-          "trellis": false,
-          "connectNulls": "Leave gaps",
-          "stack": true,
-          "dataFields": []
-        },
-        "xAxis": { "labelOrientation": 0, "position": "Bottom" },
-        "yAxis": { "position": "Left", "scale": "Linear", "splitLine": true, "label": "$byte_unit" },
-        "legend": { "position": "Right", "truncate": true },
-        "onClickAction": { "type": "None" },
-        "timestats": true,
-        "axis": {}
-      },
-      "search": {
-        "type": "inline",
-        "query": "dataset=\"cribl_metrics\" metric=\"total.in_bytes\" dist_mode in (\"worker\",\"managed-edge\")\n| where isnotnull(input)\n| extend divisor=case(\"$byte_unit\"==\"MB\", 1048576, \"$byte_unit\"==\"TB\", 1099511627776, 1073741824)\n| summarize bytes_in=sum(value / divisor) by _time=bin(_time, 1h), input\n| timestats sum(bytes_in) by input",
-        "earliest": "$timepick.earliest",
-        "latest": "$timepick.latest",
-        "timezone": "$timepick.timezone"
-      },
-      "layout": { "x": 0, "y": 17, "w": 12, "h": 5 }
-    },
-    {
-      "id": "di_events_by_input_chart",
-      "type": "chart.column",
-      "title": "Events by Source (over time)",
-      "config": {
-        "colorPalette": 0,
-        "customData": {
-          "trellis": false,
-          "connectNulls": "Leave gaps",
-          "stack": true,
-          "dataFields": []
-        },
-        "xAxis": { "labelOrientation": 0, "position": "Bottom" },
-        "yAxis": { "position": "Left", "scale": "Linear", "splitLine": true, "label": "Events" },
-        "legend": { "position": "Right", "truncate": true },
-        "onClickAction": { "type": "None" },
-        "timestats": true,
-        "axis": {}
-      },
-      "search": {
-        "type": "inline",
-        "query": "dataset=\"cribl_metrics\" metric=\"total.in_events\" dist_mode in (\"worker\",\"managed-edge\")\n| where isnotnull(input)\n| summarize events_in=sum(value) by _time=bin(_time, 1h), input\n| timestats sum(events_in) by input",
-        "earliest": "$timepick.earliest",
-        "latest": "$timepick.latest",
-        "timezone": "$timepick.timezone"
-      },
-      "layout": { "x": 0, "y": 22, "w": 12, "h": 5 }
     }
   ]
 }
