@@ -21,3 +21,15 @@ def get_metrics(
     resp = client.get("/api/v1/system/metrics", params=params)
     resp.raise_for_status()
     return resp.json()
+
+
+def query_metrics(client: httpx.Client, payload: dict[str, Any]) -> Any:
+    """POST a metric query to /api/v1/system/metrics/query.
+
+    Args:
+        client: An authenticated httpx client.
+        payload: Query body with ``where``, ``aggs``, ``earliest``, ``latest``.
+    """
+    resp = client.post("/api/v1/system/metrics/query", json=payload)
+    resp.raise_for_status()
+    return resp.json()

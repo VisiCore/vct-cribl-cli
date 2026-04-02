@@ -87,6 +87,7 @@ def _register_commands() -> None:
     from cribl_cli.commands.packs import packs_group
     from cribl_cli.commands.license_usage import license_usage_group
     from cribl_cli.commands.billing import billing_group
+    from cribl_cli.commands.ingest import ingest_group
 
     for group in [
         config_group, workers_group, sources_group, destinations_group,
@@ -94,7 +95,7 @@ def _register_commands() -> None:
         routes_group, jobs_group, version_group, system_group, edge_group,
         kms_group, preview_group, logger_group, profiler_group, health_group,
         overview_group, alerts_group, packs_group, license_usage_group,
-        billing_group,
+        billing_group, ingest_group,
     ]:
         cli.add_command(group)
 

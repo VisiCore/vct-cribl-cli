@@ -12,7 +12,7 @@
 
 Python CLI built with Click. Two kinds of commands:
 
-1. **Hand-written (20):** `cribl_cli/commands/*.py` — complex operations (workers, routes, search, edge, health report, etc.)
+1. **Hand-written (21):** `cribl_cli/commands/*.py` — complex operations (workers, routes, search, edge, health report, ingest dashboard, etc.)
 2. **Factory-generated (~51):** Declared in `commands/registry.py`, built by `commands/command_factory.py` — standard CRUD
 
 Key modules:
@@ -36,7 +36,7 @@ Key modules:
 
 Worker groups are managed via `workers`, not `groups`.
 
-**Hand-written commands:** collectors, config, credentials, destinations, edge, health (check, report), jobs, kms, lookups, metrics, outposts, overview, packs, pipelines, preview, profiler, routes, search, sources, system, version, workers, workspaces
+**Hand-written commands:** collectors, config, credentials, destinations, edge, health (check, report, cpu), ingest (dashboard, query), jobs, kms, lookups, metrics, outposts, overview, packs, pipelines, preview, profiler, routes, search, sources, system, version, workers, workspaces
 
 **Factory-generated commands (standard CRUD):** ai-settings, alerts, appscope, auth-settings, banners, certificates, conditions, dashboard-categories, dashboards, dataset-providers, datasets, datatypes, db-connections, encryption-keys, event-breakers, executors, feature-flags, functions, git-settings, global-vars, grok, hmac-functions, lake-datasets, licenses, logger, macros, messages, notebooks, notification-targets, notifications, parquet-schemas, parsers, policies, protobuf-libs, regex, roles, samples, saved-searches, schemas, scripts, sds-rules, sds-rulesets, secrets, storage-locations, subscriptions, teams, trust-policies, usage-groups, users
 
@@ -53,4 +53,7 @@ Worker groups are managed via `workers`, not `groups`.
 - `--dry-run` logs request details to stderr and raises `DryRunAbort` (caught by error handler, exits 0).
 - Config tests mock the filesystem to avoid touching real `~/.criblrc`.
 - `health report` aggregates nodes, capacity alerts, versions, unhealthy IO, and error logs into a single command. Supports `--json`, `--skip-errors`, and `-g` group filter.
+- `ingest dashboard` shows daily ingest totals (events/bytes in/out) by source (Stream, Edge, Search). Supports `--json`, `--table`, and `--hours`.
+- `ingest query` runs a raw metric query — accepts a JSON payload as argument.
+- `dashboards/daily-ingest.json` is a Cribl Search dashboard definition replicating the Workspace Home "Daily Ingest" panels. Deploy with `cribl dashboards create "$(cat dashboards/daily-ingest.json)"`.
 - When running CLI commands to read data, use default JSON output (no `--table`). JSON is structured and easier to parse. Only use `--table` if the user explicitly asks for it.
