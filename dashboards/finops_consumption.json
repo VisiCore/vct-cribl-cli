@@ -1,0 +1,235 @@
+{
+  "id": "finops_consumption",
+  "name": "FinOps - Consumption Tracker",
+  "description": "Throughput utilization and estimated credit consumption. Tracks daily ingest vs licensed capacity and estimates credits based on published per-GB rates.",
+  "category": "cat_finops",
+  "layout": {},
+  "schedule": { "enabled": false, "cronSchedule": "0 0 * * *", "tz": "UTC", "keepLastN": 2 },
+  "elements": [
+    {
+      "id": "fo_timerange",
+      "inputId": "timepick",
+      "type": "input.timerange",
+      "title": "Time Range",
+      "config": { "defaultValue": { "earliest": "-365d", "latest": "now", "timezone": "local" } },
+      "layout": { "x": 0, "y": 0, "w": 3, "h": 2 }
+    },
+    {
+      "id": "fo_quota_override",
+      "inputId": "quota_override",
+      "type": "input.number",
+      "title": "Quota Override (GB/day)",
+      "config": { "defaultValue": 0 },
+      "layout": { "x": 3, "y": 0, "w": 2, "h": 2 }
+    },
+    {
+      "id": "fo_byte_unit",
+      "inputId": "byte_unit",
+      "type": "input.dropdown",
+      "title": "Byte Unit",
+      "config": {
+        "defaultValue": "TB",
+        "values": [null],
+        "field": "unit",
+        "query": "dataset=\"cribl_metrics\" | limit 1 | project unit=\"MB\" | union (dataset=\"cribl_metrics\" | limit 1 | project unit=\"GB\") | union (dataset=\"cribl_metrics\" | limit 1 | project unit=\"TB\") | sort by unit asc",
+        "axis": {}
+      },
+      "search": {
+        "type": "inline",
+        "query": "dataset=\"cribl_metrics\" | limit 1 | project unit=\"MB\" | union (dataset=\"cribl_metrics\" | limit 1 | project unit=\"GB\") | union (dataset=\"cribl_metrics\" | limit 1 | project unit=\"TB\") | sort by unit asc",
+        "earliest": "-5m",
+        "latest": "now"
+      },
+      "layout": { "x": 5, "y": 0, "w": 2, "h": 2 }
+    },
+    {
+      "id": "fo_explainer",
+      "type": "markdown.default",
+      "variant": "markdown",
+      "title": "About this dashboard",
+      "config": {
+        "markdown": "- **Throughput** — Daily ingest vs licensed capacity (quota)\n- **Est. Credits** — Stream 0.32/GB, Edge 0.26/GB\n- **Not included** — Infrastructure, Search compute, Lake storage\n- **Quota Override** — Set in GB/day (0 = use license)",
+        "axis": {}
+      },
+      "layout": { "x": 7, "y": 0, "w": 5, "h": 2 }
+    },
+    {
+      "id": "fo_throughput_util",
+      "type": "counter.single",
+      "title": "Throughput Utilization (%)",
+      "config": {
+        "style": false, "applyThreshold": true,
+        "colorThresholds": {
+          "thresholds": [
+            { "color": "#45850B", "threshold": 0 },
+            { "color": "#EFDB23", "threshold": 70 },
+            { "color": "#B20000", "threshold": 90 }
+          ]
+        },
+        "customData": { "trellis": false, "dataFields": ["utilization_pct"], "seriesCount": 1 },
+        "axis": {}, "onClickAction": { "type": "None" }
+      },
+      "search": {
+        "type": "inline",
+        "query": "dataset=\"license_usage\" | mv-expand items | extend type=\"usage\", val=items.inBytes / 1073741824 | project type, val\n| union (dataset=\"license_info\" | mv-expand items | extend type=\"quota\", val=todouble(items.quota) | project type, val)\n| summarize avg_daily=avgif(val, type==\"usage\"), license_quota=maxif(val, type==\"quota\")\n| extend quota=iff($quota_override > 0, todouble($quota_override), license_quota)\n| extend utilization_pct=round((avg_daily / quota) * 100, 1)\n| project utilization_pct",
+        "earliest": "$timepick.earliest", "latest": "$timepick.latest", "timezone": "$timepick.timezone"
+      },
+      "layout": { "x": 0, "y": 2, "w": 2, "h": 2 }
+    },
+    {
+      "id": "fo_avg_daily",
+      "type": "counter.single",
+      "title": "Avg Daily Ingest ($byte_unit)",
+      "config": {
+        "style": false, "applyThreshold": false,
+        "customData": { "trellis": false, "dataFields": ["avg_daily"], "seriesCount": 1 },
+        "axis": {}, "onClickAction": { "type": "None" }
+      },
+      "search": {
+        "type": "inline",
+        "query": "dataset=\"license_usage\"\n| mv-expand items\n| extend daily_gb=items.inBytes / 1073741824\n| summarize avg_gb=avg(daily_gb)\n| extend divisor=case(\"$byte_unit\"==\"MB\", 0.001024, \"$byte_unit\"==\"GB\", 1, 1024)\n| extend avg_daily=round(avg_gb / divisor, 2)\n| project avg_daily",
+        "earliest": "$timepick.earliest", "latest": "$timepick.latest", "timezone": "$timepick.timezone"
+      },
+      "layout": { "x": 2, "y": 2, "w": 2, "h": 2 }
+    },
+    {
+      "id": "fo_daily_quota",
+      "type": "counter.single",
+      "title": "Daily Quota (GB)",
+      "config": {
+        "style": false, "applyThreshold": false,
+        "customData": { "trellis": false, "dataFields": ["quota"], "seriesCount": 1 },
+        "axis": {}, "onClickAction": { "type": "None" }
+      },
+      "search": {
+        "type": "inline",
+        "query": "dataset=\"license_info\"\n| mv-expand items\n| extend quota=iff($quota_override > 0, $quota_override, items.quota)\n| project quota",
+        "earliest": "-1d", "latest": "now"
+      },
+      "layout": { "x": 4, "y": 2, "w": 2, "h": 2 }
+    },
+    {
+      "id": "fo_est_credits_total",
+      "type": "counter.single",
+      "title": "Est. Total Credits",
+      "config": {
+        "style": false, "applyThreshold": false,
+        "customData": { "trellis": false, "dataFields": ["total_credits"], "seriesCount": 1 },
+        "axis": {}, "onClickAction": { "type": "None" }
+      },
+      "search": {
+        "type": "inline",
+        "query": "dataset=\"license_usage\"\n| mv-expand items\n| extend edge_gb=coalesce(items.edge.inBytes, 0) / 1073741824, stream_gb=(items.inBytes - coalesce(items.edge.inBytes, 0)) / 1073741824\n| summarize stream=sum(stream_gb), edge=sum(edge_gb)\n| extend total_credits=round(stream * 0.32 + edge * 0.26, 0)\n| project total_credits",
+        "earliest": "$timepick.earliest", "latest": "$timepick.latest", "timezone": "$timepick.timezone"
+      },
+      "layout": { "x": 6, "y": 2, "w": 2, "h": 2 }
+    },
+    {
+      "id": "fo_est_credits_stream",
+      "type": "counter.single",
+      "title": "Est. Stream Credits",
+      "config": {
+        "style": false, "applyThreshold": false,
+        "customData": { "trellis": false, "dataFields": ["stream_credits"], "seriesCount": 1 },
+        "axis": {}, "onClickAction": { "type": "None" }
+      },
+      "search": {
+        "type": "inline",
+        "query": "dataset=\"license_usage\"\n| mv-expand items\n| extend stream_gb=(items.inBytes - coalesce(items.edge.inBytes, 0)) / 1073741824\n| summarize stream_credits=round(sum(stream_gb) * 0.32, 0)",
+        "earliest": "$timepick.earliest", "latest": "$timepick.latest", "timezone": "$timepick.timezone"
+      },
+      "layout": { "x": 8, "y": 2, "w": 2, "h": 2 }
+    },
+    {
+      "id": "fo_est_credits_edge",
+      "type": "counter.single",
+      "title": "Est. Edge Credits",
+      "config": {
+        "style": false, "applyThreshold": false,
+        "customData": { "trellis": false, "dataFields": ["edge_credits"], "seriesCount": 1 },
+        "axis": {}, "onClickAction": { "type": "None" }
+      },
+      "search": {
+        "type": "inline",
+        "query": "dataset=\"license_usage\"\n| mv-expand items\n| extend edge_gb=coalesce(items.edge.inBytes, 0) / 1073741824\n| summarize edge_credits=round(sum(edge_gb) * 0.26, 0)",
+        "earliest": "$timepick.earliest", "latest": "$timepick.latest", "timezone": "$timepick.timezone"
+      },
+      "layout": { "x": 10, "y": 2, "w": 2, "h": 2 }
+    },
+    {
+      "id": "fo_daily_trend",
+      "type": "chart.line",
+      "title": "Daily Ingest ($byte_unit/day)",
+      "config": {
+        "colorPalette": 0,
+        "customData": { "trellis": false, "connectNulls": "Connect", "stack": false, "dataFields": [] },
+        "xAxis": { "labelOrientation": 0, "position": "Bottom" },
+        "yAxis": { "position": "Left", "scale": "Linear", "splitLine": true, "label": "$byte_unit" },
+        "legend": { "position": "Bottom", "truncate": true },
+        "onClickAction": { "type": "None" },
+        "timestats": false,
+        "axis": {}
+      },
+      "search": {
+        "type": "inline",
+        "query": "dataset=\"license_usage\"\n| mv-expand items\n| extend _time=items.startTime / 1000, daily_gb=items.inBytes / 1073741824\n| extend divisor=case(\"$byte_unit\"==\"MB\", 0.001024, \"$byte_unit\"==\"GB\", 1, 1024)\n| extend Daily=round(daily_gb / divisor, 2)\n| project _time, Daily",
+        "earliest": "$timepick.earliest", "latest": "$timepick.latest", "timezone": "$timepick.timezone"
+      },
+      "layout": { "x": 0, "y": 4, "w": 6, "h": 4 }
+    },
+    {
+      "id": "fo_daily_credits_chart",
+      "type": "chart.column",
+      "title": "Est. Daily Credits (Stream + Edge)",
+      "config": {
+        "colorPalette": 0,
+        "customData": { "trellis": false, "connectNulls": "Leave gaps", "stack": true, "dataFields": [] },
+        "xAxis": { "labelOrientation": 0, "position": "Bottom" },
+        "yAxis": { "position": "Left", "scale": "Linear", "splitLine": true, "label": "Credits" },
+        "legend": { "position": "Bottom", "truncate": true },
+        "onClickAction": { "type": "None" },
+        "timestats": false,
+        "axis": {}
+      },
+      "search": {
+        "type": "inline",
+        "query": "dataset=\"license_usage\"\n| mv-expand items\n| extend _time=items.startTime / 1000, edge_gb=coalesce(items.edge.inBytes, 0) / 1073741824\n| extend Stream=round((items.inBytes / 1073741824 - edge_gb) * 0.32, 1), Edge=round(edge_gb * 0.26, 1)\n| project _time, Stream, Edge",
+        "earliest": "$timepick.earliest", "latest": "$timepick.latest", "timezone": "$timepick.timezone"
+      },
+      "layout": { "x": 6, "y": 4, "w": 6, "h": 4 }
+    },
+    {
+      "id": "fo_monthly_chart",
+      "type": "chart.column",
+      "title": "Monthly Ingest ($byte_unit) — Stream vs Edge",
+      "config": {
+        "colorPalette": 0,
+        "customData": { "trellis": false, "connectNulls": "Leave gaps", "stack": true, "dataFields": [] },
+        "xAxis": { "labelOrientation": 0, "position": "Bottom" },
+        "yAxis": { "position": "Left", "scale": "Linear", "splitLine": true, "label": "$byte_unit" },
+        "legend": { "position": "Bottom", "truncate": true },
+        "onClickAction": { "type": "None" },
+        "timestats": true,
+        "axis": {}
+      },
+      "search": {
+        "type": "inline",
+        "query": "dataset=\"license_usage\"\n| mv-expand items\n| extend _time=items.startTime / 1000, edge_bytes=coalesce(items.edge.inBytes, 0)\n| extend divisor=case(\"$byte_unit\"==\"MB\", 1048576, \"$byte_unit\"==\"TB\", 1099511627776, 1073741824)\n| extend stream_val=(items.inBytes - edge_bytes) / divisor, edge_val=edge_bytes / divisor\n| project _time, Stream=stream_val, Edge=edge_val\n| timestats sum(Stream), sum(Edge)",
+        "earliest": "$timepick.earliest", "latest": "$timepick.latest", "timezone": "$timepick.timezone"
+      },
+      "layout": { "x": 0, "y": 8, "w": 12, "h": 4 }
+    },
+    {
+      "id": "fo_monthly_table",
+      "type": "list.table",
+      "title": "Monthly Detail",
+      "config": { "showRowNumbers": false, "onClickAction": { "type": "None" }, "axis": {} },
+      "search": {
+        "type": "inline",
+        "query": "dataset=\"license_usage\"\n| mv-expand items\n| extend _time=items.startTime / 1000, in_gb=items.inBytes / 1073741824, edge_gb=coalesce(items.edge.inBytes, 0) / 1073741824\n| extend stream_gb=in_gb - edge_gb\n| summarize in_gb=round(sum(in_gb), 1), stream_gb=round(sum(stream_gb), 1), edge_gb=round(sum(edge_gb), 1), days=count(), stream_credits=round(sum(stream_gb) * 0.32, 0), edge_credits=round(sum(edge_gb) * 0.26, 0) by month=bin(_time, 30d)\n| extend total_credits=stream_credits + edge_credits, avg_daily_gb=round(in_gb / days, 1)\n| project month, days, in_gb, stream_gb, edge_gb, avg_daily_gb, stream_credits, edge_credits, total_credits\n| sort by month desc",
+        "earliest": "$timepick.earliest", "latest": "$timepick.latest", "timezone": "$timepick.timezone"
+      },
+      "layout": { "x": 0, "y": 12, "w": 12, "h": 4 }
+    }
+  ]
+}
