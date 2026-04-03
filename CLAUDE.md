@@ -12,8 +12,8 @@
 
 Python CLI built with Click. Two kinds of commands:
 
-1. **Hand-written (21):** `cribl_cli/commands/*.py` — complex operations (workers, routes, search, edge, health report, ingest dashboard, etc.)
-2. **Factory-generated (~51):** Declared in `commands/registry.py`, built by `commands/command_factory.py` — standard CRUD
+1. **Hand-written (25):** `cribl_cli/commands/*.py` — complex operations (workers, routes, search, edge, health report, ingest dashboard, billing, finops, etc.)
+2. **Factory-generated (52):** Declared in `commands/registry.py`, built by `commands/command_factory.py` — standard CRUD
 
 Key modules:
 - `cli.py` — Click group (`CriblCLI`), registers all commands, skips auth for `config` subcommand
@@ -36,9 +36,9 @@ Key modules:
 
 Worker groups are managed via `workers`, not `groups`.
 
-**Hand-written commands:** collectors, config, credentials, destinations, edge, health (check, report, cpu), ingest (dashboard, query), jobs, kms, lookups, metrics, outposts, overview, packs, pipelines, preview, profiler, routes, search, sources, system, version, workers, workspaces
+**Hand-written commands:** alerts, billing, config, destinations, edge, finops, health (check, report, cpu), ingest (dashboard, query), jobs, kms, license-usage, logger, metrics, notebooks, overview, packs, pipelines, preview, profiler, routes, search, sources, system, version, workers
 
-**Factory-generated commands (standard CRUD):** ai-settings, alerts, appscope, auth-settings, banners, certificates, conditions, dashboard-categories, dashboards, dataset-providers, datasets, datatypes, db-connections, encryption-keys, event-breakers, executors, feature-flags, functions, git-settings, global-vars, grok, hmac-functions, lake-datasets, licenses, logger, macros, messages, notebooks, notification-targets, notifications, parquet-schemas, parsers, policies, protobuf-libs, regex, roles, samples, saved-searches, schemas, scripts, sds-rules, sds-rulesets, secrets, storage-locations, subscriptions, teams, trust-policies, usage-groups, users
+**Factory-generated commands (standard CRUD):** ai-settings, alert-monitors, appscope, auth-settings, banners, certificates, collectors, conditions, credentials, dashboard-categories, dashboards, dataset-providers, datasets, datatypes, db-connections, encryption-keys, event-breakers, executors, feature-flags, functions, git-settings, global-vars, grok, hmac-functions, lake-datasets, licenses, lookups, macros, messages, notification-targets, notifications, outposts, parquet-schemas, parsers, policies, protobuf-libs, regex, roles, samples, saved-searches, schemas, scripts, sds-rules, sds-rulesets, secrets, storage-locations, subscriptions, teams, trust-policies, usage-groups, users, workspaces
 
 ## Safety Rules
 

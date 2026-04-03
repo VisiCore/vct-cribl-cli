@@ -63,7 +63,7 @@ cribl --base-url https://your-org.cribl.cloud --client-id ... --client-secret ..
 cribl <command> <subcommand> [options]
 ```
 
-### Hand-written commands (26)
+### Hand-written commands (25)
 
 | Command | Description |
 |---|---|
@@ -91,11 +91,10 @@ cribl <command> <subcommand> [options]
 | `ingest` | Ingest dashboards and metric queries |
 | `billing` | Billing usage and cost tracking |
 | `finops` | FinOps consumption tracking and dashboards |
-| `credentials` | Credential management |
 | `license-usage` | Daily license throughput metrics |
 
 <details>
-<summary><strong>Factory-generated commands (~51)</strong> — standard CRUD (list, get, create, update, delete)</summary>
+<summary><strong>Factory-generated commands (52)</strong> — standard CRUD (list, get, create, update, delete)</summary>
 
 `ai-settings`, `alert-monitors`, `appscope`, `auth-settings`, `banners`, `certificates`, `collectors`, `conditions`, `credentials`, `dashboard-categories`, `dashboards`, `dataset-providers`, `datasets`, `datatypes`, `db-connections`, `encryption-keys`, `event-breakers`, `executors`, `feature-flags`, `functions`, `git-settings`, `global-vars`, `grok`, `hmac-functions`, `lake-datasets`, `licenses`, `lookups`, `macros`, `messages`, `notification-targets`, `notifications`, `outposts`, `parquet-schemas`, `parsers`, `policies`, `protobuf-libs`, `regex`, `roles`, `samples`, `saved-searches`, `schemas`, `scripts`, `sds-rules`, `sds-rulesets`, `secrets`, `storage-locations`, `subscriptions`, `teams`, `trust-policies`, `usage-groups`, `users`, `workspaces`
 

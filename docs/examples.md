@@ -180,6 +180,70 @@ cribl health check -g pi --table
 cribl health check -g pi --table --all
 ```
 
+## Ingest monitoring
+
+```bash
+# Daily ingest dashboard (last 24h)
+cribl ingest dashboard
+
+# Ingest over the last 48 hours as JSON
+cribl ingest dashboard --hours 48 --json
+
+# Table breakdown by source (Stream, Edge, Search)
+cribl ingest dashboard --table
+
+# Raw metric query
+cribl ingest query '{"where":"(has_no_dimensions)","aggs":{"aggregations":["sum(\"total.in_bytes\").as(\"bytesIn\")"],"timeWindowSeconds":-1},"earliest":"86400s","latest":0}'
+```
+
+## Billing and consumption
+
+```bash
+# Monthly consumption stats across all products
+cribl billing products-stats --start 2026-01-01T00:00:00Z --end 2026-04-01T00:00:00Z
+
+# Credits purchased vs used
+cribl billing credits-summary --start 2026-01-01T00:00:00Z --end 2026-04-01T00:00:00Z
+
+# Breakdown for a specific product
+cribl billing product stream --start 2026-01-01T00:00:00Z --end 2026-04-01T00:00:00Z
+
+# List invoices
+cribl billing invoices
+```
+
+## FinOps and license tracking
+
+```bash
+# Annual consumption summary with on-track/over status
+cribl finops summary
+
+# JSON output for dashboards or alerting
+cribl finops summary --json
+
+# Monthly breakdown as table
+cribl finops summary --table
+
+# Daily license usage metrics (last 90 days)
+cribl license-usage get
+
+# License usage for a date range
+cribl license-usage get --start 2026-01-01 --end 2026-03-31
+```
+
+## CPU monitoring
+
+```bash
+# Detect nodes with CPU spikes (last 24h, >80% threshold)
+cribl health cpu
+
+# Lower threshold, longer window
+cribl health cpu --hours 48 --threshold 60
+
+# Scope to a specific group
+cribl health cpu -g defaultHybrid --json
+```
+
 ## Version control
 
 ```bash

@@ -21,9 +21,15 @@ All commands output JSON by default. Use `--table` where supported for tabular o
 - [preview](#preview) — Pipeline preview
 - [logger](#logger) — Logger configuration
 - [profiler](#profiler) — Profiler management
-- [health](#health) — Health checks
+- [health](#health) — Health checks, reports, and CPU monitoring
 - [overview](#overview) — Environment summaries
-- [Factory-generated commands](#factory-generated-commands) — CRUD for 49 resource types
+- [ingest](#ingest) — Daily ingest dashboard and metrics
+- [billing](#billing) — Billing, consumption, and invoices
+- [finops](#finops) — FinOps consumption tracking
+- [license-usage](#license-usage) — Daily license usage metrics
+- [alerts](#alerts) — Scheduled saved search alerts
+- [packs](#packs) — Pack management
+- [Factory-generated commands](#factory-generated-commands) — CRUD for 52 resource types
 
 ---
 
@@ -374,13 +380,19 @@ cribl profiler stop -g <group>
 
 ## health
 
-Check health of sources and destinations.
+Health checks, comprehensive reports, and CPU spike detection.
 
 ```bash
 cribl health check -g <group> [--table] [--all]
+cribl health report [-g <group>] [--json] [--skip-errors] [--error-limit <n>]
+cribl health cpu [-g <group>] [--hours <n>] [--threshold <pct>] [--json] [--table]
 ```
 
-With `--all`, shows all items. Default shows only unhealthy (Red/Yellow) items.
+| Subcommand | Options |
+|---|---|
+| `check` | `-g, --group`, `--table`, `--all` — show unhealthy (or all) sources and destinations |
+| `report` | `-g, --group`, `--json`, `--skip-errors`, `--error-limit` (default: 10) — comprehensive report: nodes, capacity alerts, versions, unhealthy IO, config drift, errors |
+| `cpu` | `-g, --group`, `--hours` (default: 24), `--threshold` (default: 80), `--json`, `--table` — per-node CPU spike detection |
 
 ---
 
@@ -398,9 +410,103 @@ cribl overview destinations -g <group> [--table]
 
 ---
 
+## ingest
+
+Daily ingest dashboard and raw metric queries.
+
+```bash
+cribl ingest dashboard [--hours <n>] [--json] [--table]
+cribl ingest query '<json_body>' [--table]
+```
+
+| Subcommand | Options |
+|---|---|
+| `dashboard` | `--hours` (default: 24), `--json`, `--table` — daily ingest totals (events/bytes in/out) by source (Stream, Edge, Search) |
+| `query` | `JSON_BODY`, `--table` — run a raw metric query against `/api/v1/system/metrics/query` |
+
+---
+
+## billing
+
+Billing, consumption, and invoice management (cloud only). All consumption subcommands require `--start` and `--end` dates (ISO 8601).
+
+```bash
+cribl billing products-stats --start <date> --end <date> [--table]
+cribl billing credits-summary --start <date> --end <date> [--table]
+cribl billing cumulative --start <date> --end <date> [--table]
+cribl billing products-breakdown --start <date> --end <date> [--table]
+cribl billing product <slug> --start <date> --end <date> [--table]
+cribl billing invoices [--table]
+cribl billing invoice <invoice_id> [--table]
+```
+
+| Subcommand | Options |
+|---|---|
+| `products-stats` | `--start`, `--end`, `--window` (default: monthly), `--table` |
+| `credits-summary` | `--start`, `--end`, `--window`, `--table` |
+| `cumulative` | `--start`, `--end`, `--window`, `--table` |
+| `products-breakdown` | `--start`, `--end`, `--window`, `--table` |
+| `product` | `PRODUCT_SLUG` (stream\|search\|edge\|lakehouse\|lake\|infrastructure\|other), `--start`, `--end`, `--window`, `--table` |
+| `invoices` | `--table` |
+| `invoice` | `INVOICE_ID`, `--table` |
+
+---
+
+## finops
+
+FinOps credit consumption tracking and license utilization.
+
+```bash
+cribl finops summary [--json] [--table]
+```
+
+| Subcommand | Options |
+|---|---|
+| `summary` | `--json`, `--table` — annual consumption summary with on-track/over/under status, monthly breakdown, estimated credits |
+
+---
+
+## license-usage
+
+Daily license usage metrics (up to 90 days).
+
+```bash
+cribl license-usage get [--start <date>] [--end <date>] [--table]
+```
+
+| Subcommand | Options |
+|---|---|
+| `get` | `--start` (ISO 8601), `--end` (ISO 8601), `--table` |
+
+---
+
+## alerts
+
+Alerts (scheduled saved searches). Hand-written command that filters notifications to show only scheduled alert items.
+
+```bash
+cribl alerts list [-g <group>] [--table]
+```
+
+---
+
+## packs
+
+Pack management — export, install, upgrade, delete.
+
+```bash
+cribl packs list -g <group> [--table]
+cribl packs export <pack_id> -g <group> -o <output_path>
+cribl packs install <source> -g <group>
+cribl packs upgrade <pack_id> -g <group> [--source <url>]
+cribl packs delete <pack_id> -g <group>
+```
+
+---
+
 ## Factory-generated commands
 
-49 resource types with auto-generated CRUD subcommands. Each supports a subset of: `list`, `get`, `create`, `update`, `delete`.
+52 resource types with auto-generated CRUD subcommands. Each supports a subset of: `list`, `get`, `create`, `update`, `delete`.
 
 ### Group-scoped (use `-g, --group`)
 
@@ -426,7 +532,6 @@ cribl overview destinations -g <group> [--table]
 | `certificates` | list, get, create, delete | `system/certificates` |
 | `samples` | list, get, create, delete | `system/samples` |
 | `scripts` | list, get, create, delete | `system/scripts` |
-| `packs` | list, get, create, update | `packs` |
 | `executors` | list, get | `executors` |
 | `hmac-functions` | list, get | `lib/hmac` |
 | `functions` | list, get | `system/functions` |
@@ -445,7 +550,7 @@ cribl overview destinations -g <group> [--table]
 | `workspaces` | all | `workspaces` |
 | `messages` | list, get, create, delete | `system/messages` |
 | `licenses` | list, get | `system/licenses` |
-| `subscriptions` | list, get | `system/subscriptions` |
+| `subscriptions` | list, get, create, update | `system/subscriptions` |
 | `outposts` | list, get | `system/outposts` |
 | `feature-flags` | list, get, update, delete | `system/feature-flags` |
 | `ai-settings` | list, get, update, delete | `system/ai-settings` |
@@ -463,8 +568,10 @@ cribl overview destinations -g <group> [--table]
 | `datatypes` | all | `datatypes` |
 | `datasets` | all | `datasets` |
 | `dashboards` | list, get, create, delete | `dashboards` |
-| `usage-groups` | list, get | `usage-groups` |
-| `alerts` | list | `notifications` |
+| `saved-searches` | all | `saved` |
+| `notifications` | all | `notifications` |
+| `alert-monitors` | all | `alert/monitors` |
+| `usage-groups` | all | `usage-groups` |
 
 ### Lake-scoped (use `--lake`)
 
