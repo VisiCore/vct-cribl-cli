@@ -1,6 +1,14 @@
 # cribl-cli
 
-Command-line interface for the Cribl Cloud REST API. Manage worker groups, sources, destinations, pipelines, routes, search jobs, notebooks, edge nodes, and more from your terminal.
+![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue)
+![License: MIT](https://img.shields.io/badge/license-MIT-green)
+![Tests: 138 passing](https://img.shields.io/badge/tests-138%20passing-brightgreen)
+
+Command-line interface for the Cribl Cloud REST API. Manage pipelines, routes, sources, destinations, Edge fleets, search, health monitoring, FinOps billing, and 70+ resources from your terminal.
+
+## Requirements
+
+- Python 3.10+
 
 ## Installation
 
@@ -55,7 +63,7 @@ cribl --base-url https://your-org.cribl.cloud --client-id ... --client-secret ..
 cribl <command> <subcommand> [options]
 ```
 
-### Hand-written commands (20)
+### Hand-written commands (26)
 
 | Command | Description |
 |---|---|
@@ -76,14 +84,22 @@ cribl <command> <subcommand> [options]
 | `preview` | Pipeline preview |
 | `logger` | Logger configuration |
 | `profiler` | Profiler management |
-| `health` | Health checks and reports |
+| `health` | Health checks, reports, and CPU spike detection |
 | `overview` | Environment summary |
 | `alerts` | Alerts (scheduled saved searches) |
 | `packs` | Pack export, install, upgrade, delete |
+| `ingest` | Ingest dashboards and metric queries |
+| `billing` | Billing usage and cost tracking |
+| `finops` | FinOps consumption tracking and dashboards |
+| `credentials` | Credential management |
+| `license-usage` | Daily license throughput metrics |
 
-### Factory-generated commands (~51)
+<details>
+<summary><strong>Factory-generated commands (~51)</strong> — standard CRUD (list, get, create, update, delete)</summary>
 
-Standard CRUD operations (list, get, create, update, delete) are auto-generated for resources like `parsers`, `schemas`, `lookups`, `users`, `roles`, `datasets`, `dashboards`, and many more. Run `cribl -h` for the full list.
+`ai-settings`, `alert-monitors`, `appscope`, `auth-settings`, `banners`, `certificates`, `collectors`, `conditions`, `credentials`, `dashboard-categories`, `dashboards`, `dataset-providers`, `datasets`, `datatypes`, `db-connections`, `encryption-keys`, `event-breakers`, `executors`, `feature-flags`, `functions`, `git-settings`, `global-vars`, `grok`, `hmac-functions`, `lake-datasets`, `licenses`, `lookups`, `macros`, `messages`, `notification-targets`, `notifications`, `outposts`, `parquet-schemas`, `parsers`, `policies`, `protobuf-libs`, `regex`, `roles`, `samples`, `saved-searches`, `schemas`, `scripts`, `sds-rules`, `sds-rulesets`, `secrets`, `storage-locations`, `subscriptions`, `teams`, `trust-policies`, `usage-groups`, `users`, `workspaces`
+
+</details>
 
 ### Common examples
 
@@ -114,6 +130,18 @@ cribl edge errors -f pi
 
 # Environment overview
 cribl overview summary
+
+# Health report across all groups
+cribl health report
+
+# CPU spike detection for a group
+cribl health cpu -g defaultHybrid
+
+# Daily ingest dashboard
+cribl ingest dashboard
+
+# FinOps consumption tracking
+cribl finops consumption
 
 # Dry-run mode (preview API calls without sending)
 cribl --dry-run sources list -g default
@@ -193,7 +221,7 @@ Contributions are welcome! Here's how to get started:
 - All new commands should have corresponding unit tests
 - Follow existing code patterns — use the command factory for standard CRUD, hand-written commands for anything with special logic
 - Keep `--table` output support for any command that returns lists
-- Run `pytest` before submitting — all 109 tests must pass
+- Run `pytest` before submitting — all 138 tests must pass
 - Do not commit credentials, `.env` files, or `~/.criblrc` profiles
 
 ### Reporting issues
