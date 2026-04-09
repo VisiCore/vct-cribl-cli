@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 import click
 
 from cribl_cli.api.client import get_client
-from cribl_cli.api.endpoints.workers import list_worker_groups, get_worker_group, deploy_group
+from cribl_cli.api.endpoints.workers import list_worker_groups, list_worker_nodes, get_worker_group, deploy_group
 from cribl_cli.config.loader import load_config
 from cribl_cli.output.formatter import format_output
 from cribl_cli.utils.errors import handle_error
@@ -18,6 +18,14 @@ def workers_group():
     pass
 
 
+def _format_bytes(n: int | float) -> str:
+    if n == 0:
+        return "0 B"
+    units = ["B", "KB", "MB", "GB", "TB"]
+    i = int(n > 0 and min(len(units) - 1, int(__import__("math").log(abs(n), 1024))))
+    return f"{n / (1024 ** i):.2f} {units[i]}"
+
+
 @workers_group.command("list")
 @click.option("--table", "use_table", is_flag=True)
 def workers_list(use_table):
@@ -25,6 +33,32 @@ def workers_list(use_table):
         client = get_client()
         data = list_worker_groups(client)
         click.echo(format_output(data, table=use_table))
+    except Exception as e:
+        handle_error(e)
+
+
+@workers_group.command("nodes")
+@click.option("-g", "--group", default=None, help="Worker group to filter by.")
+@click.option("--table", "use_table", is_flag=True, help="Output as table.")
+def workers_nodes(group, use_table):
+    """List worker nodes (optionally filtered by group)."""
+    try:
+        client = get_client()
+        nodes = list_worker_nodes(client, group)
+        summary = [
+            {
+                "id": n["id"],
+                "hostname": n["hostname"],
+                "status": n["status"],
+                "group": n["group"],
+                "cpus": n["cpus"],
+                "memory": _format_bytes(n["totalmem"]),
+                "platform": n["platform"],
+                "version": n["version"],
+            }
+            for n in nodes
+        ]
+        click.echo(format_output(summary, table=use_table))
     except Exception as e:
         handle_error(e)
 

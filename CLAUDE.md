@@ -38,6 +38,10 @@ Worker groups are managed via `workers`, not `groups`.
 
 **Hand-written commands:** alerts, billing, config, destinations, edge, finops, health (check, report, cpu), ingest (dashboard, query), jobs, kms, license-usage, logger, metrics, notebooks, overview, packs, pipelines, preview, profiler, routes, search, sources, system, version, workers
 
+**Key subcommands:**
+- `workers list` — list worker groups; `workers nodes` — list individual worker nodes (supports `-g` group filter)
+- `edge nodes` — list individual edge nodes (supports `-f` fleet filter)
+
 **Factory-generated commands (standard CRUD):** ai-settings, alert-monitors, appscope, auth-settings, banners, certificates, collectors, conditions, credentials, dashboard-categories, dashboards, dataset-providers, datasets, datatypes, db-connections, encryption-keys, event-breakers, executors, feature-flags, functions, git-settings, global-vars, grok, hmac-functions, lake-datasets, licenses, lookups, macros, messages, notification-targets, notifications, outposts, parquet-schemas, parsers, policies, protobuf-libs, regex, roles, samples, saved-searches, schemas, scripts, sds-rules, sds-rulesets, secrets, storage-locations, subscriptions, teams, trust-policies, usage-groups, users, workspaces
 
 ## Safety Rules

@@ -37,6 +37,11 @@ htmlcov/
 .ruff_cache/
 .claude/
 
+# Client / org-specific artifacts
+samples/
+packs/
+dashboards/billing_license_usage.json
+
 # Distribution
 *.whl
 *.tar.gz

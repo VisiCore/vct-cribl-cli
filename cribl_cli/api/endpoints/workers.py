@@ -6,6 +6,32 @@ from typing import Any
 import httpx
 
 
+def list_worker_nodes(
+    client: httpx.Client, group: str | None = None
+) -> list[dict[str, Any]]:
+    """List all worker nodes, optionally filtered by group."""
+    resp = client.get("/api/v1/master/workers", params={"product": "stream"})
+    resp.raise_for_status()
+    items = resp.json().get("items", [])
+    nodes = []
+    for w in items:
+        if group and w.get("group") != group:
+            continue
+        info = w.get("info", {})
+        cribl = info.get("cribl", {})
+        nodes.append({
+            "id": w.get("id", ""),
+            "status": w.get("status", ""),
+            "group": w.get("group", ""),
+            "hostname": info.get("hostname", ""),
+            "cpus": info.get("cpus", 0),
+            "totalmem": info.get("totalmem", 0),
+            "platform": info.get("platform", ""),
+            "version": cribl.get("version", ""),
+        })
+    return nodes
+
+
 def list_worker_groups(client: httpx.Client) -> Any:
     """List all worker groups."""
     resp = client.get("/api/v1/master/groups")
