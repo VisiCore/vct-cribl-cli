@@ -81,3 +81,77 @@ def get_invoice(client: httpx.Client, org_id: str, invoice_id: str) -> Any:
     resp = client.get(f"{_BASE}/{org_id}/billing/invoices/{invoice_id}")
     resp.raise_for_status()
     return resp.json()
+
+
+def get_product_usage_breakdown(
+    client: httpx.Client, org_id: str, product_slug: str, *,
+    starting_on: str, ending_before: str, window: str = "monthly",
+    aggregation_profile: str = "default",
+) -> Any:
+    params = _consumption_params(starting_on, ending_before, window)
+    params["aggregationProfile"] = aggregation_profile
+    resp = client.get(_consumption_url(org_id, f"product-usage-breakdown/{product_slug}"), params=params)
+    resp.raise_for_status()
+    return resp.json()
+
+
+def get_product_usage_group_breakdown(
+    client: httpx.Client, org_id: str, product_slug: str, *,
+    starting_on: str, ending_before: str, window: str = "monthly",
+    group_key: str = "workerGroup", units: str = "credits", values_limit: int = 10,
+) -> Any:
+    params = {
+        **_consumption_params(starting_on, ending_before, window),
+        "groupKey": group_key,
+        "units": units,
+        "valuesLimit": str(values_limit),
+    }
+    resp = client.get(_consumption_url(org_id, f"product-usage-group-breakdown/{product_slug}"), params=params)
+    resp.raise_for_status()
+    return resp.json()
+
+
+def get_product_credits_summary(
+    client: httpx.Client, org_id: str, product_slug: str, *,
+    starting_on: str, ending_before: str,
+) -> Any:
+    params = {"startingOn": starting_on, "endingBefore": ending_before}
+    resp = client.get(_consumption_url(org_id, f"products/{product_slug}/credits-summary"), params=params)
+    resp.raise_for_status()
+    return resp.json()
+
+
+def get_credits_stats(
+    client: httpx.Client, org_id: str, *,
+    starting_on: str, ending_before: str, window: str = "monthly",
+) -> Any:
+    params = _consumption_params(starting_on, ending_before, window)
+    resp = client.get(f"{_BASE}/{org_id}/billing/credits/stats", params=params)
+    resp.raise_for_status()
+    return resp.json()
+
+
+def get_credits_timeseries(
+    client: httpx.Client, org_id: str, *,
+    starting_on: str, ending_before: str, window: str = "monthly",
+    aggregation_profile: str = "default", max_projections: int | None = None,
+) -> Any:
+    params = _consumption_params(starting_on, ending_before, window)
+    params["aggregationProfile"] = aggregation_profile
+    if max_projections is not None:
+        params["maxProjectionsCount"] = str(max_projections)
+    resp = client.get(f"{_BASE}/{org_id}/billing/credits/timeseries", params=params)
+    resp.raise_for_status()
+    return resp.json()
+
+
+def get_usage_timeseries(
+    client: httpx.Client, org_id: str, *,
+    starting_on: str, ending_before: str, window: str = "monthly",
+    aggregation_profile: str = "default",
+) -> Any:
+    params = _consumption_params(starting_on, ending_before, window)
+    params["aggregationProfile"] = aggregation_profile
+    resp = client.get(f"{_BASE}/{org_id}/billing/usage/timeseries", params=params)
+    resp.raise_for_status()
+    return resp.json()

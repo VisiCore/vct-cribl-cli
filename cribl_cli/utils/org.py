@@ -24,4 +24,15 @@ def extract_org_id(base_url: str) -> str:
             f"Cannot extract organization ID from '{base_url}'. "
             "Expected format: https://<orgId>.cribl.cloud"
         )
-    return parts[0]
+    subdomain = parts[0]
+    # Strip workspace prefix (e.g. 'main-eager-reed-t8h0f4x' -> 'eager-reed-t8h0f4x')
+    # Workspace prefixes are word chars followed by a dash before the org slug.
+    # Org slugs follow the pattern: <word>-<word>-<alphanum>
+    if "-" in subdomain:
+        # Check if this looks like a workspace-prefixed URL (e.g. main-org-slug-abc123)
+        # by trying to find the org slug portion (adjective-noun-id pattern)
+        import re
+        match = re.match(r'^[a-zA-Z0-9]+?-(.+-[a-zA-Z0-9]{6,})$', subdomain)
+        if match:
+            return match.group(1)
+    return subdomain
