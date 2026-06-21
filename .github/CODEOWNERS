@@ -1,0 +1,62 @@
+# ----------------------------------------------------------------------------
+# CODEOWNERS
+#
+# GitHub reads this file to automatically request a review from the right people
+# whenever a pull request changes files they own. See the PR that introduced
+# this file for a full explanation of what CODEOWNERS is and why we use it.
+#
+# How matching works:
+#   - One rule per line:  <path-pattern>  <owner> [<owner> ...]
+#   - The LAST matching rule wins, so the catch-all (*) below is overridden by
+#     any more specific rule further down.
+#   - Owners are GitHub usernames (@user) or teams (@org/team) and must have
+#     write access to this repository, or GitHub ignores them.
+#
+# Today a single maintainer owns every area. The file is split by area on
+# purpose: to add a second reviewer for just one part of the codebase later,
+# add their @handle to that section's line only — no need to touch the rest.
+# ----------------------------------------------------------------------------
+
+# Default owner for anything not matched by a more specific rule below.
+*                     @werd-drew
+
+# Application code — HTTP client, transports, and the endpoint factory.
+/cribl_cli/api/       @werd-drew
+
+# Application code — hand-written CLI commands and the command registry.
+/cribl_cli/commands/  @werd-drew
+
+# Application code — authentication (OAuth2 cloud + local).
+/cribl_cli/auth/      @werd-drew
+
+# Application code — ~/.criblrc profile loading and config precedence.
+/cribl_cli/config/    @werd-drew
+
+# Application code — JSON / table output formatting.
+/cribl_cli/output/    @werd-drew
+
+# Application code — shared utilities.
+/cribl_cli/utils/     @werd-drew
+
+# Top-level CLI wiring (Click group + command registration).
+/cribl_cli/cli.py     @werd-drew
+
+# Executable entry point.
+/bin/                 @werd-drew
+
+# Packaging, dependencies, and pytest configuration.
+/pyproject.toml       @werd-drew
+
+# Test suite.
+/tests/               @werd-drew
+
+# Cribl Search dashboard definitions.
+/dashboards/          @werd-drew
+
+# Documentation.
+/README.md            @werd-drew
+/CLAUDE.md            @werd-drew
+/docs/                @werd-drew
+
+# Repo automation and this CODEOWNERS file itself.
+/.github/             @werd-drew
