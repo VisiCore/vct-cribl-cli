@@ -68,7 +68,10 @@ usage-groups, users, workspaces
 
 ## Safety Rules
 
-- **Never replace the route table wholesale.** `routes create` fetches existing routes, inserts before the catch-all, then updates.
+- **Never replace the route table wholesale from `routes`.** `routes create`
+  fetches existing routes, inserts before the catch-all, then updates. The one
+  deliberate exception is `groups import --with-routes` — a high-risk, explicit
+  opt-in that replaces the whole table via `replace_route_table()`.
 - **Always confirm before deploying.** `version deploy` pushes config to live workers.
 - **`groups import` is staged, never deployed.** It upserts config but never
   auto-commits or deploys; routes are skipped unless `--with-routes`, and

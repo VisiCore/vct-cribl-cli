@@ -338,10 +338,16 @@ def write_dir(result: dict[str, Any], out_dir: str | Path) -> Path:
     The directory and files are locked to owner-only permissions (0700/0600) so
     exports taken with --include-sensitive are not left world-readable, matching
     how the CLI protects ~/.criblrc.
+
+    Any JSON left from a previous export of the same group is removed first, so a
+    file written by an earlier --include-sensitive run (e.g. secrets.json) can't
+    linger and get re-imported once the user re-exports without that flag.
     """
     base = Path(out_dir) / str(result.get("group", "group"))
     base.mkdir(parents=True, exist_ok=True)
     base.chmod(0o700)
+    for stale in base.glob("*.json"):
+        stale.unlink()
     for name, value in result.get("resources", {}).items():
         f = base / f"{name}.json"
         f.write_text(json.dumps(value, indent=2))

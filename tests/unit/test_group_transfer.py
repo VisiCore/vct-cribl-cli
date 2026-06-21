@@ -59,6 +59,16 @@ def test_write_read_roundtrip(tmp_path):
     payload = read_input(tmp_path)
     assert payload["group"] == "grp" and payload["resources"]["sources"] == {"items": [{"id": "s1"}]}
 
+def test_write_dir_clears_stale_files(tmp_path):
+    """Re-exporting removes JSON from a prior export (e.g. leftover secrets.json)."""
+    result = {"group": "grp", "resources": {"sources": {"items": [{"id": "s1"}]}}, "_meta": {}}
+    base = tmp_path / "grp"
+    base.mkdir()
+    (base / "secrets.json").write_text("{}")  # leftover from an earlier --include-sensitive run
+    write_dir(result, tmp_path)
+    assert not (base / "secrets.json").exists()
+    assert (base / "sources.json").exists()
+
 def test_apply_upserts_resources():
     client = MagicMock(spec=httpx.Client)
     not_found = _mock_response({}, 404)

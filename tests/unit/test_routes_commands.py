@@ -17,6 +17,7 @@ from cribl_cli.api.endpoints.routes import (
     delete_route,
     get_route,
     list_routes,
+    replace_route_table,
     update_route,
 )
 
@@ -209,3 +210,41 @@ def test_list_routes_returns_table():
 
     assert result["id"] == "default"
     assert len(result["items"]) == 3
+
+
+# ---------------------------------------------------------------------------
+# replace_route_table (wholesale swap used by `groups import --with-routes`)
+# ---------------------------------------------------------------------------
+
+
+def test_replace_route_table_stream():
+    """Stream groups: the whole items array is PATCHed back to /routes."""
+    client = _make_client()
+    client.get.return_value = _mock_response({"id": "default", "items": [{"id": "old"}]})
+    client.patch.return_value = _mock_response({"ok": True})
+
+    new_items = [{"id": "a"}, {"id": "b"}]
+    replace_route_table(client, "grp", new_items)
+
+    url = client.patch.call_args[0][0]
+    payload = client.patch.call_args[1]["json"]
+    assert url == "/api/v1/m/grp/routes"
+    assert payload["items"] == new_items
+
+
+def test_replace_route_table_edge():
+    """Edge groups: items are re-wrapped as routes and PATCHed to /routes/{id}."""
+    client = _make_client()
+    client.get.return_value = _mock_response(
+        {"items": [{"id": "default", "routes": [{"id": "old"}]}], "count": 1}
+    )
+    client.patch.return_value = _mock_response({"ok": True})
+
+    new_items = [{"id": "a"}]
+    replace_route_table(client, "grp", new_items)
+
+    url = client.patch.call_args[0][0]
+    payload = client.patch.call_args[1]["json"]
+    assert url == "/api/v1/m/grp/routes/default"
+    assert payload["routes"] == new_items
+    assert "_edge_format" not in payload
