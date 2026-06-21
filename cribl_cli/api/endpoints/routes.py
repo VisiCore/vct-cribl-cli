@@ -87,6 +87,22 @@ def list_routes(client: httpx.Client, group: str) -> Any:
     return result
 
 
+def replace_route_table(
+    client: httpx.Client, group: str, items: list[dict[str, Any]]
+) -> Any:
+    """Replace the whole route table's items in one PATCH.
+
+    Routes are a single document, not individually addressable, so importing one
+    group's routes into another means swapping the entire items array at once
+    rather than upserting routes one by one. Fetches the live table first so the
+    edge/stream wrapper format is preserved on the way back. Used by
+    ``groups import --with-routes``.
+    """
+    table = _fetch_route_table(client, group)
+    table["items"] = list(items)
+    return _patch_route_table(client, group, table)
+
+
 def get_route(client: httpx.Client, group: str, route_id: str) -> Any:
     """Get a single route by ID from the route table."""
     table = _fetch_route_table(client, group)
