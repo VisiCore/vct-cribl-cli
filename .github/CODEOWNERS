@@ -12,37 +12,39 @@
 #   - Owners are GitHub usernames (@user) or teams (@org/team) and must have
 #     write access to this repository, or GitHub ignores them.
 #
-# Today a single maintainer owns every area. The file is split by area on
-# purpose: to add a second reviewer for just one part of the codebase later,
-# add their @handle to that section's line only — no need to touch the rest.
+# @werd-drew owns every area. @InverseTachyon is a second reviewer on the
+# application code that can change backend API endpoints or CLI behavior —
+# everything under /cribl_cli/ plus the /bin/ entry point (the part integrated
+# with X10). The file is split by area so a reviewer can be added to one
+# section's line only — no need to touch the rest.
 # ----------------------------------------------------------------------------
 
 # Default owner for anything not matched by a more specific rule below.
 *                     @werd-drew
 
 # Application code — HTTP client, transports, and the endpoint factory.
-/cribl_cli/api/       @werd-drew
+/cribl_cli/api/       @werd-drew @InverseTachyon
 
 # Application code — hand-written CLI commands and the command registry.
-/cribl_cli/commands/  @werd-drew
+/cribl_cli/commands/  @werd-drew @InverseTachyon
 
 # Application code — authentication (OAuth2 cloud + local).
-/cribl_cli/auth/      @werd-drew
+/cribl_cli/auth/      @werd-drew @InverseTachyon
 
 # Application code — ~/.criblrc profile loading and config precedence.
-/cribl_cli/config/    @werd-drew
+/cribl_cli/config/    @werd-drew @InverseTachyon
 
 # Application code — JSON / table output formatting.
-/cribl_cli/output/    @werd-drew
+/cribl_cli/output/    @werd-drew @InverseTachyon
 
 # Application code — shared utilities.
-/cribl_cli/utils/     @werd-drew
+/cribl_cli/utils/     @werd-drew @InverseTachyon
 
 # Top-level CLI wiring (Click group + command registration).
-/cribl_cli/cli.py     @werd-drew
+/cribl_cli/cli.py     @werd-drew @InverseTachyon
 
 # Executable entry point.
-/bin/                 @werd-drew
+/bin/                 @werd-drew @InverseTachyon
 
 # Packaging, dependencies, and pytest configuration.
 /pyproject.toml       @werd-drew
