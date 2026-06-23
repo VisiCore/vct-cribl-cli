@@ -25,7 +25,7 @@ def extract_org_id(base_url: str) -> str:
             "Expected format: https://<orgId>.cribl.cloud"
         )
     subdomain = parts[0]
-    # Strip workspace prefix (e.g. 'main-eager-reed-t8h0f4x' -> 'eager-reed-t8h0f4x')
+    # Strip workspace prefix (e.g. 'main-acme-prod-x1y2z3a' -> 'acme-prod-x1y2z3a')
     # Workspace prefixes are word chars followed by a dash before the org slug.
     # Org slugs follow the pattern: <word>-<word>-<alphanum>
     if "-" in subdomain:

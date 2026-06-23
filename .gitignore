@@ -40,7 +40,10 @@ htmlcov/
 # Client / org-specific artifacts
 samples/
 packs/
+collectors/
+dataset_providers/
 dashboards/billing_license_usage.json
+dashboards/data_quality.json
 
 # Distribution
 *.whl
