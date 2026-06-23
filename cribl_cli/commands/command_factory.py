@@ -49,7 +49,7 @@ def register_crud_command(parent: click.Group, reg: CommandRegistration) -> None
             try:
                 client = get_client()
                 group = resolve_group_for_scope(client, scope, kwargs.get("group") or kwargs.get("lake"))
-                data = endpoints.list(client, group)
+                data = endpoints.list(client, group, pack=kwargs.get("pack"))
                 click.echo(format_output(data, table=use_table))
             except Exception as e:
                 handle_error(e)
@@ -64,7 +64,7 @@ def register_crud_command(parent: click.Group, reg: CommandRegistration) -> None
             try:
                 client = get_client()
                 group = resolve_group_for_scope(client, scope, kwargs.get("group") or kwargs.get("lake"))
-                data = endpoints.get(client, group, id)
+                data = endpoints.get(client, group, id, pack=kwargs.get("pack"))
                 data = unwrap_item(data)
                 click.echo(format_output(data, table=use_table))
             except Exception as e:
@@ -80,7 +80,7 @@ def register_crud_command(parent: click.Group, reg: CommandRegistration) -> None
                 client = get_client()
                 group = resolve_group_for_scope(client, scope, kwargs.get("group") or kwargs.get("lake"))
                 body = parse_json(json_config, label)
-                data = endpoints.create(client, group, body)
+                data = endpoints.create(client, group, body, pack=kwargs.get("pack"))
                 click.echo(format_output(data))
             except Exception as e:
                 handle_error(e)
@@ -95,15 +95,16 @@ def register_crud_command(parent: click.Group, reg: CommandRegistration) -> None
             try:
                 client = get_client()
                 group = resolve_group_for_scope(client, scope, kwargs.get("group") or kwargs.get("lake"))
+                pack = kwargs.get("pack")
                 # Merge-on-update: fetch existing, strip server fields, merge
-                existing = endpoints.get(client, group, id)
+                existing = endpoints.get(client, group, id, pack=pack)
                 existing = unwrap_item(existing)
                 if isinstance(existing, dict):
                     existing.pop("status", None)
                     existing.pop("notifications", None)
                 updates = parse_json(json_config, label)
                 merged = deep_merge(existing, updates)
-                data = endpoints.update(client, group, id, merged)
+                data = endpoints.update(client, group, id, merged, pack=pack)
                 click.echo(format_output(data))
             except Exception as e:
                 handle_error(e)
@@ -117,19 +118,23 @@ def register_crud_command(parent: click.Group, reg: CommandRegistration) -> None
             try:
                 client = get_client()
                 group = resolve_group_for_scope(client, scope, kwargs.get("group") or kwargs.get("lake"))
-                data = endpoints.delete(client, group, id)
+                data = endpoints.delete(client, group, id, pack=kwargs.get("pack"))
                 click.echo(format_output(data))
             except Exception as e:
                 handle_error(e)
 
 
 def _scope_options(scope: str):
-    """Return a decorator that adds --group or --lake depending on scope."""
+    """Return a decorator that adds --group/--lake (and --pack for group scope)."""
 
     def decorator(fn):
         if scope == "lake":
             fn = click.option("--lake", required=True, help="Lake ID.")(fn)
         elif scope != "global":
+            fn = click.option(
+                "--pack", "-P", default=None,
+                help="Pack ID — scope the request to a pack inside the worker group.",
+            )(fn)
             fn = click.option("--group", "-g", default=None, help="Worker group.")(fn)
         return fn
 

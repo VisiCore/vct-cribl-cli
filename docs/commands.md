@@ -134,12 +134,16 @@ cribl pipelines clone <pipeline_id> --source-group <src> --dest-group <dst>
 
 | Subcommand | Options |
 |---|---|
-| `list` | `-g, --group`, `--table` |
-| `get` | `PIPELINE_ID`, `-g, --group`, `--table` |
-| `create` | `JSON_CONFIG`, `-g, --group` |
-| `update` | `PIPELINE_ID`, `JSON_CONFIG`, `-g, --group` |
-| `delete` | `PIPELINE_ID`, `-g, --group` |
-| `clone` | `PIPELINE_ID`, `--source-group` (required), `--dest-group` (required) |
+| `list` | `-g, --group`, `-P, --pack`, `--table` |
+| `get` | `PIPELINE_ID`, `-g, --group`, `-P, --pack`, `--table` |
+| `create` | `JSON_CONFIG`, `-g, --group`, `-P, --pack` |
+| `update` | `PIPELINE_ID`, `JSON_CONFIG`, `-g, --group`, `-P, --pack` |
+| `delete` | `PIPELINE_ID`, `-g, --group`, `-P, --pack` |
+| `clone` | `PIPELINE_ID`, `--source-group` (required), `--dest-group` (required), `--source-pack`, `--dest-pack` |
+
+Pass `-P, --pack <pack_id>` to operate on a pipeline that lives **inside an
+installed pack** rather than at the worker-group level. This nests the request
+under `/api/v1/m/{group}/p/{pack}/pipelines`.
 
 ---
 
@@ -352,8 +356,10 @@ cribl kms health -g <group> [--table]
 Pipeline preview — test a pipeline against sample data.
 
 ```bash
-cribl preview run '<json_config>' -g <group>
+cribl preview run '<json_config>' -g <group> [-P, --pack <pack_id>]
 ```
+
+Add `-P, --pack <pack_id>` to preview a pipeline inside an installed pack.
 
 ---
 
@@ -522,6 +528,9 @@ cribl packs install ./foo.crbl -g defaultHybrid                       # local fi
 ## Factory-generated commands
 
 52 resource types with auto-generated CRUD subcommands. Each supports a subset of: `list`, `get`, `create`, `update`, `delete`.
+
+Group-scoped commands also accept `-P, --pack <pack_id>` to target the resource
+**inside an installed pack** (nesting the request under `/api/v1/m/{group}/p/{pack}/{path}`).
 
 ### Group-scoped (use `-g, --group`)
 
