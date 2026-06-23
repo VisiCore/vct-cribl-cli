@@ -1,9 +1,12 @@
 """Pack management commands."""
 from __future__ import annotations
 
+import json
+
 import click
 
 from cribl_cli.api.client import get_client
+from cribl_cli.api.endpoints.dispensary import list_dispensary_packs
 from cribl_cli.api.endpoints.packs import (
     list_packs,
     get_pack,
@@ -126,13 +129,43 @@ def packs_export(pack_id, mode, output, group):
 @packs_group.command("install")
 @click.argument("source")
 @click.option("-g", "--group", default=None, help="Worker group.")
-def packs_install(source, group):
-    """Install a pack from a URL or .crbl path."""
+@click.option(
+    "--version",
+    default=None,
+    help="Pin a version when installing a Dispensary pack by ID (default: latest).",
+)
+def packs_install(source, group, version):
+    """Install a pack from a Dispensary pack ID, URL, or .crbl path."""
     try:
         client = get_client()
         g = resolve_group(client, group)
-        data = install_pack(client, g, source)
+        data = install_pack(client, g, source, version)
         click.echo(format_output(data))
+    except Exception as e:
+        handle_error(e)
+
+
+@packs_group.command("dispensary")
+@click.option("--search", "search", default=None, help="Filter by name, description, or tags.")
+@click.option("--table", "use_table", is_flag=True, help="Table output.")
+def packs_dispensary(search, use_table):
+    """Browse packs available in the Cribl Packs Dispensary."""
+    try:
+        packs = list_dispensary_packs()
+        if search:
+            term = search.lower()
+            packs = [p for p in packs if term in json.dumps(p).lower()]
+        rows = [
+            {
+                "id": p.get("name"),
+                "displayName": p.get("displayName"),
+                "version": p.get("version"),
+                "byCribl": p.get("byCribl"),
+                "description": p.get("description"),
+            }
+            for p in packs
+        ]
+        click.echo(format_output(rows, table=use_table))
     except Exception as e:
         handle_error(e)
 
