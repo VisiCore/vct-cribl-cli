@@ -19,12 +19,16 @@ def preview_group():
 @preview_group.command("run", help="Run a preview.")
 @click.argument("json_config")
 @click.option("-g", "--group", default=None)
-def preview_run(json_config, group):
+@click.option(
+    "--pack", "-P", default=None,
+    help="Pack ID — scope the preview to a pack inside the worker group.",
+)
+def preview_run(json_config, group, pack):
     try:
         client = get_client()
         g = resolve_group(client, group)
         body = parse_json(json_config, "preview config")
-        data = run_preview(client, g, body)
+        data = run_preview(client, g, body, pack=pack)
         click.echo(format_output(data))
     except Exception as e:
         handle_error(e)

@@ -19,14 +19,18 @@ class EndpointConfig:
     singleton: bool = False
 
 
-def _build_base_url(scope: Scope, path: str, group: str) -> str:
+def _build_base_url(
+    scope: Scope, path: str, group: str, pack: str | None = None
+) -> str:
     if scope == "global":
         return f"/api/v1/{path}"
     if scope == "search":
         return f"/api/v1/m/{group}/search/{path}"
     if scope == "lake":
         return f"/api/v1/products/lake/lakes/{group}/{path}"
-    # group scope
+    # group scope (optionally nested in a pack)
+    if pack:
+        return f"/api/v1/m/{group}/p/{pack}/{path}"
     return f"/api/v1/m/{group}/{path}"
 
 
@@ -48,41 +52,66 @@ class Endpoints:
     def __init__(self, config: EndpointConfig) -> None:
         self._config = config
 
-    def list(self, client: httpx.Client, group: str, **params: Any) -> Any:
-        url = _build_base_url(self._config.scope, self._config.path, group)
+    def list(
+        self,
+        client: httpx.Client,
+        group: str,
+        pack: str | None = None,
+        **params: Any,
+    ) -> Any:
+        url = _build_base_url(self._config.scope, self._config.path, group, pack)
         resp = client.get(url, params=params or None)
         resp.raise_for_status()
         return resp.json()
 
-    def get(self, client: httpx.Client, group: str, resource_id: str) -> Any:
-        if self._config.singleton:
-            url = _build_base_url(self._config.scope, self._config.path, group)
-        else:
-            url = f"{_build_base_url(self._config.scope, self._config.path, group)}/{resource_id}"
+    def get(
+        self,
+        client: httpx.Client,
+        group: str,
+        resource_id: str,
+        pack: str | None = None,
+    ) -> Any:
+        base = _build_base_url(self._config.scope, self._config.path, group, pack)
+        url = base if self._config.singleton else f"{base}/{resource_id}"
         resp = client.get(url)
         resp.raise_for_status()
         return resp.json()
 
-    def create(self, client: httpx.Client, group: str, data: dict) -> Any:
-        url = _build_base_url(self._config.scope, self._config.path, group)
+    def create(
+        self,
+        client: httpx.Client,
+        group: str,
+        data: dict,
+        pack: str | None = None,
+    ) -> Any:
+        url = _build_base_url(self._config.scope, self._config.path, group, pack)
         resp = client.post(url, json=data)
         resp.raise_for_status()
         return resp.json()
 
     def update(
-        self, client: httpx.Client, group: str, resource_id: str, data: dict
+        self,
+        client: httpx.Client,
+        group: str,
+        resource_id: str,
+        data: dict,
+        pack: str | None = None,
     ) -> Any:
-        if self._config.singleton:
-            url = _build_base_url(self._config.scope, self._config.path, group)
-        else:
-            url = f"{_build_base_url(self._config.scope, self._config.path, group)}/{resource_id}"
+        base = _build_base_url(self._config.scope, self._config.path, group, pack)
+        url = base if self._config.singleton else f"{base}/{resource_id}"
         resp = client.patch(url, json=data)
         resp.raise_for_status()
         return resp.json()
 
-    def delete(self, client: httpx.Client, group: str, resource_id: str) -> Any:
-        url = f"{_build_base_url(self._config.scope, self._config.path, group)}/{resource_id}"
-        resp = client.delete(url)
+    def delete(
+        self,
+        client: httpx.Client,
+        group: str,
+        resource_id: str,
+        pack: str | None = None,
+    ) -> Any:
+        base = _build_base_url(self._config.scope, self._config.path, group, pack)
+        resp = client.delete(f"{base}/{resource_id}")
         resp.raise_for_status()
         return resp.json()
 

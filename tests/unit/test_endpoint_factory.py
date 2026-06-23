@@ -163,3 +163,70 @@ def test_delete_by_id():
     client.delete.assert_called_once()
     url_arg = client.delete.call_args[0][0]
     assert url_arg == "/api/v1/m/default/system/parsers/p1"
+
+
+# ---------------------------------------------------------------------------
+# Pack-scoped requests — nest resources under /p/{pack}/
+# ---------------------------------------------------------------------------
+
+
+def test_pack_scope_list():
+    """A pack ID nests the path under /api/v1/m/{group}/p/{pack}/{path}."""
+    client = _make_client()
+    client.get.return_value = _mock_response({"items": []})
+
+    ep = Endpoints(EndpointConfig(scope="group", path="pipelines"))
+    ep.list(client, "default", pack="cribl-cisco-ftd-cleanup")
+
+    url_arg = client.get.call_args[0][0]
+    assert url_arg == "/api/v1/m/default/p/cribl-cisco-ftd-cleanup/pipelines"
+
+
+def test_pack_scope_get_by_id():
+    """get within a pack appends /{id} to the pack-scoped base."""
+    client = _make_client()
+    client.get.return_value = _mock_response({"items": [{"id": "p1"}]})
+
+    ep = Endpoints(EndpointConfig(scope="group", path="pipelines"))
+    ep.get(client, "default", "p1", pack="my-pack")
+
+    url_arg = client.get.call_args[0][0]
+    assert url_arg == "/api/v1/m/default/p/my-pack/pipelines/p1"
+
+
+def test_pack_scope_create():
+    """create within a pack POSTs to the pack-scoped base."""
+    client = _make_client()
+    client.post.return_value = _mock_response({"items": []})
+
+    ep = Endpoints(EndpointConfig(scope="group", path="pipelines"))
+    ep.create(client, "default", {"id": "new"}, pack="my-pack")
+
+    url_arg = client.post.call_args[0][0]
+    assert url_arg == "/api/v1/m/default/p/my-pack/pipelines"
+
+
+def test_pack_scope_update_and_delete():
+    """update/delete within a pack target the pack-scoped /{id} URL."""
+    client = _make_client()
+    client.patch.return_value = _mock_response({"ok": True})
+    client.delete.return_value = _mock_response({"ok": True})
+
+    ep = Endpoints(EndpointConfig(scope="group", path="pipelines"))
+    ep.update(client, "default", "p1", {"name": "x"}, pack="my-pack")
+    ep.delete(client, "default", "p1", pack="my-pack")
+
+    assert client.patch.call_args[0][0] == "/api/v1/m/default/p/my-pack/pipelines/p1"
+    assert client.delete.call_args[0][0] == "/api/v1/m/default/p/my-pack/pipelines/p1"
+
+
+def test_no_pack_uses_plain_group_path():
+    """Omitting pack keeps the standard group path (no /p/ segment)."""
+    client = _make_client()
+    client.get.return_value = _mock_response({"items": []})
+
+    ep = Endpoints(EndpointConfig(scope="group", path="pipelines"))
+    ep.list(client, "default")
+
+    assert "/p/" not in client.get.call_args[0][0]
+    assert client.get.call_args[0][0] == "/api/v1/m/default/pipelines"
