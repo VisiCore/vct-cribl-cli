@@ -492,14 +492,29 @@ cribl alerts list [-g <group>] [--table]
 
 ## packs
 
-Pack management — export, install, upgrade, delete.
+Pack management — browse the Dispensary, export, install, upgrade, delete.
 
 ```bash
 cribl packs list -g <group> [--table]
+cribl packs dispensary [--search <term>] [--table]
 cribl packs export <pack_id> -g <group> -o <output_path>
-cribl packs install <source> -g <group>
+cribl packs install <source> -g <group> [--version <ver>]
 cribl packs upgrade <pack_id> -g <group> [--source <url>]
 cribl packs delete <pack_id> -g <group>
+```
+
+`packs install <source>` resolves `<source>` in three layers: a local `.crbl`
+file is uploaded, anything with a `://` scheme is treated as a URL, and a bare
+pack ID is looked up in the [Cribl Packs Dispensary](https://packs.cribl.io/)
+and installed (latest version, or pin with `--version`). The Leader needs
+outbound internet access for URL/Dispensary installs.
+
+```bash
+# All equivalent ways to install the same pack:
+cribl packs install cribl-cisco-ftd-cleanup -g defaultHybrid          # by Dispensary ID
+cribl packs install cribl-cisco-ftd-cleanup -g defaultHybrid --version 1.1.16
+cribl packs install https://packs.cribl.io/dl/.../foo.crbl -g defaultHybrid
+cribl packs install ./foo.crbl -g defaultHybrid                       # local file
 ```
 
 ---
