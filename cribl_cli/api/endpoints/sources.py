@@ -45,3 +45,9 @@ def delete_source(client: httpx.Client, group: str, source_id: str) -> Any:
     resp = client.delete(f"{_base(group)}/{source_id}")
     resp.raise_for_status()
     return resp.json()
+
+def list_datagen_files(client: httpx.Client, group: str) -> Any:
+    """List all samples available to a worker group."""
+    resp = client.get(f"/api/v1/m/{group}/system/samples")
+    resp.raise_for_status()
+    return resp.json()
