@@ -66,6 +66,7 @@ def _register_commands() -> None:
     # Hand-written commands
     from cribl_cli.commands.config_cmd import config_group
     from cribl_cli.commands.workers import workers_group
+    from cribl_cli.commands.groups import groups_group
     from cribl_cli.commands.sources import sources_group
     from cribl_cli.commands.destinations import destinations_group
     from cribl_cli.commands.metrics import metrics_group
@@ -91,7 +92,7 @@ def _register_commands() -> None:
     from cribl_cli.commands.finops import finops_group
 
     for group in [
-        config_group, workers_group, sources_group, destinations_group,
+        config_group, workers_group, groups_group, sources_group, destinations_group,
         metrics_group, search_group, notebooks_group, pipelines_group,
         routes_group, jobs_group, version_group, system_group, edge_group,
         kms_group, preview_group, logger_group, profiler_group, health_group,
