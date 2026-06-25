@@ -151,6 +151,42 @@ def resolve_group_meta(client: httpx.Client, group_id: str) -> dict[str, Any]:
     raise ValueError(f"Group or fleet '{group_id}' not found. Available: {available}")
 
 
+def _is_builtin(item: dict[str, Any]) -> bool:
+    """True for content that lists but cannot be re-imported as standalone config.
+
+    - Cribl-shipped library items carry ``lib == "cribl"`` (regex, parsers,
+      breakers, SDS rules, …); built-in system objects carry
+      ``destroyable == False`` (e.g. sample collectors).
+    - Pack-owned items have an ``id`` prefixed ``pack:`` — they ship with their
+      pack, not as loose resources, and 400/500 on a standalone write.
+
+    Re-importing any of these only yields 4xx/5xx errors, so they are dropped
+    from an export — only user-authored, group-level config is kept.
+    """
+    if item.get("lib") == "cribl" or item.get("destroyable") is False:
+        return True
+    rid = item.get("id")
+    return isinstance(rid, str) and rid.startswith("pack:")
+
+
+def _drop_builtins(value: Any) -> tuple[Any, int]:
+    """Remove built-in items from a list payload, preserving its wrapper shape.
+
+    Returns ``(filtered_value, dropped_count)``.
+    """
+    if isinstance(value, dict) and "items" in value:
+        kept = [i for i in value["items"] if not (isinstance(i, dict) and _is_builtin(i))]
+        out = dict(value)
+        out["items"] = kept
+        if "count" in out:
+            out["count"] = len(kept)
+        return out, len(value["items"]) - len(kept)
+    if isinstance(value, list):
+        kept = [i for i in value if not (isinstance(i, dict) and _is_builtin(i))]
+        return kept, len(value) - len(kept)
+    return value, 0
+
+
 def collect(
     client: httpx.Client, group_id: str, *, include_sensitive: bool = False,
     include_packs: bool = False, include_lookups: bool = False
@@ -163,10 +199,14 @@ def collect(
     resources: dict[str, Any] = {}
     exported: list[str] = []
     errors: dict[str, str] = {}
+    builtins: dict[str, int] = {}
 
     for name, cfg in included:
         try:
-            resources[name] = Endpoints(cfg).list(client, group_id)
+            filtered, dropped = _drop_builtins(Endpoints(cfg).list(client, group_id))
+            resources[name] = filtered
+            if dropped:
+                builtins[name] = dropped
             exported.append(name)
         except httpx.HTTPError as exc:
             errors[name] = f"HTTP Error: {exc}"
@@ -189,7 +229,7 @@ def collect(
         "resources": resources,
         "_meta": {
             "exported": exported,
-            "skipped": {**skipped, "binary_content": list(BINARY_CAVEAT)},
+            "skipped": {**skipped, "builtin": builtins, "binary_content": list(BINARY_CAVEAT)},
             "errors": errors,
         },
     }
@@ -405,6 +445,10 @@ def format_caveat(result: dict[str, Any]) -> str:
         lines.append(f"  Excluded (default): {', '.join(skipped['omitted_by_default'])} (use --include-packs/--include-lookups)")
     if skipped.get("stream_only"):
         lines.append(f"  Skipped (Stream-only, not on this fleet): {', '.join(skipped['stream_only'])}")
+    if skipped.get("builtin"):
+        b = skipped["builtin"]
+        detail = ", ".join(f"{name}×{count}" for name, count in b.items())
+        lines.append(f"  Dropped {sum(b.values())} built-in/pack-owned item(s) (not importable): {detail}")
     if skipped.get("binary_content"):
         lines.append(f"  Not captured: {'; '.join(skipped['binary_content'])}")
     if m.get("errors"):

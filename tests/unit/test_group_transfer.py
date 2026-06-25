@@ -49,6 +49,39 @@ def test_collect_aggregates_and_handles_errors():
     assert "parsers" in result["_meta"]["errors"] and "parsers" not in result["resources"]
     assert "packs" in result["resources"]
 
+def test_collect_drops_builtin_items():
+    """Cribl-shipped content (lib=='cribl' or destroyable is False) is filtered
+    from an export so import doesn't choke on non-writable built-ins."""
+    client = MagicMock(spec=httpx.Client)
+
+    def _get(url, *args, **kwargs):
+        if url == "/api/v1/master/groups":
+            return _mock_response({"items": [{"id": "grp", "type": "stream", "isFleet": False}]})
+        if url.endswith("/routes"):
+            return _mock_response({"id": "default", "items": [{"id": "r1"}]})
+        if url.endswith("/lib/parsers"):
+            return _mock_response({"count": 4, "items": [
+                {"id": "builtin", "lib": "cribl"},   # Cribl-shipped -> dropped
+                {"id": "pack:foo"},                   # pack-owned -> dropped
+                {"id": "mine", "lib": "custom"},
+                {"id": "also-mine"},                  # no lib -> user content
+            ]})
+        if url.endswith("/collectors"):
+            return _mock_response({"items": [
+                {"id": "sys", "destroyable": False},  # built-in system object -> dropped
+                {"id": "user", "destroyable": True},
+            ]})
+        return _mock_response({"items": []})
+
+    client.get.side_effect = _get
+    result = collect(client, "grp")
+
+    parsers = result["resources"]["parsers"]
+    assert {p["id"] for p in parsers["items"]} == {"mine", "also-mine"}
+    assert parsers["count"] == 2  # wrapper count is corrected
+    assert {c["id"] for c in result["resources"]["collectors"]["items"]} == {"user"}
+    assert result["_meta"]["skipped"]["builtin"] == {"parsers": 2, "collectors": 1}
+
 def test_write_read_roundtrip(tmp_path):
     result = {
         "group": "grp", "type": "stream", "isFleet": False,

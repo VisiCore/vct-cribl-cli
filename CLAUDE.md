@@ -98,6 +98,9 @@ usage-groups, users, workspaces
 - `groups export`/`groups import` move a whole group's config; the resource list
   is derived from `commands/registry.py` group-scoped entries plus the
   hand-written sources/destinations/pipelines/packs/routes, so it never drifts.
+  Export drops Cribl-shipped built-ins (`lib == "cribl"` or `destroyable` false)
+  and pack-owned items (`id` prefixed `pack:`) — they list but 4xx/5xx on import,
+  so only user-authored config is kept; the count is reported in `_meta.skipped.builtin`.
 - When running CLI commands to read data, use default JSON output (no `--table`).
   JSON is structured and easier to parse. Only use `--table` if the user
   explicitly asks for it.
