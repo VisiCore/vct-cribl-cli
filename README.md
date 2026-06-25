@@ -2,9 +2,11 @@
 
 ![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
-![Tests: 138 passing](https://img.shields.io/badge/tests-138%20passing-brightgreen)
+![Tests: 162 passing](https://img.shields.io/badge/tests-162%20passing-brightgreen)
 
-Command-line interface for the Cribl Cloud REST API. Manage pipelines, routes, sources, destinations, Edge fleets, search, health monitoring, FinOps billing, and 70+ resources from your terminal.
+Command-line interface for the Cribl Cloud REST API. Manage pipelines, routes,
+sources, destinations, Edge fleets, search, health monitoring, FinOps billing,
+and 70+ resources from your terminal.
 
 ## Requirements
 
@@ -29,7 +31,7 @@ Configure authentication via `~/.criblrc` profiles, environment variables, or CL
 
 ```bash
 # Create a profile for Cribl Cloud
-cribl config set cloud \
+cribl config set -p cloud \
   --base-url https://your-org.cribl.cloud \
   --client-id your-client-id \
   --client-secret your-client-secret
@@ -37,8 +39,8 @@ cribl config set cloud \
 # Set it as default
 cribl config use cloud
 
-# List profiles
-cribl config list
+# Show the active profile
+cribl config show
 ```
 
 ### Using environment variables
@@ -96,7 +98,14 @@ cribl <command> <subcommand> [options]
 <details>
 <summary><strong>Factory-generated commands (52)</strong> — standard CRUD (list, get, create, update, delete)</summary>
 
-`ai-settings`, `alert-monitors`, `appscope`, `auth-settings`, `banners`, `certificates`, `collectors`, `conditions`, `credentials`, `dashboard-categories`, `dashboards`, `dataset-providers`, `datasets`, `datatypes`, `db-connections`, `encryption-keys`, `event-breakers`, `executors`, `feature-flags`, `functions`, `git-settings`, `global-vars`, `grok`, `hmac-functions`, `lake-datasets`, `licenses`, `lookups`, `macros`, `messages`, `notification-targets`, `notifications`, `outposts`, `parquet-schemas`, `parsers`, `policies`, `protobuf-libs`, `regex`, `roles`, `samples`, `saved-searches`, `schemas`, `scripts`, `sds-rules`, `sds-rulesets`, `secrets`, `storage-locations`, `subscriptions`, `teams`, `trust-policies`, `usage-groups`, `users`, `workspaces`
+`ai-settings`, `alert-monitors`, `appscope`, `auth-settings`, `banners`, `certificates`, `collectors`,
+`conditions`, `credentials`, `dashboard-categories`, `dashboards`, `dataset-providers`, `datasets`, `datatypes`,
+`db-connections`, `encryption-keys`, `event-breakers`, `executors`, `feature-flags`, `functions`, `git-settings`,
+`global-vars`, `grok`, `hmac-functions`, `lake-datasets`, `licenses`, `lookups`, `macros`,
+`messages`, `notification-targets`, `notifications`, `outposts`, `parquet-schemas`, `parsers`, `policies`,
+`protobuf-libs`, `regex`, `roles`, `samples`, `saved-searches`, `schemas`, `scripts`,
+`sds-rules`, `sds-rulesets`, `secrets`, `storage-locations`, `subscriptions`, `teams`, `trust-policies`,
+`usage-groups`, `users`, `workspaces`
 
 </details>
 
@@ -176,7 +185,7 @@ CRIBL_INTEGRATION_TEST=true pytest -m integration
 
 ## Project structure
 
-```
+```text
 cribl_cli/
   api/
     endpoints/     # Hand-written API endpoint modules
@@ -226,6 +235,7 @@ Contributions are welcome! Here's how to get started:
 ### Reporting issues
 
 Open an issue at [github.com/VisiCore/vct-cribl-cli/issues](https://github.com/VisiCore/vct-cribl-cli/issues) with:
+
 - What you expected vs what happened
 - CLI command you ran
 - Cribl version and deployment type (cloud/on-prem/hybrid)
