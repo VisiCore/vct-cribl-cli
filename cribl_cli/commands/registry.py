@@ -20,22 +20,22 @@ class CommandRegistration:
 
 REGISTRY: list[CommandRegistration] = [
     # Group-scoped (full CRUD)
-    CommandRegistration("parsers", EndpointConfig("group", "system/parsers")),
-    CommandRegistration("schemas", EndpointConfig("group", "schemas")),
+    CommandRegistration("parsers", EndpointConfig("group", "lib/parsers")),
+    CommandRegistration("schemas", EndpointConfig("group", "lib/schemas")),
     CommandRegistration("regex", EndpointConfig("group", "lib/regex")),
     CommandRegistration("grok", EndpointConfig("group", "lib/grok")),
     CommandRegistration("event-breakers", EndpointConfig("group", "lib/breakers")),
     CommandRegistration("global-vars", EndpointConfig("group", "lib/vars")),
-    CommandRegistration("db-connections", EndpointConfig("group", "lib/db-connections")),
+    CommandRegistration("db-connections", EndpointConfig("group", "lib/database-connections")),
     CommandRegistration("secrets", EndpointConfig("group", "system/secrets")),
     CommandRegistration("credentials", EndpointConfig("group", "system/credentials")),
     CommandRegistration("collectors", EndpointConfig("group", "collectors")),
-    CommandRegistration("conditions", EndpointConfig("group", "lib/conditions")),
+    CommandRegistration("conditions", EndpointConfig("group", "conditions")),
     CommandRegistration("parquet-schemas", EndpointConfig("group", "lib/parquet-schemas")),
     CommandRegistration("protobuf-libs", EndpointConfig("group", "lib/protobuf-libs")),
-    CommandRegistration("sds-rules", EndpointConfig("group", "lib/sds/rules")),
-    CommandRegistration("sds-rulesets", EndpointConfig("group", "lib/sds/rulesets")),
-    CommandRegistration("appscope", EndpointConfig("group", "lib/appscope")),
+    CommandRegistration("sds-rules", EndpointConfig("group", "lib/sds-rules")),
+    CommandRegistration("sds-rulesets", EndpointConfig("group", "lib/sds-rulesets")),
+    CommandRegistration("appscope", EndpointConfig("group", "lib/appscope-configs")),
     # Group-scoped (limited)
     CommandRegistration("certificates", EndpointConfig("group", "system/certificates"), ["list", "get", "create", "delete"]),
     CommandRegistration("samples", EndpointConfig("group", "system/samples"), ["list", "get", "create", "delete"]),
@@ -43,7 +43,7 @@ REGISTRY: list[CommandRegistration] = [
     CommandRegistration("lookups", EndpointConfig("group", "system/lookups")),
     # packs: hand-written command in commands/packs.py (export, install, upgrade)
     CommandRegistration("executors", EndpointConfig("group", "executors"), ["list", "get"]),
-    CommandRegistration("hmac-functions", EndpointConfig("group", "lib/hmac"), ["list", "get"]),
+    CommandRegistration("hmac-functions", EndpointConfig("group", "lib/hmac-functions"), ["list", "get"]),
     CommandRegistration("functions", EndpointConfig("group", "system/functions"), ["list", "get"]),
     # Global-scoped (full CRUD)
     CommandRegistration("users", EndpointConfig("global", "system/users")),
