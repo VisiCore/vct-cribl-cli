@@ -2,7 +2,7 @@
 
 ![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
-![Tests: 138 passing](https://img.shields.io/badge/tests-138%20passing-brightgreen)
+![Tests: 162 passing](https://img.shields.io/badge/tests-162%20passing-brightgreen)
 
 Command-line interface for the Cribl Cloud REST API. Manage pipelines, routes,
 sources, destinations, Edge fleets, search, health monitoring, FinOps billing,
