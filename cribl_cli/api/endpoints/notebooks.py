@@ -84,3 +84,54 @@ def delete_notebook(client: httpx.Client, group: str, notebook_id: str) -> Any:
     resp = client.delete(f"{_base(group)}/{notebook_id}")
     resp.raise_for_status()
     return resp.json()
+
+
+# Resource policies that back a notebook's per-resource sharing grants.
+# Maintainer can own/edit/delete; NotebookBase ("Read Only") can view and use.
+NOTEBOOK_POLICIES: dict[str, str] = {
+    "maintainer": "NotebookMaintain",
+    "read": "NotebookBase",
+}
+
+
+def get_notebook_acl(
+    client: httpx.Client, group: str, notebook_id: str, *, teams: bool = False
+) -> Any:
+    """Get explicit sharing grants for a notebook.
+
+    Members (users and API credentials) live at ``/acl``; teams at
+    ``/acl/teams``. An empty result means no explicit grants exist — access
+    is then governed entirely by product roles (e.g. Search Admins inherit
+    Maintainer on every notebook), which this endpoint does not enumerate.
+    """
+    sub = "acl/teams" if teams else "acl"
+    resp = client.get(f"{_base(group)}/{notebook_id}/{sub}")
+    resp.raise_for_status()
+    return resp.json()
+
+
+def apply_notebook_acl(
+    client: httpx.Client,
+    group: str,
+    notebook_id: str,
+    *,
+    add: dict[str, list[str]] | None = None,
+    remove: dict[str, list[str]] | None = None,
+    teams: bool = False,
+) -> Any:
+    """Add and/or remove sharing grants for a notebook.
+
+    ``add``/``remove`` map a resource policy (``NotebookMaintain`` or
+    ``NotebookBase``) to a list of member ids (users/API credentials) or team
+    ids. Writes go to ``/acl/apply`` (members) or ``/acl/teams/apply`` (teams).
+    The wire schema uses ``add`` to grant and ``rm`` to revoke.
+    """
+    sub = "acl/teams/apply" if teams else "acl/apply"
+    body: dict[str, Any] = {}
+    if add:
+        body["add"] = add
+    if remove:
+        body["rm"] = remove
+    resp = client.post(f"{_base(group)}/{notebook_id}/{sub}", json=body)
+    resp.raise_for_status()
+    return resp.json()

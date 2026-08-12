@@ -10,6 +10,7 @@ import click
 from cribl_cli.api.client import get_client
 from cribl_cli.api.endpoints.notebooks import (
     list_notebooks, get_notebook, create_notebook, add_notebook_query, delete_notebook,
+    get_notebook_acl, apply_notebook_acl, NOTEBOOK_POLICIES,
 )
 from cribl_cli.output.formatter import format_output
 from cribl_cli.utils.errors import handle_error
@@ -155,6 +156,93 @@ def notebooks_delete(notebook_id, group):
         client = get_client()
         g = group
         data = delete_notebook(client, g, notebook_id)
+        click.echo(format_output(data))
+    except Exception as e:
+        handle_error(e)
+
+
+@notebooks_group.command("acl", help="Show a notebook's explicit sharing grants (members and teams).")
+@click.argument("notebook_id")
+@click.option("-g", "--group", default="default_search")
+@click.option("--table", "use_table", is_flag=True)
+def notebooks_acl(notebook_id, group, use_table):
+    """List explicit member and team grants on a notebook.
+
+    An empty result means no explicit grants — access is governed by product
+    roles (e.g. Search Admins inherit Maintainer), which are not listed here.
+    """
+    try:
+        client = get_client()
+        members = get_notebook_acl(client, group, notebook_id, teams=False)
+        teams = get_notebook_acl(client, group, notebook_id, teams=True)
+        data = {
+            "members": members.get("items", members) if isinstance(members, dict) else members,
+            "teams": teams.get("items", teams) if isinstance(teams, dict) else teams,
+        }
+        click.echo(format_output(data, table=use_table))
+    except Exception as e:
+        handle_error(e)
+
+
+@notebooks_group.command("share", help="Grant a member or team access to a notebook.")
+@click.argument("notebook_id")
+@click.argument("principal")
+@click.option("--team", is_flag=True, help="PRINCIPAL is a team id (default: a member id — user or API credential).")
+@click.option(
+    "--permission",
+    type=click.Choice(list(NOTEBOOK_POLICIES.keys())),
+    default="maintainer",
+    show_default=True,
+    help="Access level to grant.",
+)
+@click.option("-g", "--group", default="default_search")
+def notebooks_share(notebook_id, principal, team, permission, group):
+    try:
+        client = get_client()
+        policy = NOTEBOOK_POLICIES[permission]
+        data = apply_notebook_acl(
+            client, group, notebook_id, add={policy: [principal]}, teams=team
+        )
+        click.echo(format_output(data))
+    except Exception as e:
+        handle_error(e)
+
+
+@notebooks_group.command("unshare", help="Revoke a member's or team's access to a notebook.")
+@click.argument("notebook_id")
+@click.argument("principal")
+@click.option("--team", is_flag=True, help="PRINCIPAL is a team id (default: a member id — user or API credential).")
+@click.option("-g", "--group", default="default_search")
+def notebooks_unshare(notebook_id, principal, team, group):
+    """Revoke PRINCIPAL's grant on a notebook.
+
+    Looks up the policy PRINCIPAL currently holds and revokes exactly that —
+    the apply endpoint ignores a revoke for a policy the principal does not
+    hold, so we cannot blindly revoke both levels.
+    """
+    try:
+        client = get_client()
+        current = get_notebook_acl(client, group, notebook_id, teams=team)
+        items = current.get("items", []) if isinstance(current, dict) else (current or [])
+        held: list[str] = []
+        for it in items:
+            ident = (
+                it.get("team") or it.get("member") or it.get("id")
+                or it.get("user") or it.get("name")
+            )
+            if ident == principal:
+                held = [p.get("policy") for p in it.get("perms", []) if p.get("policy")]
+                break
+        if not held:
+            click.echo(format_output({
+                "status": "noop",
+                "message": f"No existing grant for '{principal}' on this notebook.",
+            }))
+            return
+        remove: dict[str, list[str]] = {}
+        for policy in held:
+            remove.setdefault(policy, []).append(principal)
+        data = apply_notebook_acl(client, group, notebook_id, remove=remove, teams=team)
         click.echo(format_output(data))
     except Exception as e:
         handle_error(e)
