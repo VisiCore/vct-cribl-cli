@@ -54,6 +54,12 @@ profiler, routes, search, sources, system, version, workers
 - `groups export <group>` — pull all config for one worker group or edge fleet
   (JSON to stdout, or `--out-dir` for one file per resource type); `groups import
   <group>` — push it back (see Safety Rules)
+- `notebooks acl <id>` — list a notebook's explicit member + team sharing grants;
+  `notebooks share <id> <principal> [--team] [--permission maintainer|read]` —
+  grant access; `notebooks unshare <id> <principal> [--team]` — revoke it.
+  Members are internal ids (`auth0|…`, not emails); teams use `--team`. Empty ACLs
+  mean no explicit grants — access is then via product roles (Search Admins inherit
+  Maintainer on every notebook), which `acl` does not list.
 
 **Factory-generated commands (standard CRUD):** ai-settings, alert-monitors,
 appscope, auth-settings, banners, certificates, collectors, conditions,
