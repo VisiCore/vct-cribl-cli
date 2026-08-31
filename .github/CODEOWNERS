@@ -1,0 +1,64 @@
+# ----------------------------------------------------------------------------
+# CODEOWNERS
+#
+# GitHub reads this file to automatically request a review from the right people
+# whenever a pull request changes files they own. See the PR that introduced
+# this file for a full explanation of what CODEOWNERS is and why we use it.
+#
+# How matching works:
+#   - One rule per line:  <path-pattern>  <owner> [<owner> ...]
+#   - The LAST matching rule wins, so the catch-all (*) below is overridden by
+#     any more specific rule further down.
+#   - Owners are GitHub usernames (@user) or teams (@org/team) and must have
+#     write access to this repository, or GitHub ignores them.
+#
+# @werd-drew owns every area. @InverseTachyon is a second reviewer on the
+# application code that can change backend API endpoints or CLI behavior —
+# everything under /cribl_cli/ plus the /bin/ entry point (the part integrated
+# with X10). The file is split by area so a reviewer can be added to one
+# section's line only — no need to touch the rest.
+# ----------------------------------------------------------------------------
+
+# Default owner for anything not matched by a more specific rule below.
+*                     @werd-drew
+
+# Application code — HTTP client, transports, and the endpoint factory.
+/cribl_cli/api/       @werd-drew @InverseTachyon
+
+# Application code — hand-written CLI commands and the command registry.
+/cribl_cli/commands/  @werd-drew @InverseTachyon
+
+# Application code — authentication (OAuth2 cloud + local).
+/cribl_cli/auth/      @werd-drew @InverseTachyon
+
+# Application code — ~/.criblrc profile loading and config precedence.
+/cribl_cli/config/    @werd-drew @InverseTachyon
+
+# Application code — JSON / table output formatting.
+/cribl_cli/output/    @werd-drew @InverseTachyon
+
+# Application code — shared utilities.
+/cribl_cli/utils/     @werd-drew @InverseTachyon
+
+# Top-level CLI wiring (Click group + command registration).
+/cribl_cli/cli.py     @werd-drew @InverseTachyon
+
+# Executable entry point.
+/bin/                 @werd-drew @InverseTachyon
+
+# Packaging, dependencies, and pytest configuration.
+/pyproject.toml       @werd-drew
+
+# Test suite.
+/tests/               @werd-drew
+
+# Cribl Search dashboard definitions.
+/dashboards/          @werd-drew
+
+# Documentation.
+/README.md            @werd-drew
+/CLAUDE.md            @werd-drew
+/docs/                @werd-drew
+
+# Repo automation and this CODEOWNERS file itself.
+/.github/             @werd-drew
