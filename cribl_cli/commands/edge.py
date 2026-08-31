@@ -15,6 +15,7 @@ from cribl_cli.api.endpoints.edge import (
     list_files,
     list_processes,
 )
+from cribl_cli.api.endpoints.workers import list_all_nodes
 from cribl_cli.api.endpoints.edge_nodes import (
     file_inspect,
     file_ls,
@@ -62,7 +63,7 @@ def format_uptime(seconds: int | float) -> str:
 def _require_node(client, name_or_id: str) -> dict:
     node = find_edge_node(client, name_or_id)
     if node is None:
-        all_nodes = list_edge_nodes(client)
+        all_nodes = list_all_nodes(client)
         names = ", ".join(n["hostname"] or n["id"] for n in all_nodes)
         raise ValueError(f'Node "{name_or_id}" not found. Available nodes: {names}')
     return node
@@ -192,7 +193,9 @@ def edge_heartbeats(fleet, use_table, threshold):
         import time as _time
 
         client = get_client()
-        resp = client.get("/api/v1/master/workers", params={"product": "edge"})
+        # Covers every node, Stream and Edge alike — the leader ignores
+        # ?product=, so no filter is passed here.
+        resp = client.get("/api/v1/master/workers")
         resp.raise_for_status()
         items = resp.json().get("items", [])
 
@@ -508,7 +511,7 @@ def edge_errors(fleet, limit, query, use_table):
     """
     try:
         client = get_client()
-        nodes = list_edge_nodes(client, fleet)
+        nodes = list_all_nodes(client, fleet)
 
         if not nodes:
             click.echo("No nodes found.", err=True)

@@ -181,7 +181,7 @@ def workers_add(group, token, cribl_version, port, container_name, show_only, im
         click.echo("Waiting for worker to connect...", err=True)
         for attempt in range(6):
             time.sleep(5)
-            resp = client.get("/api/v1/master/workers", params={"product": "edge"})
+            resp = client.get("/api/v1/master/workers")
             resp.raise_for_status()
             workers = resp.json().get("items", [])
             for w in workers:
