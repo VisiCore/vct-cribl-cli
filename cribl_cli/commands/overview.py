@@ -4,7 +4,7 @@ from __future__ import annotations
 import click
 
 from cribl_cli.api.client import get_client
-from cribl_cli.api.endpoints.edge_nodes import list_edge_nodes
+from cribl_cli.api.endpoints.workers import list_all_nodes
 from cribl_cli.output.formatter import format_output
 from cribl_cli.utils.errors import handle_error
 
@@ -47,8 +47,8 @@ def overview_summary(as_json):
         wg_resp.raise_for_status()
         groups = wg_resp.json().get("items", [])
 
-        # All nodes
-        nodes = list_edge_nodes(client)
+        # All nodes, across every product type
+        nodes = list_all_nodes(client)
 
         # Build per-group detail
         group_details = []

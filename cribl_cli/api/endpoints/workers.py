@@ -6,30 +6,73 @@ from typing import Any
 import httpx
 
 
-def list_worker_nodes(
-    client: httpx.Client, group: str | None = None
+def get_group_types(client: httpx.Client) -> dict[str, str]:
+    """Map each worker group / edge fleet id to its product type.
+
+    Types are ``stream``, ``edge``, ``search`` or ``outpost``. Returns an empty
+    dict if the groups endpoint is unavailable; callers treat that as "don't
+    filter" so a transient failure degrades to an unfiltered list rather than
+    silently reporting zero nodes.
+    """
+    try:
+        resp = client.get("/api/v1/master/groups")
+        resp.raise_for_status()
+        items = resp.json().get("items", [])
+    except Exception:
+        return {}
+    return {g["id"]: g.get("type", "stream") for g in items if g.get("id")}
+
+
+def list_nodes(
+    client: httpx.Client,
+    group: str | None = None,
+    product_types: tuple[str, ...] | None = None,
 ) -> list[dict[str, Any]]:
-    """List all worker nodes, optionally filtered by group."""
-    resp = client.get("/api/v1/master/workers", params={"product": "stream"})
+    """List connected nodes, optionally narrowed to a group and product type.
+
+    The leader ignores the ``?product=`` query param on ``/master/workers`` — it
+    returns every node whatever value is passed — so a node's product is
+    resolved from the type of the group it reports into.
+    """
+    resp = client.get("/api/v1/master/workers")
     resp.raise_for_status()
     items = resp.json().get("items", [])
+    group_types = get_group_types(client) if product_types else {}
     nodes = []
     for w in items:
-        if group and w.get("group") != group:
+        grp = w.get("group", "")
+        if group and grp != group:
+            continue
+        if product_types and group_types and group_types.get(grp) not in product_types:
             continue
         info = w.get("info", {})
         cribl = info.get("cribl", {})
         nodes.append({
             "id": w.get("id", ""),
             "status": w.get("status", ""),
-            "group": w.get("group", ""),
+            "group": grp,
             "hostname": info.get("hostname", ""),
             "cpus": info.get("cpus", 0),
             "totalmem": info.get("totalmem", 0),
             "platform": info.get("platform", ""),
             "version": cribl.get("version", ""),
+            "distMode": cribl.get("distMode", ""),
         })
     return nodes
+
+
+def list_all_nodes(
+    client: httpx.Client, group: str | None = None
+) -> list[dict[str, Any]]:
+    """List every connected node regardless of product type."""
+    return list_nodes(client, group=group)
+
+
+def list_worker_nodes(
+    client: httpx.Client, group: str | None = None
+) -> list[dict[str, Any]]:
+    """List Stream worker nodes, optionally filtered by group."""
+    return list_nodes(client, group=group, product_types=("stream",))
 
 
 def list_worker_groups(client: httpx.Client) -> Any:

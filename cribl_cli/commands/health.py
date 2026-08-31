@@ -11,7 +11,6 @@ from cribl_cli.api.client import get_client
 from cribl_cli.api.endpoint_factory import EndpointConfig, create_endpoints
 from cribl_cli.api.endpoints.edge_nodes import (
     get_node_metrics,
-    list_edge_nodes,
     list_worker_logs,
     search_worker_log,
 )

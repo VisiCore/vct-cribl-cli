@@ -8,39 +8,25 @@ from urllib.parse import quote
 
 import httpx
 
+from cribl_cli.api.endpoints.workers import list_all_nodes, list_nodes
+
 
 def list_edge_nodes(
     client: httpx.Client, fleet: str | None = None
 ) -> list[dict[str, Any]]:
-    """List all edge nodes, optionally filtered by fleet/group."""
-    resp = client.get("/api/v1/master/workers", params={"product": "edge"})
-    resp.raise_for_status()
-    items = resp.json().get("items", [])
-    nodes = []
-    for w in items:
-        if fleet and w.get("group") != fleet:
-            continue
-        info = w.get("info", {})
-        cribl = info.get("cribl", {})
-        nodes.append({
-            "id": w.get("id", ""),
-            "status": w.get("status", ""),
-            "group": w.get("group", ""),
-            "hostname": info.get("hostname", ""),
-            "cpus": info.get("cpus", 0),
-            "totalmem": info.get("totalmem", 0),
-            "platform": info.get("platform", ""),
-            "version": cribl.get("version", ""),
-            "distMode": cribl.get("distMode", ""),
-        })
-    return nodes
+    """List Edge nodes, optionally filtered by fleet."""
+    return list_nodes(client, group=fleet, product_types=("edge",))
 
 
 def find_edge_node(
     client: httpx.Client, name_or_id: str
 ) -> dict[str, Any] | None:
-    """Find an edge node by hostname or ID."""
-    all_nodes = list_edge_nodes(client)
+    """Find a node by hostname or ID.
+
+    Resolves across every connected node, not just Edge ones — the ``edge``
+    subcommands that take a NODE argument also work against hybrid workers.
+    """
+    all_nodes = list_all_nodes(client)
     for n in all_nodes:
         if (
             n["id"] == name_or_id
