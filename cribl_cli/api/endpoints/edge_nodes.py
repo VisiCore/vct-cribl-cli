@@ -74,6 +74,56 @@ def list_node_processes(client: httpx.Client, node_id: str) -> Any:
     return resp.json()
 
 
+def list_node_containers(client: httpx.Client, node_id: str) -> Any:
+    """List containers discovered on a managed-edge node."""
+    resp = client.get(f"/api/v1/w/{quote(node_id, safe='')}/edge/containers")
+    resp.raise_for_status()
+    return resp.json()
+
+
+def get_node_metadata(client: httpx.Client, node_id: str) -> Any:
+    """Get a managed-edge node's metadata (Cribl build, env, OS, interfaces)."""
+    resp = client.get(f"/api/v1/w/{quote(node_id, safe='')}/edge/metadata")
+    resp.raise_for_status()
+    return resp.json()
+
+
+def list_edge_log_files(client: httpx.Client, node_id: str) -> Any:
+    """List log files auto-discovered on a managed-edge node, with the
+    processes writing them."""
+    resp = client.get(f"/api/v1/w/{quote(node_id, safe='')}/edge/logs")
+    resp.raise_for_status()
+    return resp.json()
+
+
+def get_source_events(
+    client: httpx.Client, node_id: str, source_id: str, limit: int | None = None
+) -> Any:
+    """Get recent events captured by one source on a managed-edge node.
+
+    The bare ``/edge/events`` path is 403; the source id is required.
+    """
+    params = {"limit": limit} if limit else None
+    resp = client.get(
+        f"/api/v1/w/{quote(node_id, safe='')}/edge/events/{quote(source_id, safe='')}",
+        params=params,
+    )
+    resp.raise_for_status()
+    return resp.json()
+
+
+def get_kube_container_logs(client: httpx.Client, node_id: str, container_id: str) -> Any:
+    """Get Kubernetes logs for one container on a managed-edge node.
+
+    The bare ``/edge/kube-logs`` path is 403; the container id is required.
+    """
+    resp = client.get(
+        f"/api/v1/w/{quote(node_id, safe='')}/edge/kube-logs/{quote(container_id, safe='')}"
+    )
+    resp.raise_for_status()
+    return resp.json()
+
+
 def file_inspect(client: httpx.Client, node_id: str, path: str) -> Any:
     """Inspect a file on an edge node (stat, hashes, head, hexdump)."""
     resp = client.get(

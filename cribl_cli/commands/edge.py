@@ -6,14 +6,6 @@ import json
 import click
 
 from cribl_cli.api.client import get_client
-from cribl_cli.api.endpoints.edge import (
-    get_events,
-    get_kube_logs,
-    get_logs,
-    get_metadata,
-    list_containers,
-    list_files,
-)
 from cribl_cli.api.endpoints.workers import list_all_nodes
 from cribl_cli.api.endpoints.edge_nodes import (
     file_inspect,
@@ -21,11 +13,16 @@ from cribl_cli.api.endpoints.edge_nodes import (
     file_search,
     find_edge_node,
     get_inputs,
+    get_kube_container_logs,
+    get_node_metadata,
     get_node_metrics,
     get_outputs,
+    get_source_events,
     get_system_info,
     is_edge_node,
+    list_edge_log_files,
     list_edge_nodes,
+    list_node_containers,
     list_node_processes,
     list_worker_logs,
     search_worker_log,
@@ -69,6 +66,67 @@ def _require_node(client, name_or_id: str) -> dict:
     return node
 
 
+def _edge_targets(client, node: str | None, fleet: str | None) -> list[dict]:
+    """Resolve NODE (one node) or -f FLEET (every managed-edge node in it)."""
+    if node:
+        return [_require_node(client, node)]
+    return list_edge_nodes(client, fleet)
+
+
+def _fan_out(client, targets: list[dict], fetch, summarize=None) -> list[dict]:
+    """Call a per-node ``/edge/*`` list endpoint on each target and merge items.
+
+    Hybrid workers are skipped with a stderr note — they do not serve the edge
+    endpoints. ``summarize(hostname, item)`` trims each item when given.
+    """
+    rows: list[dict] = []
+    for n in targets:
+        if not is_edge_node(n):
+            click.echo(
+                f'Note: skipping "{n["hostname"]}" — hybrid workers do not expose this data.',
+                err=True,
+            )
+            continue
+        data = fetch(client, n["id"])
+        items = data.get("items", data) if isinstance(data, dict) else data
+        for item in items:
+            rows.append(summarize(n["hostname"], item) if summarize else item)
+    return rows
+
+
+def _summarize_metadata(hostname: str, item: dict) -> dict:
+    """Trim /edge/metadata to identity fields; the raw item carries the full env."""
+    cribl = item.get("cribl") or {}
+    os_info = item.get("os") or {}
+    return {
+        "hostname": os_info.get("hostname") or hostname,
+        "version": cribl.get("version"),
+        "mode": cribl.get("mode"),
+        "fleet": cribl.get("group"),
+        "config_version": cribl.get("config_version"),
+        "tags": cribl.get("tags"),
+        "arch": os_info.get("arch"),
+        "cpu": os_info.get("cpu_type"),
+        "cpus": os_info.get("cpu_count"),
+        "cribl_home": (item.get("env") or {}).get("CRIBL_HOME"),
+        "timestamp": item.get("timestamp"),
+    }
+
+
+def _summarize_log_file(hostname: str, item: dict) -> dict:
+    """Flatten a /edge/logs item: one row per discovered log file."""
+    procs = item.get("processInfo") or []
+    return {
+        "hostname": hostname,
+        "path": item.get("filePath"),
+        "size": format_bytes(item.get("size") or 0),
+        "mode": item.get("mode"),
+        "owner": item.get("owner"),
+        "mod_time": item.get("modTime"),
+        "processes": ", ".join(f'{p.get("process")}({p.get("pid")})' for p in procs),
+    }
+
+
 def _summarize_process(hostname: str, proc: dict) -> dict:
     """Trim a raw /edge/processes item to the fields worth scanning."""
     stat = proc.get("stat") or {}
@@ -99,19 +157,27 @@ def edge_group():
 
 
 # ---------------------------------------------------------------------------
-# Fleet-scoped commands
+# Node-fanout commands (NODE or -f FLEET, per-node /edge/* endpoints)
 # ---------------------------------------------------------------------------
 
 @edge_group.command("containers")
-@click.option("-f", "--fleet", required=True, help="Fleet/group name.")
+@click.argument("node", metavar="[NODE]", required=False)
+@click.option("-f", "--fleet", default=None, help="Fleet name to filter by (ignored when NODE is given).")
 @click.option("--table", "use_table", is_flag=True, help="Output as table.")
-def edge_containers(fleet, use_table):
-    """List containers on edge nodes."""
+def edge_containers(node, fleet, use_table):
+    """List containers discovered on edge nodes.
+
+    With NODE, lists that node's containers; otherwise every managed-edge node,
+    narrowed to one fleet with -f.
+    """
     try:
         client = get_client()
-        data = list_containers(client, fleet, fleet)
-        items = data.get("items", data) if isinstance(data, dict) else data
-        click.echo(format_output(items, table=use_table))
+        targets = _edge_targets(client, node, fleet)
+        rows = _fan_out(
+            client, targets, list_node_containers,
+            lambda host, item: {"hostname": host, **item},
+        )
+        click.echo(format_output(rows, table=use_table))
     except Exception as e:
         handle_error(e)
 
@@ -130,89 +196,96 @@ def edge_processes(node, fleet, raw, use_table):
     """
     try:
         client = get_client()
-        if node:
-            targets = [_require_node(client, node)]
-        else:
-            targets = list_edge_nodes(client, fleet)
-
-        rows: list[dict] = []
-        for n in targets:
-            if not is_edge_node(n):
-                click.echo(
-                    f'Note: skipping "{n["hostname"]}" — hybrid workers do not expose processes.',
-                    err=True,
-                )
-                continue
-            data = list_node_processes(client, n["id"])
-            items = data.get("items", data) if isinstance(data, dict) else data
-            for proc in items:
-                rows.append(proc if raw else _summarize_process(n["hostname"], proc))
+        targets = _edge_targets(client, node, fleet)
+        rows = _fan_out(
+            client, targets, list_node_processes,
+            None if raw else _summarize_process,
+        )
         click.echo(format_output(rows, table=use_table))
     except Exception as e:
         handle_error(e)
 
 
 @edge_group.command("logs")
-@click.option("-f", "--fleet", required=True, help="Fleet/group name.")
-def edge_logs(fleet):
-    """Get edge node logs."""
+@click.argument("node", metavar="[NODE]", required=False)
+@click.option("-f", "--fleet", default=None, help="Fleet name to filter by (ignored when NODE is given).")
+@click.option("--raw", is_flag=True, help="Emit the raw per-file payload instead of a summary.")
+@click.option("--table", "use_table", is_flag=True, help="Output as table.")
+def edge_logs(node, fleet, raw, use_table):
+    """List log files auto-discovered on edge nodes, with the processes writing them.
+
+    With NODE, lists that node's files; otherwise every managed-edge node,
+    narrowed to one fleet with -f. Use file-search or fileinspect to read one.
+    """
     try:
         client = get_client()
-        data = get_logs(client, fleet, fleet)
-        click.echo(format_output(data))
+        targets = _edge_targets(client, node, fleet)
+        rows = _fan_out(
+            client, targets, list_edge_log_files,
+            None if raw else _summarize_log_file,
+        )
+        click.echo(format_output(rows, table=use_table))
     except Exception as e:
         handle_error(e)
 
 
 @edge_group.command("metadata")
-@click.option("-f", "--fleet", required=True, help="Fleet/group name.")
+@click.argument("node", metavar="[NODE]", required=False)
+@click.option("-f", "--fleet", default=None, help="Fleet name to filter by (ignored when NODE is given).")
+@click.option("--raw", is_flag=True, help="Emit the full payload (includes the node's environment variables).")
 @click.option("--table", "use_table", is_flag=True, help="Output as table.")
-def edge_metadata(fleet, use_table):
-    """Get edge node metadata."""
+def edge_metadata(node, fleet, raw, use_table):
+    """Get edge node metadata: Cribl build, mode, fleet, config version, OS.
+
+    With NODE, one node; otherwise every managed-edge node, narrowed with -f.
+    """
     try:
         client = get_client()
-        data = get_metadata(client, fleet, fleet)
-        click.echo(format_output(data, table=use_table))
+        targets = _edge_targets(client, node, fleet)
+        rows = _fan_out(
+            client, targets, get_node_metadata,
+            None if raw else _summarize_metadata,
+        )
+        click.echo(format_output(rows, table=use_table))
     except Exception as e:
         handle_error(e)
 
 
 @edge_group.command("events")
-@click.option("-f", "--fleet", required=True, help="Fleet/group name.")
+@click.argument("node", metavar="NODE")
+@click.argument("source", metavar="SOURCE_ID")
+@click.option("-l", "--limit", default=None, type=int, help="Max events to return.")
 @click.option("--table", "use_table", is_flag=True, help="Output as table.")
-def edge_events(fleet, use_table):
-    """Get edge events."""
+def edge_events(node, source, limit, use_table):
+    """Get recent events captured by one source on an edge node.
+
+    SOURCE_ID is an input id as listed by `edge inputs NODE` (e.g. in_system_state).
+    """
     try:
         client = get_client()
-        data = get_events(client, fleet, fleet, "")
-        click.echo(format_output(data, table=use_table))
-    except Exception as e:
-        handle_error(e)
-
-
-@edge_group.command("files")
-@click.argument("path")
-@click.option("-f", "--fleet", required=True, help="Fleet/group name.")
-@click.option("--table", "use_table", is_flag=True, help="Output as table.")
-def edge_files(path, fleet, use_table):
-    """Browse edge files."""
-    try:
-        client = get_client()
-        data = list_files(client, fleet, fleet, path)
-        click.echo(format_output(data, table=use_table))
+        found = _require_node(client, node)
+        data = get_source_events(client, found["id"], source, limit)
+        items = data.get("items", data) if isinstance(data, dict) else data
+        click.echo(format_output(items, table=use_table))
     except Exception as e:
         handle_error(e)
 
 
 @edge_group.command("kube-logs")
-@click.option("-f", "--fleet", required=True, help="Fleet/group name.")
+@click.argument("node", metavar="NODE")
+@click.argument("container", metavar="CONTAINER_ID")
 @click.option("--table", "use_table", is_flag=True, help="Output as table.")
-def edge_kube_logs(fleet, use_table):
-    """Get Kubernetes logs."""
+def edge_kube_logs(node, container, use_table):
+    """Get Kubernetes logs for one container on an edge node.
+
+    CONTAINER_ID comes from `edge containers NODE`.
+    """
     try:
         client = get_client()
-        data = get_kube_logs(client, fleet, fleet)
-        click.echo(format_output(data, table=use_table))
+        found = _require_node(client, node)
+        data = get_kube_container_logs(client, found["id"], container)
+        items = data.get("items", data) if isinstance(data, dict) else data
+        click.echo(format_output(items, table=use_table))
     except Exception as e:
         handle_error(e)
 
