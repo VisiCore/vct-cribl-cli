@@ -169,5 +169,5 @@ def test_processes_skips_hybrid_worker_by_name(mock_get_client):
 
     assert result.exit_code == 0, result.output
     assert "/api/v1/w/hybrid-1/edge/processes" not in client.calls
-    assert "hybrid workers do not expose processes" in result.output
+    assert "hybrid workers do not expose this data" in result.output
     assert json.loads(result.output.splitlines()[-1]) == []

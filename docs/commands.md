@@ -231,28 +231,31 @@ Notebooks are created with proper `info` blocks (timestamps, identity from JWT t
 
 Edge node and fleet operations — system info, file inspection, log scanning, metrics.
 
-### Fleet-scoped commands
+### Node listing
 
 ```bash
 cribl edge nodes [-f <fleet>] [--table]
-cribl edge containers -f <fleet> [--table]
-cribl edge logs -f <fleet>
-cribl edge metadata -f <fleet> [--table]
-cribl edge events -f <fleet> [--table]
-cribl edge files <path> -f <fleet> [--table]
-cribl edge kube-logs -f <fleet> [--table]
 ```
 
 ### Node-scoped commands
+
+`NODE` is a hostname or node id. Commands marked `[<node>]` accept a single
+node, or fan out across every managed-edge node (narrowed with `-f <fleet>`)
+when no node is given. Hybrid workers are skipped.
 
 ```bash
 cribl edge system-info <node>
 cribl edge system-info-raw <node>
 cribl edge inputs <node> [--table]
 cribl edge outputs <node> [--table]
+cribl edge metadata [<node>] [-f <fleet>] [--raw] [--table]
+cribl edge processes [<node>] [-f <fleet>] [--raw] [--table]
+cribl edge containers [<node>] [-f <fleet>] [--table]
+cribl edge logs [<node>] [-f <fleet>] [--raw] [--table]
+cribl edge events <node> <source-id> [-l <limit>] [--table]
+cribl edge kube-logs <node> <container-id> [--table]
 cribl edge fileinspect <node> <path>
 cribl edge node-ls <node> <path> [--stats] [--table]
-cribl edge processes [<node>] [-f <fleet>] [--raw] [--table]
 cribl edge file-search <node> <path> -q <query> [-l <limit>]
 cribl edge metrics <node> [-d <duration>] [--summary] [--table]
 ```
@@ -271,6 +274,10 @@ cribl edge heartbeats [-f <fleet>] [--threshold <seconds>] [--table]
 | `fileinspect` | `NODE`, `PATH` — stat, hashes (MD5/SHA256), head, hexdump. Edge nodes only. |
 | `metrics` | `NODE`, `-d, --duration` (5m\|10m\|15m\|30m\|1h\|4h\|12h\|1d), `--summary` — CPU, memory, disk over time |
 | `system-info` | `NODE` — formatted summary: CPU, memory, disk, network, OS |
+| `metadata` | Cribl build, mode, fleet, config version, OS per node; `--raw` adds the node's env vars |
+| `logs` | log files auto-discovered on the node and the processes writing them; read one with `file-search` |
+| `events` | `NODE`, `SOURCE_ID` (from `edge inputs`) — recent events captured by that source |
+| `kube-logs` | `NODE`, `CONTAINER_ID` (from `edge containers`) — Kubernetes logs for one container |
 
 ---
 
