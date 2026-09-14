@@ -63,6 +63,17 @@ def get_outputs(client: httpx.Client, node_id: str) -> Any:
     return resp.json()
 
 
+def list_node_processes(client: httpx.Client, node_id: str) -> Any:
+    """List OS processes running on a managed-edge node.
+
+    Process listing is a per-node endpoint (``/w/{id}/edge/processes``); the
+    leader serves no fleet-level ``/m/{fleet}/fleet/{fleet}/processes`` path.
+    """
+    resp = client.get(f"/api/v1/w/{quote(node_id, safe='')}/edge/processes")
+    resp.raise_for_status()
+    return resp.json()
+
+
 def file_inspect(client: httpx.Client, node_id: str, path: str) -> Any:
     """Inspect a file on an edge node (stat, hashes, head, hexdump)."""
     resp = client.get(
