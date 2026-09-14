@@ -236,7 +236,6 @@ Edge node and fleet operations — system info, file inspection, log scanning, m
 ```bash
 cribl edge nodes [-f <fleet>] [--table]
 cribl edge containers -f <fleet> [--table]
-cribl edge processes -f <fleet> [--table]
 cribl edge logs -f <fleet>
 cribl edge metadata -f <fleet> [--table]
 cribl edge events -f <fleet> [--table]
@@ -253,6 +252,7 @@ cribl edge inputs <node> [--table]
 cribl edge outputs <node> [--table]
 cribl edge fileinspect <node> <path>
 cribl edge node-ls <node> <path> [--stats] [--table]
+cribl edge processes [<node>] [-f <fleet>] [--raw] [--table]
 cribl edge file-search <node> <path> -q <query> [-l <limit>]
 cribl edge metrics <node> [-d <duration>] [--summary] [--table]
 ```

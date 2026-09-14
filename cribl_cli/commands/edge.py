@@ -13,7 +13,6 @@ from cribl_cli.api.endpoints.edge import (
     get_metadata,
     list_containers,
     list_files,
-    list_processes,
 )
 from cribl_cli.api.endpoints.workers import list_all_nodes
 from cribl_cli.api.endpoints.edge_nodes import (
@@ -27,6 +26,7 @@ from cribl_cli.api.endpoints.edge_nodes import (
     get_system_info,
     is_edge_node,
     list_edge_nodes,
+    list_node_processes,
     list_worker_logs,
     search_worker_log,
 )
@@ -69,6 +69,26 @@ def _require_node(client, name_or_id: str) -> dict:
     return node
 
 
+def _summarize_process(hostname: str, proc: dict) -> dict:
+    """Trim a raw /edge/processes item to the fields worth scanning."""
+    stat = proc.get("stat") or {}
+    args = (proc.get("cmdline") or {}).get("args") or []
+    return {
+        "hostname": hostname,
+        "pid": proc.get("pid"),
+        "ppid": proc.get("ppid"),
+        "command": stat.get("comm"),
+        "state": stat.get("state"),
+        "uid": proc.get("uid"),
+        "service": proc.get("service"),
+        "cpu_pct": proc.get("cpu"),
+        "mem_pct": proc.get("mem_percent"),
+        "mem": format_bytes(proc.get("mem_bytes") or 0),
+        "threads": stat.get("num_threads"),
+        "cmdline": " ".join(args),
+    }
+
+
 # ---------------------------------------------------------------------------
 # Click group
 # ---------------------------------------------------------------------------
@@ -97,15 +117,37 @@ def edge_containers(fleet, use_table):
 
 
 @edge_group.command("processes")
-@click.option("-f", "--fleet", required=True, help="Fleet/group name.")
+@click.argument("node", metavar="[NODE]", required=False)
+@click.option("-f", "--fleet", default=None, help="Fleet name to filter by (ignored when NODE is given).")
+@click.option("--raw", is_flag=True, help="Emit the full per-process payload instead of a summary.")
 @click.option("--table", "use_table", is_flag=True, help="Output as table.")
-def edge_processes(fleet, use_table):
-    """List processes on edge nodes."""
+def edge_processes(node, fleet, raw, use_table):
+    """List OS processes on edge nodes.
+
+    With NODE, lists that node's processes. Otherwise lists processes on every
+    managed-edge node, narrowed to one fleet with -f. Hybrid workers are skipped
+    since they do not serve the edge process endpoint.
+    """
     try:
         client = get_client()
-        data = list_processes(client, fleet, fleet)
-        items = data.get("items", data) if isinstance(data, dict) else data
-        click.echo(format_output(items, table=use_table))
+        if node:
+            targets = [_require_node(client, node)]
+        else:
+            targets = list_edge_nodes(client, fleet)
+
+        rows: list[dict] = []
+        for n in targets:
+            if not is_edge_node(n):
+                click.echo(
+                    f'Note: skipping "{n["hostname"]}" — hybrid workers do not expose processes.',
+                    err=True,
+                )
+                continue
+            data = list_node_processes(client, n["id"])
+            items = data.get("items", data) if isinstance(data, dict) else data
+            for proc in items:
+                rows.append(proc if raw else _summarize_process(n["hostname"], proc))
+        click.echo(format_output(rows, table=use_table))
     except Exception as e:
         handle_error(e)
 

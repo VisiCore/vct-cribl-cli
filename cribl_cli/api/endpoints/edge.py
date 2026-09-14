@@ -1,4 +1,4 @@
-"""Fleet-scoped edge operations for containers, processes, logs, and files."""
+"""Fleet-scoped edge operations for containers, logs, and files."""
 from __future__ import annotations
 
 from typing import Any
@@ -9,13 +9,6 @@ import httpx
 def list_containers(client: httpx.Client, group: str, fleet_id: str) -> Any:
     """List containers for an edge fleet."""
     resp = client.get(f"/api/v1/m/{group}/fleet/{fleet_id}/containers")
-    resp.raise_for_status()
-    return resp.json()
-
-
-def list_processes(client: httpx.Client, group: str, fleet_id: str) -> Any:
-    """List processes for an edge fleet."""
-    resp = client.get(f"/api/v1/m/{group}/fleet/{fleet_id}/processes")
     resp.raise_for_status()
     return resp.json()
 
