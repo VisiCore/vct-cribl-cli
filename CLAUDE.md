@@ -42,13 +42,17 @@ The `groups` command is separate: it exports and imports an entire worker group'
 or edge fleet's config. Both are the same API object — a fleet is a group with
 `isFleet: true`.
 
-**Hand-written commands:** alerts, billing, config, destinations, edge, finops,
+**Hand-written commands:** alerts, apps, billing, config, destinations, edge, finops,
 groups, health (check, report, cpu), ingest (dashboard, query), jobs, kms,
 license-usage, logger, metrics, notebooks, overview, packs, pipelines, preview,
 profiler, routes, search, sources, system, version, workers
 
 **Key subcommands:**
 
+- `apps list|get|check|install|upgrade|uninstall|backend-status|endpoints|invoke` —
+  App Platform. `install`/`upgrade`/`check` accept a local `.tgz`/`.crbl` (staged via
+  `PUT /apps` first), an `https://` URL, or `git+<repo>`. `invoke <app> <endpoint>` calls
+  `/api/v1/a/{app}/endpoints/{name}`. Apps are global (no `-g`).
 - `workers list` — list worker groups; `workers nodes` — list individual worker nodes (supports `-g` group filter)
 - `edge nodes` — list individual edge nodes (supports `-f` fleet filter)
 - `groups export <group>` — pull all config for one worker group or edge fleet

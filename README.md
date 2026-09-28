@@ -65,7 +65,7 @@ cribl --base-url https://your-org.cribl.cloud --client-id ... --client-secret ..
 cribl <command> <subcommand> [options]
 ```
 
-### Hand-written commands (25)
+### Hand-written commands (26)
 
 | Command | Description |
 |---|---|
@@ -90,6 +90,7 @@ cribl <command> <subcommand> [options]
 | `overview` | Environment summary |
 | `alerts` | Alerts (scheduled saved searches) |
 | `packs` | Pack export, install, upgrade, delete |
+| `apps` | App Platform: list, check, install, upgrade, uninstall, backend status, invoke endpoints |
 | `ingest` | Ingest dashboards and metric queries |
 | `billing` | Billing usage and cost tracking |
 | `finops` | FinOps consumption tracking and dashboards |
