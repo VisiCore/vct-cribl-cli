@@ -76,7 +76,7 @@ def version_commit(message, group):
     """Commit pending configuration changes."""
     try:
         client = get_client()
-        g = resolve_group(client, group)
+        g = resolve_group(client, group, write=True)
         data = commit_version(client, g, message)
         click.echo(format_output(data))
     except Exception as e:
@@ -89,7 +89,7 @@ def version_push(group):
     """Push committed changes."""
     try:
         client = get_client()
-        g = resolve_group(client, group)
+        g = resolve_group(client, group, write=True)
         data = push_version(client, g)
         click.echo(format_output(data))
     except Exception as e:
@@ -102,7 +102,7 @@ def version_sync(group):
     """Sync version control state."""
     try:
         client = get_client()
-        g = resolve_group(client, group)
+        g = resolve_group(client, group, write=True)
         data = sync_version(client, g)
         click.echo(format_output(data))
     except Exception as e:
@@ -154,14 +154,14 @@ def version_deploy(group, message, yes):
     if not yes:
         click.echo(
             "WARNING: This will commit and deploy configuration to live workers.\n"
-            "Pass --yes to confirm deployment.",
+            "Pass --yes to confirm deployment, or preview with: cribl --dry-run version deploy ... --yes",
             err=True,
         )
         sys.exit(1)
 
     try:
         client = get_client()
-        g = resolve_group(client, group)
+        g = resolve_group(client, group, write=True)
 
         # Commit first if a message was provided
         if message:

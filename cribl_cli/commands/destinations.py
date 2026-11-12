@@ -11,7 +11,7 @@ from cribl_cli.output.formatter import format_output
 from cribl_cli.utils.errors import handle_error
 from cribl_cli.utils.group_resolver import resolve_group
 from cribl_cli.utils.unwrap import unwrap_item
-from cribl_cli.utils.validation import parse_json, parse_port
+from cribl_cli.utils.validation import merge_update, parse_json, parse_port
 
 
 @click.group("destinations", help="Manage destinations (outputs).")
@@ -42,6 +42,15 @@ def destinations_get(destination_id, group, use_table):
         g = resolve_group(client, group)
         data = get_destination(client, g, destination_id)
         data = unwrap_item(data)
+        # The single-item endpoint returns only the leader's own status (always
+        # Green). The list endpoint has the real one, aggregated across nodes,
+        # which is what the UI shows -- so take status from there.
+        if isinstance(data, dict):
+            listed = list_destinations(client, g)
+            items = listed.get("items", []) if isinstance(listed, dict) else []
+            match = next((i for i in items if isinstance(i, dict) and i.get("id") == data.get("id")), None)
+            if match is not None and "status" in match:
+                data["status"] = match["status"]
         click.echo(format_output(data, table=use_table))
     except Exception as e:
         handle_error(e)
@@ -56,7 +65,7 @@ def destinations_get(destination_id, group, use_table):
 def destinations_create(dest_type, dest_id, port, json_config, group):
     try:
         client = get_client()
-        g = resolve_group(client, group)
+        g = resolve_group(client, group, write=True)
         if json_config:
             body = parse_json(json_config, "destination config")
         else:
@@ -78,16 +87,19 @@ def destinations_create(dest_type, dest_id, port, json_config, group):
 @click.argument("json_config")
 @click.option("-g", "--group", default=None)
 def destinations_update(destination_id, json_config, group):
+    """Update a destination by merging JSON_CONFIG into it.
+
+    Only the fields you pass change; everything else is kept, including
+    nested keys you did not mention (e.g. '{"conf": {"description": "x"}}'
+    leaves the other conf fields alone). Preview with: cribl --dry-run ...
+    """
     try:
         client = get_client()
-        g = resolve_group(client, group)
+        g = resolve_group(client, group, write=True)
         existing = get_destination(client, g, destination_id)
         existing = unwrap_item(existing)
-        if isinstance(existing, dict):
-            existing.pop("status", None)
-            existing.pop("notifications", None)
         updates = parse_json(json_config, "destination config")
-        merged = {**existing, **updates}
+        merged = merge_update(existing, updates)
         data = update_destination(client, g, destination_id, merged)
         click.echo(format_output(data))
     except Exception as e:
@@ -100,7 +112,7 @@ def destinations_update(destination_id, json_config, group):
 def destinations_delete(destination_id, group):
     try:
         client = get_client()
-        g = resolve_group(client, group)
+        g = resolve_group(client, group, write=True)
         data = delete_destination(client, g, destination_id)
         click.echo(format_output(data))
     except Exception as e:

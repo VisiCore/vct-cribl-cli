@@ -250,6 +250,31 @@ def get_node_metrics(
     return points
 
 
+def metrics_coverage(points: list[dict[str, Any]], requested_seconds: int) -> dict[str, Any]:
+    """Describe how much of the requested window the returned points cover.
+
+    Nodes keep a limited metrics history (Stream workers only ~10 minutes), so
+    a request for the last 6 hours can come back with far less. Reporting the
+    real span keeps callers from presenting a 10-minute sample as a 6-hour one.
+    ``partial`` is True when under 90% of the window is covered.
+    """
+    requested_min = round(requested_seconds / 60, 1)
+    if not points:
+        return {"requested_minutes": requested_min, "covered_minutes": 0, "from": None, "to": None, "partial": True}
+    times = sorted(datetime.fromisoformat(p["time"]) for p in points)
+    span = (times[-1] - times[0]).total_seconds()
+    # Each point is one sample interval; count the last one too.
+    step = span / (len(times) - 1) if len(times) > 1 else 60
+    covered = span + step
+    return {
+        "requested_minutes": requested_min,
+        "covered_minutes": round(covered / 60, 1),
+        "from": times[0].isoformat(),
+        "to": times[-1].isoformat(),
+        "partial": covered < requested_seconds * 0.9,
+    }
+
+
 def _metric_val(entry: dict, key: str) -> float | None:
     arr = entry.get(key)
     if isinstance(arr, list) and arr:

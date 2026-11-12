@@ -12,7 +12,7 @@ from cribl_cli.commands.registry import CommandRegistration
 from cribl_cli.output.formatter import format_output
 from cribl_cli.utils.errors import handle_error
 from cribl_cli.utils.unwrap import unwrap_item
-from cribl_cli.utils.validation import deep_merge, parse_json
+from cribl_cli.utils.validation import merge_update, parse_json
 
 
 def _singular(name: str) -> str:
@@ -78,7 +78,9 @@ def register_crud_command(parent: click.Group, reg: CommandRegistration) -> None
         def create_cmd(ctx: click.Context, json_config: str, **kwargs: Any) -> None:
             try:
                 client = get_client()
-                group = resolve_group_for_scope(client, scope, kwargs.get("group") or kwargs.get("lake"))
+                group = resolve_group_for_scope(
+                    client, scope, kwargs.get("group") or kwargs.get("lake"), write=True
+                )
                 body = parse_json(json_config, label)
                 data = endpoints.create(client, group, body, pack=kwargs.get("pack"))
                 click.echo(format_output(data))
@@ -86,28 +88,38 @@ def register_crud_command(parent: click.Group, reg: CommandRegistration) -> None
                 handle_error(e)
 
     if "update" in reg.operations:
-        @group_cmd.command(name="update", help=f"Update a {_label(singular)}.")
-        @click.argument("id", required=not is_singleton)
-        @click.argument("json_config")
-        @_scope_options(scope)
-        @click.pass_context
-        def update_cmd(ctx: click.Context, id: str, json_config: str, **kwargs: Any) -> None:
+        def update_cmd(
+            ctx: click.Context, json_config: str, id: str | None = None, **kwargs: Any
+        ) -> None:
             try:
                 client = get_client()
-                group = resolve_group_for_scope(client, scope, kwargs.get("group") or kwargs.get("lake"))
+                group = resolve_group_for_scope(
+                    client, scope, kwargs.get("group") or kwargs.get("lake"), write=True
+                )
                 pack = kwargs.get("pack")
                 # Merge-on-update: fetch existing, strip server fields, merge
                 existing = endpoints.get(client, group, id, pack=pack)
                 existing = unwrap_item(existing)
-                if isinstance(existing, dict):
-                    existing.pop("status", None)
-                    existing.pop("notifications", None)
                 updates = parse_json(json_config, label)
-                merged = deep_merge(existing, updates)
+                merged = merge_update(existing, updates)
                 data = endpoints.update(client, group, id, merged, pack=pack)
                 click.echo(format_output(data))
             except Exception as e:
                 handle_error(e)
+
+        # Decorators are applied by hand so a singleton (auth-settings,
+        # git-settings) takes only JSON_CONFIG. An optional ID placed before a
+        # required JSON_CONFIG would swallow the JSON and fail to parse.
+        update_cmd = click.pass_context(update_cmd)
+        update_cmd = _scope_options(scope)(update_cmd)
+        update_cmd = click.argument("json_config")(update_cmd)
+        if not is_singleton:
+            update_cmd = click.argument("id")(update_cmd)
+        group_cmd.command(
+            name="update",
+            help=f"Update a {_label(singular)} by merging JSON_CONFIG into it "
+                 "(fields you do not pass are kept).",
+        )(update_cmd)
 
     if "delete" in reg.operations:
         @group_cmd.command(name="delete", help=f"Delete a {_label(singular)}.")
@@ -117,7 +129,9 @@ def register_crud_command(parent: click.Group, reg: CommandRegistration) -> None
         def delete_cmd(ctx: click.Context, id: str, **kwargs: Any) -> None:
             try:
                 client = get_client()
-                group = resolve_group_for_scope(client, scope, kwargs.get("group") or kwargs.get("lake"))
+                group = resolve_group_for_scope(
+                    client, scope, kwargs.get("group") or kwargs.get("lake"), write=True
+                )
                 data = endpoints.delete(client, group, id, pack=kwargs.get("pack"))
                 click.echo(format_output(data))
             except Exception as e:
@@ -128,8 +142,15 @@ def _scope_options(scope: str):
     """Return a decorator that adds --group/--lake (and --pack for group scope)."""
 
     def decorator(fn):
-        if scope == "lake":
-            fn = click.option("--lake", required=True, help="Lake ID.")(fn)
+        if scope == "searchgroup":
+            fn = click.option(
+                "--group", "-g", default=None, help="Search group (default: default_search).",
+            )(fn)
+        elif scope == "lake":
+            fn = click.option(
+                "--lake", default="default", show_default=True,
+                help="Lake ID. Cribl Cloud workspaces have a single lake named 'default'.",
+            )(fn)
         elif scope != "global":
             fn = click.option(
                 "--pack", "-P", default=None,

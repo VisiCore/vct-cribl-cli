@@ -14,8 +14,10 @@ from cribl_cli.config.types import CriblConfig
 from cribl_cli.utils.errors import DryRunAbort
 
 _IDEMPOTENT_METHODS = frozenset({"GET", "HEAD", "PUT", "DELETE", "OPTIONS"})
+_READ_METHODS = frozenset({"GET", "HEAD", "OPTIONS"})
 _RETRY_STATUS_CODES = frozenset({502, 503, 504})
 _MAX_RETRIES = 3
+DEFAULT_TIMEOUT = 30.0  # seconds per request; override with --timeout / CRIBL_TIMEOUT
 _BACKOFF_BASE = 1  # seconds
 
 _client: httpx.Client | None = None
@@ -58,12 +60,23 @@ class AuthTransport(httpx.BaseTransport):
 
 
 class DryRunTransport(httpx.BaseTransport):
-    """Transport that logs the request and aborts instead of sending."""
+    """Transport that stops at the first request that would change something.
+
+    Read requests (GET/HEAD/OPTIONS) are sent as normal: commands need them to
+    resolve the group or fetch the object they are about to merge into, and
+    without them a dry run could only ever show that first lookup. The first
+    write (POST/PUT/PATCH/DELETE) is logged in full to stderr and aborted, so
+    nothing is ever changed.
+    """
 
     def __init__(self, transport: httpx.BaseTransport) -> None:
         self._transport = transport
 
     def handle_request(self, request: httpx.Request) -> httpx.Response:
+        if request.method in _READ_METHODS:
+            sys.stderr.write(f"dry-run: {request.method} {request.url} (read, sent)\n")
+            return self._transport.handle_request(request)
+
         body: Any = None
         if request.content:
             try:
@@ -87,6 +100,7 @@ def create_client(
     *,
     dry_run: bool = False,
     verbose: bool = False,
+    timeout: float = DEFAULT_TIMEOUT,
 ) -> httpx.Client:
     transport: httpx.BaseTransport = httpx.HTTPTransport(retries=3)
     transport = RetryTransport(transport)
@@ -97,7 +111,7 @@ def create_client(
     client = httpx.Client(
         base_url=config.base_url,
         transport=transport,
-        timeout=30.0,
+        timeout=timeout,
         event_hooks={
             "request": [_log_request] if verbose else [],
         },
@@ -110,6 +124,7 @@ def create_management_client(
     *,
     dry_run: bool = False,
     verbose: bool = False,
+    timeout: float = DEFAULT_TIMEOUT,
 ) -> httpx.Client:
     """Create a client for the Cribl Cloud management plane (api.cribl.cloud)."""
     transport: httpx.BaseTransport = httpx.HTTPTransport(retries=3)
@@ -121,7 +136,7 @@ def create_management_client(
     client = httpx.Client(
         base_url="https://api.cribl.cloud",
         transport=transport,
-        timeout=30.0,
+        timeout=timeout,
         event_hooks={
             "request": [_log_request] if verbose else [],
         },

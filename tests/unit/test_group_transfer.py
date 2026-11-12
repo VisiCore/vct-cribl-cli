@@ -66,7 +66,7 @@ def test_collect_drops_builtin_items():
                 {"id": "mine", "lib": "custom"},
                 {"id": "also-mine"},                  # no lib -> user content
             ]})
-        if url.endswith("/collectors"):
+        if url.endswith("/lib/jobs"):
             return _mock_response({"items": [
                 {"id": "sys", "destroyable": False},  # built-in system object -> dropped
                 {"id": "user", "destroyable": True},

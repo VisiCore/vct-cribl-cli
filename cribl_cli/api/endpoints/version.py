@@ -50,7 +50,7 @@ def sync_version(client: httpx.Client, group: str) -> Any:
 
 def list_branches(client: httpx.Client, group: str) -> Any:
     """List available branches."""
-    resp = client.get(f"/api/v1/m/{group}/version/branches")
+    resp = client.get(f"/api/v1/m/{group}/version/branch")
     resp.raise_for_status()
     return resp.json()
 

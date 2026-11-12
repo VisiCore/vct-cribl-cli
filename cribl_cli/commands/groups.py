@@ -29,7 +29,7 @@ def groups_group():
 @groups_group.command("export", help="Pull all config for one worker group or edge fleet.")
 @click.argument("group")
 @click.option("--out-dir", default=None, help="Write one file per resource type under <out-dir>/<group>/.")
-@click.option("--include-sensitive", is_flag=True, help="Include secrets, credentials, and certificates.")
+@click.option("--include-sensitive", is_flag=True, help="Include secrets, certificates, and encryption keys.")
 @click.option("--include-packs", is_flag=True, help="Include pack configurations (definitions only).")
 @click.option("--include-lookups", is_flag=True, help="Include lookup configurations (definitions only).")
 @click.option("--table", "use_table", is_flag=True, help="Table output (stdout mode only).")
@@ -101,6 +101,14 @@ def groups_import(group, in_path, with_routes, with_packs, with_lookups, commit_
             with_routes=with_routes, with_packs=with_packs, with_lookups=with_lookups
         )
         click.echo(format_output(report))
+
+        if report["failed"]:
+            click.echo(
+                f"{len(report['failed'])} item(s) failed to import (see \"failed\" above). "
+                f"Nothing was committed or deployed; whatever did import is staged in '{target}'.",
+                err=True,
+            )
+            sys.exit(1)
 
         if commit_message or deploy:
             message = commit_message or "Import group config"

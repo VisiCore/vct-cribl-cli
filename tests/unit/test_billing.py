@@ -126,6 +126,5 @@ def test_subscriptions_create_update():
     runner = CliRunner()
     result = runner.invoke(cli, ["subscriptions", "--help"])
     assert result.exit_code == 0
-    for sub in ("list", "get", "create", "update"):
+    for sub in ("list", "get", "create", "update", "delete"):
         assert sub in result.output, f"Expected '{sub}' in subscriptions help"
-    assert "delete" not in result.output

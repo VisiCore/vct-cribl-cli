@@ -11,7 +11,7 @@ from cribl_cli.output.formatter import format_output
 from cribl_cli.utils.errors import handle_error
 from cribl_cli.utils.group_resolver import resolve_group
 from cribl_cli.utils.unwrap import unwrap_item
-from cribl_cli.utils.validation import parse_json
+from cribl_cli.utils.validation import merge_update, parse_json
 
 
 _PACK_OPT = click.option(
@@ -28,12 +28,18 @@ def pipelines_group():
 @pipelines_group.command("list")
 @click.option("-g", "--group", default=None)
 @_PACK_OPT
+@click.option("--no-packs", is_flag=True, help="Leave out the pack entries (ids starting 'pack:').")
 @click.option("--table", "use_table", is_flag=True)
-def pipelines_list(group, pack, use_table):
+def pipelines_list(group, pack, no_packs, use_table):
+    """List pipelines. The API also returns one entry per installed pack
+    (id 'pack:<name>'); use --no-packs to list standalone pipelines only."""
     try:
         client = get_client()
         g = resolve_group(client, group)
         data = list_pipelines(client, g, pack=pack)
+        if no_packs and isinstance(data, dict):
+            items = [p for p in data.get("items", []) if not str(p.get("id", "")).startswith("pack:")]
+            data = {**data, "items": items, "count": len(items)}
         click.echo(format_output(data, table=use_table))
     except Exception as e:
         handle_error(e)
@@ -62,7 +68,7 @@ def pipelines_get(pipeline_id, group, pack, use_table):
 def pipelines_create(json_config, group, pack):
     try:
         client = get_client()
-        g = resolve_group(client, group)
+        g = resolve_group(client, group, write=True)
         body = parse_json(json_config, "pipeline config")
         data = create_pipeline(client, g, body, pack=pack)
         click.echo(format_output(data))
@@ -76,13 +82,19 @@ def pipelines_create(json_config, group, pack):
 @click.option("-g", "--group", default=None)
 @_PACK_OPT
 def pipelines_update(pipeline_id, json_config, group, pack):
+    """Update a pipeline by merging JSON_CONFIG into it.
+
+    Only the fields you pass change; everything else is kept, including
+    nested keys you did not mention (e.g. '{"conf": {"description": "x"}}'
+    leaves the other conf fields alone). Preview with: cribl --dry-run ...
+    """
     try:
         client = get_client()
-        g = resolve_group(client, group)
+        g = resolve_group(client, group, write=True)
         existing = get_pipeline(client, g, pipeline_id, pack=pack)
         existing = unwrap_item(existing)
         updates = parse_json(json_config, "pipeline config")
-        merged = {**existing, **updates}
+        merged = merge_update(existing, updates)
         data = update_pipeline(client, g, pipeline_id, merged, pack=pack)
         click.echo(format_output(data))
     except Exception as e:
@@ -96,7 +108,7 @@ def pipelines_update(pipeline_id, json_config, group, pack):
 def pipelines_delete(pipeline_id, group, pack):
     try:
         client = get_client()
-        g = resolve_group(client, group)
+        g = resolve_group(client, group, write=True)
         data = delete_pipeline(client, g, pipeline_id, pack=pack)
         click.echo(format_output(data))
     except Exception as e:

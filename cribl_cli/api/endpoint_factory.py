@@ -9,7 +9,9 @@ import httpx
 
 from cribl_cli.utils.group_resolver import resolve_group
 
-Scope = Literal["group", "global", "search", "lake"]
+# "searchgroup" is for resources that live in the search group but are not
+# under its /search/ path (alerting): /api/v1/m/default_search/{path}.
+Scope = Literal["group", "global", "search", "lake", "searchgroup"]
 
 
 @dataclass
@@ -28,22 +30,22 @@ def _build_base_url(
         return f"/api/v1/m/{group}/search/{path}"
     if scope == "lake":
         return f"/api/v1/products/lake/lakes/{group}/{path}"
-    # group scope (optionally nested in a pack)
+    # group / searchgroup scope (group optionally nested in a pack)
     if pack:
         return f"/api/v1/m/{group}/p/{pack}/{path}"
     return f"/api/v1/m/{group}/{path}"
 
 
 def resolve_group_for_scope(
-    client: httpx.Client, scope: Scope, group: str | None = None
+    client: httpx.Client, scope: Scope, group: str | None = None, *, write: bool = False
 ) -> str:
     if scope == "global":
         return "_global_"
-    if scope == "search":
+    if scope in ("search", "searchgroup"):
         return group or "default_search"
     if scope == "lake":
         return group or ""
-    return resolve_group(client, group)
+    return resolve_group(client, group, write=write)
 
 
 class Endpoints:

@@ -35,7 +35,7 @@ def kms_config(group, use_table):
 def kms_update(json_config, group):
     try:
         client = get_client()
-        g = resolve_group(client, group)
+        g = resolve_group(client, group, write=True)
         body = parse_json(json_config, "KMS config")
         data = update_kms_config(client, g, body)
         click.echo(format_output(data))

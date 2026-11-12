@@ -7,6 +7,7 @@ from typing import Any
 import click
 
 from cribl_cli.api.client import (
+    DEFAULT_TIMEOUT,
     create_client,
     create_management_client,
     set_client,
@@ -17,33 +18,35 @@ from cribl_cli.config.loader import load_config
 
 
 class CriblCLI(click.Group):
-    """Custom Click group that initialises the API client before non-config commands."""
+    """Root Click group. Its callback initialises the API clients before
+    every command except ``config`` (which must work without credentials)."""
 
-    def invoke(self, ctx: click.Context) -> Any:
-        # Resolve the subcommand that will actually run
-        cmd_name = ctx.protected_args[0] if ctx.protected_args else None
+    @staticmethod
+    def init_clients(ctx: click.Context) -> None:
+        """Load config and build the API clients for this invocation.
 
-        # Skip auth for the "config" subcommand
-        if cmd_name != "config":
-            try:
-                cfg = load_config(
-                    profile=ctx.params.get("profile"),
-                    base_url=ctx.params.get("base_url"),
-                    client_id=ctx.params.get("client_id"),
-                    client_secret=ctx.params.get("client_secret"),
-                )
-                dry_run = ctx.params.get("dry_run", False)
-                verbose = ctx.params.get("verbose", False)
-                client = create_client(cfg, dry_run=dry_run, verbose=verbose)
-                set_client(client)
-                mgmt_client = create_management_client(cfg, dry_run=dry_run, verbose=verbose)
-                set_management_client(mgmt_client)
-                ctx.ensure_object(dict)
-                ctx.obj["_config"] = cfg
-            except Exception as exc:
-                set_config_error(str(exc))
-
-        return super().invoke(ctx)
+        A config problem is recorded rather than raised, so the error surfaces
+        (as clean JSON) only when a command actually asks for a client.
+        """
+        params = ctx.params
+        try:
+            cfg = load_config(
+                profile=params.get("profile"),
+                base_url=params.get("base_url"),
+                client_id=params.get("client_id"),
+                client_secret=params.get("client_secret"),
+            )
+            dry_run = params.get("dry_run", False)
+            verbose = params.get("verbose", False)
+            timeout = params.get("timeout") or DEFAULT_TIMEOUT
+            set_client(create_client(cfg, dry_run=dry_run, verbose=verbose, timeout=timeout))
+            set_management_client(
+                create_management_client(cfg, dry_run=dry_run, verbose=verbose, timeout=timeout)
+            )
+            ctx.ensure_object(dict)
+            ctx.obj["_config"] = cfg
+        except Exception as exc:
+            set_config_error(str(exc))
 
 
 @click.group(cls=CriblCLI, context_settings={"help_option_names": ["-h", "--help"]})
@@ -53,12 +56,19 @@ class CriblCLI(click.Group):
 @click.option("--client-secret", default=None, help="OAuth client secret override.")
 @click.option("--verbose", is_flag=True, help="Log HTTP requests to stderr.")
 @click.option("--dry-run", is_flag=True, help="Preview mode — log requests without sending.")
+@click.option(
+    "--timeout", type=click.FloatRange(min=1), default=None, envvar="CRIBL_TIMEOUT",
+    help=f"Seconds to wait for each API request (default: {DEFAULT_TIMEOUT:g}; env CRIBL_TIMEOUT).",
+)
 @click.option("--fields", default=None, help="Comma-separated list of fields to include in output.")
 @click.pass_context
 def cli(ctx: click.Context, **kwargs: Any) -> None:
     """Cribl CLI — command-line interface for the Cribl Cloud REST API."""
     ctx.ensure_object(dict)
     ctx.obj.update(kwargs)
+    # Click sets invoked_subcommand before running this callback.
+    if ctx.invoked_subcommand != "config":
+        CriblCLI.init_clients(ctx)
 
 
 def _register_commands() -> None:
@@ -90,6 +100,8 @@ def _register_commands() -> None:
     from cribl_cli.commands.billing import billing_group
     from cribl_cli.commands.ingest import ingest_group
     from cribl_cli.commands.finops import finops_group
+    from cribl_cli.commands.apps import apps_group
+    from cribl_cli.commands.api import api_cmd, api_spec_group
 
     for group in [
         config_group, workers_group, groups_group, sources_group, destinations_group,
@@ -97,7 +109,7 @@ def _register_commands() -> None:
         routes_group, jobs_group, version_group, system_group, edge_group,
         kms_group, preview_group, logger_group, profiler_group, health_group,
         overview_group, alerts_group, packs_group, license_usage_group,
-        billing_group, ingest_group, finops_group,
+        billing_group, ingest_group, finops_group, apps_group, api_cmd, api_spec_group,
     ]:
         cli.add_command(group)
 

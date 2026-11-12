@@ -78,20 +78,27 @@ def send_system_diag(client: httpx.Client) -> Any:
 
 def restart_system(client: httpx.Client) -> Any:
     """Restart the system."""
-    resp = client.post("/api/v1/system/restart")
+    resp = client.post("/api/v1/system/settings/restart")
     resp.raise_for_status()
     return resp.json()
 
 
 def reload_system(client: httpx.Client) -> Any:
     """Reload system configuration."""
-    resp = client.post("/api/v1/system/reload")
+    resp = client.post("/api/v1/system/settings/reload")
     resp.raise_for_status()
     return resp.json()
 
 
-def upgrade_system(client: httpx.Client) -> Any:
-    """Upgrade the system."""
-    resp = client.post("/api/v1/system/upgrade")
+def list_upgrade_versions(client: httpx.Client) -> Any:
+    """List the Cribl versions available to upgrade to."""
+    resp = client.get("/api/v1/system/settings/upgrade")
+    resp.raise_for_status()
+    return resp.json()
+
+
+def upgrade_system(client: httpx.Client, version: str) -> Any:
+    """Upgrade the system to a specific version."""
+    resp = client.post(f"/api/v1/system/settings/upgrade/{version}")
     resp.raise_for_status()
     return resp.json()

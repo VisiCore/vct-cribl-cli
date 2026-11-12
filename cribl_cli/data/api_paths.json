@@ -1,0 +1,6215 @@
+{
+"version":"4.21.0-RC3-5d9ef099",
+"operations":[
+{
+"method":"GET",
+"path":"/a/{appId}/backend-schedules",
+"tag":"apps",
+"summary":"List backend schedules for an App"
+},
+{
+"method":"POST",
+"path":"/a/{appId}/backend-schedules",
+"tag":"apps",
+"summary":"Create a backend schedule for an App"
+},
+{
+"method":"DELETE",
+"path":"/a/{appId}/backend-schedules/{id}",
+"tag":"apps",
+"summary":"Delete a backend schedule for an App"
+},
+{
+"method":"GET",
+"path":"/a/{appId}/backend-schedules/{id}",
+"tag":"apps",
+"summary":"Get a backend schedule for an App"
+},
+{
+"method":"PATCH",
+"path":"/a/{appId}/backend-schedules/{id}",
+"tag":"apps",
+"summary":"Update a backend schedule for an App"
+},
+{
+"method":"GET",
+"path":"/admin/products/{product}/mappings",
+"tag":"mappings",
+"summary":"List all Mapping Rulesets"
+},
+{
+"method":"POST",
+"path":"/admin/products/{product}/mappings",
+"tag":"mappings",
+"summary":"Create a Mapping Ruleset"
+},
+{
+"method":"POST",
+"path":"/admin/products/{product}/mappings/activate",
+"tag":"mappings",
+"summary":"Activate a Mapping Ruleset"
+},
+{
+"method":"DELETE",
+"path":"/admin/products/{product}/mappings/{id}",
+"tag":"mappings",
+"summary":"Delete a Mapping Ruleset"
+},
+{
+"method":"GET",
+"path":"/admin/products/{product}/mappings/{id}",
+"tag":"mappings",
+"summary":"Get a Mapping Ruleset"
+},
+{
+"method":"PATCH",
+"path":"/admin/products/{product}/mappings/{id}",
+"tag":"mappings",
+"summary":"Update a Mapping Ruleset"
+},
+{
+"method":"GET",
+"path":"/ai/consent",
+"tag":"consent",
+"summary":"Get consent setting for AI features"
+},
+{
+"method":"POST",
+"path":"/ai/consent",
+"tag":"consent",
+"summary":"Update consent setting for AI features"
+},
+{
+"method":"POST",
+"path":"/ai/event",
+"tag":"ai-settings",
+"summary":"Forward AI usage events to the Cribl AI backend"
+},
+{
+"method":"GET",
+"path":"/ai/guard/findings",
+"tag":"AI",
+"summary":"List Guard findings"
+},
+{
+"method":"DELETE",
+"path":"/ai/guard/findings/ignore",
+"tag":"AI",
+"summary":"Remove a Guard ignore rule"
+},
+{
+"method":"GET",
+"path":"/ai/guard/findings/ignore",
+"tag":"AI",
+"summary":"List Guard ignore rules"
+},
+{
+"method":"POST",
+"path":"/ai/guard/findings/ignore",
+"tag":"AI",
+"summary":"Ignore a Guard finding"
+},
+{
+"method":"POST",
+"path":"/ai/guard/findings/mitigate",
+"tag":"AI",
+"summary":"Mitigate Guard findings"
+},
+{
+"method":"DELETE",
+"path":"/ai/guard/findings/raw",
+"tag":"AI",
+"summary":"Delete raw Guard findings"
+},
+{
+"method":"GET",
+"path":"/ai/guard/findings/raw",
+"tag":"AI",
+"summary":"Get raw Guard findings"
+},
+{
+"method":"POST",
+"path":"/ai/guard/mitigation-job",
+"tag":"AI",
+"summary":"Start a Guard mitigation job"
+},
+{
+"method":"GET",
+"path":"/ai/guard/mitigation-job/{id}",
+"tag":"AI",
+"summary":"Get Guard mitigation job status"
+},
+{
+"method":"GET",
+"path":"/ai/guard/recommendations",
+"tag":"AI",
+"summary":"List Guard mitigation recommendations"
+},
+{
+"method":"POST",
+"path":"/ai/guard/recommendations/apply",
+"tag":"AI",
+"summary":"Record applied Guard recommendation actions"
+},
+{
+"method":"GET",
+"path":"/ai/guard/shadow-findings",
+"tag":"AI",
+"summary":"List GuardLite shadow findings"
+},
+{
+"method":"GET",
+"path":"/ai/sessions/{agentSlug}",
+"tag":"AI",
+"summary":"List AI sessions for an agent"
+},
+{
+"method":"POST",
+"path":"/ai/sessions/{agentSlug}",
+"tag":"AI",
+"summary":"Create an AI session"
+},
+{
+"method":"DELETE",
+"path":"/ai/sessions/{agentSlug}/{id}",
+"tag":"AI",
+"summary":"Delete an AI session"
+},
+{
+"method":"GET",
+"path":"/ai/sessions/{agentSlug}/{id}",
+"tag":"AI",
+"summary":"Get an AI session"
+},
+{
+"method":"PATCH",
+"path":"/ai/sessions/{agentSlug}/{id}",
+"tag":"AI",
+"summary":"Update an AI session"
+},
+{
+"method":"PUT",
+"path":"/ai/sessions/{agentSlug}/{id}/shares",
+"tag":"AI",
+"summary":"Update session collaborators"
+},
+{
+"method":"GET",
+"path":"/ai/settings/agents.md/{product}",
+"tag":"ai-settings",
+"summary":"Get agents.md for a product"
+},
+{
+"method":"POST",
+"path":"/ai/settings/agents.md/{product}",
+"tag":"ai-settings",
+"summary":"Update agents.md for a product"
+},
+{
+"method":"DELETE",
+"path":"/ai/settings/dataset-intelligence/{datasetId}",
+"tag":"ai-settings",
+"summary":"Delete dataset intelligence for a dataset"
+},
+{
+"method":"GET",
+"path":"/ai/settings/dataset-intelligence/{datasetId}",
+"tag":"ai-settings",
+"summary":"Get dataset intelligence for a dataset"
+},
+{
+"method":"PATCH",
+"path":"/ai/settings/dataset-intelligence/{datasetId}",
+"tag":"ai-settings",
+"summary":"Edit dataset intelligence content"
+},
+{
+"method":"POST",
+"path":"/ai/settings/dataset-intelligence/{datasetId}",
+"tag":"ai-settings",
+"summary":"Generate dataset intelligence for a dataset"
+},
+{
+"method":"GET",
+"path":"/ai/settings/disabled",
+"tag":"ai-settings",
+"summary":"Get global disabled status for AI features"
+},
+{
+"method":"GET",
+"path":"/ai/settings/features",
+"tag":"ai-settings",
+"summary":"List the enabled or disabled settings for all AI features"
+},
+{
+"method":"POST",
+"path":"/ai/settings/features",
+"tag":"ai-settings",
+"summary":"Update multiple AI feature flags"
+},
+{
+"method":"GET",
+"path":"/ai/settings/features/{feature}",
+"tag":"ai-settings",
+"summary":"Get the enabled or disabled setting for an AI feature"
+},
+{
+"method":"POST",
+"path":"/ai/settings/features/{feature}",
+"tag":"ai-settings",
+"summary":"Enable or disable an AI feature"
+},
+{
+"method":"GET",
+"path":"/ai/settings/guard/available-models",
+"tag":"AI",
+"summary":"List available Guard models"
+},
+{
+"method":"GET",
+"path":"/ai/settings/guard/selected-model",
+"tag":"AI",
+"summary":"Get the selected Guard model"
+},
+{
+"method":"POST",
+"path":"/ai/settings/guard/selected-model",
+"tag":"AI",
+"summary":"Update the selected Guard model"
+},
+{
+"method":"GET",
+"path":"/ai/settings/leader-mcp/tools",
+"tag":"ai-settings",
+"summary":"List Leader MCP tools for Settings"
+},
+{
+"method":"GET",
+"path":"/ai/settings/mcp/servers",
+"tag":"ai-settings",
+"summary":"List all MCP external context servers"
+},
+{
+"method":"POST",
+"path":"/ai/settings/mcp/servers",
+"tag":"ai-settings",
+"summary":"Add an MCP external context server"
+},
+{
+"method":"DELETE",
+"path":"/ai/settings/mcp/servers/{id}",
+"tag":"ai-settings",
+"summary":"Delete an MCP external context server"
+},
+{
+"method":"GET",
+"path":"/ai/settings/mcp/servers/{id}",
+"tag":"ai-settings",
+"summary":"Get an MCP external context server"
+},
+{
+"method":"POST",
+"path":"/ai/settings/mcp/servers/{id}/disable",
+"tag":"ai-settings",
+"summary":"Disable an MCP external context server"
+},
+{
+"method":"POST",
+"path":"/ai/settings/mcp/servers/{id}/enable",
+"tag":"ai-settings",
+"summary":"Enable an MCP external context server"
+},
+{
+"method":"PUT",
+"path":"/ai/settings/mode",
+"tag":"ai-settings",
+"summary":"Set the deployment AI mode"
+},
+{
+"method":"PUT",
+"path":"/ai/settings/mode/lock",
+"tag":"ai-settings",
+"summary":"Lock or unlock the deployment AI mode"
+},
+{
+"method":"DELETE",
+"path":"/ai/settings/providers",
+"tag":"ai-settings",
+"summary":"Delete the custom AI Provider"
+},
+{
+"method":"GET",
+"path":"/ai/settings/providers",
+"tag":"ai-settings",
+"summary":"Get the custom AI Provider configuration"
+},
+{
+"method":"POST",
+"path":"/ai/settings/providers",
+"tag":"ai-settings",
+"summary":"Create or replace the custom AI Provider"
+},
+{
+"method":"POST",
+"path":"/ai/settings/providers/models",
+"tag":"ai-settings",
+"summary":"List available models for a custom AI Provider"
+},
+{
+"method":"GET",
+"path":"/ai/settings/providers/test",
+"tag":"ai-settings",
+"summary":"Test connectivity to the active AI provider"
+},
+{
+"method":"POST",
+"path":"/ai/settings/providers/test-models",
+"tag":"ai-settings",
+"summary":"Test connectivity for custom AI Provider models"
+},
+{
+"method":"GET",
+"path":"/alert/history",
+"tag":"insights",
+"summary":"Get alert Monitor states"
+},
+{
+"method":"GET",
+"path":"/alert/history/stats",
+"tag":"insights",
+"summary":"Get alert Monitor activity statistics"
+},
+{
+"method":"GET",
+"path":"/alert/history/{id}",
+"tag":"insights",
+"summary":"Get evaluation history for an alert Monitor"
+},
+{
+"method":"GET",
+"path":"/alert/history/{id}/{fingerprint}",
+"tag":"insights",
+"summary":"Get evaluation history for an instance of an alert Monitor"
+},
+{
+"method":"GET",
+"path":"/alert/monitors",
+"tag":"insights",
+"summary":"List alert Monitors"
+},
+{
+"method":"POST",
+"path":"/alert/monitors",
+"tag":"insights",
+"summary":"Create an alert Monitor"
+},
+{
+"method":"DELETE",
+"path":"/alert/monitors/{id}",
+"tag":"insights",
+"summary":"Delete an alert Monitor"
+},
+{
+"method":"GET",
+"path":"/alert/monitors/{id}",
+"tag":"insights",
+"summary":"Get an alert Monitor"
+},
+{
+"method":"PATCH",
+"path":"/alert/monitors/{id}",
+"tag":"insights",
+"summary":"Update an alert Monitor"
+},
+{
+"method":"POST",
+"path":"/alert/monitors/{id}/clone",
+"tag":"insights",
+"summary":"Clone an alert Monitor"
+},
+{
+"method":"GET",
+"path":"/alert/silences",
+"tag":"insights",
+"summary":"List alert silences"
+},
+{
+"method":"POST",
+"path":"/alert/silences",
+"tag":"insights",
+"summary":"Create an alert silence"
+},
+{
+"method":"DELETE",
+"path":"/alert/silences/{id}",
+"tag":"insights",
+"summary":"Delete an alert silence"
+},
+{
+"method":"GET",
+"path":"/alert/silences/{id}",
+"tag":"insights",
+"summary":"Get an alert silence"
+},
+{
+"method":"PATCH",
+"path":"/alert/silences/{id}",
+"tag":"insights",
+"summary":"Update an alert silence"
+},
+{
+"method":"GET",
+"path":"/apps",
+"tag":"apps",
+"summary":"List all Apps"
+},
+{
+"method":"POST",
+"path":"/apps",
+"tag":"apps",
+"summary":"Install an App"
+},
+{
+"method":"PUT",
+"path":"/apps",
+"tag":"apps",
+"summary":"Upload an App archive file"
+},
+{
+"method":"POST",
+"path":"/apps/preinstall-check",
+"tag":"apps",
+"summary":"Preview an App before installation or upgrade"
+},
+{
+"method":"DELETE",
+"path":"/apps/{id}",
+"tag":"apps",
+"summary":"Uninstall an App"
+},
+{
+"method":"GET",
+"path":"/apps/{id}",
+"tag":"apps",
+"summary":"Get an App"
+},
+{
+"method":"PATCH",
+"path":"/apps/{id}",
+"tag":"apps",
+"summary":"Upgrade an installed App"
+},
+{
+"method":"GET",
+"path":"/apps/{id}/acl",
+"tag":"apps",
+"summary":"Get user ACL policies for an App"
+},
+{
+"method":"POST",
+"path":"/apps/{id}/acl/apply",
+"tag":"apps",
+"summary":"Assign or remove user ACL policies for an App"
+},
+{
+"method":"GET",
+"path":"/apps/{id}/acl/teams",
+"tag":"apps",
+"summary":"Get Team ACL policies for an App"
+},
+{
+"method":"POST",
+"path":"/apps/{id}/acl/teams/apply",
+"tag":"apps",
+"summary":"Assign or remove Team ACL policies for an App"
+},
+{
+"method":"GET",
+"path":"/apps/{id}/backend/endpoints",
+"tag":"apps",
+"summary":"Get backend endpoint declarations for an App"
+},
+{
+"method":"POST",
+"path":"/apps/{id}/backend/redeploy",
+"tag":"apps",
+"summary":"Re-attempt a failed App backend deployment"
+},
+{
+"method":"GET",
+"path":"/apps/{id}/backend/status",
+"tag":"apps",
+"summary":"Get the live backend deployment status for an App"
+},
+{
+"method":"GET",
+"path":"/apps/{id}/kvstore-settings",
+"tag":"apps",
+"summary":"Get the KV store settings for an App"
+},
+{
+"method":"PATCH",
+"path":"/apps/{id}/kvstore-settings",
+"tag":"apps",
+"summary":"Update the KV store settings for an App"
+},
+{
+"method":"PATCH",
+"path":"/apps/{id}/metadata",
+"tag":"apps",
+"summary":"Set an App's authorization mode"
+},
+{
+"method":"GET",
+"path":"/apps/{id}/policies",
+"tag":"apps",
+"summary":"Get the API access policies for an App"
+},
+{
+"method":"GET",
+"path":"/apps/{id}/proxies",
+"tag":"apps",
+"summary":"Get proxy domain declarations for an App"
+},
+{
+"method":"PUT",
+"path":"/apps/{id}/proxies",
+"tag":"apps",
+"summary":"Replace proxy declarations for an App"
+},
+{
+"method":"GET",
+"path":"/auth/authorization-code/callback",
+"tag":"auth",
+"summary":"API call that the IDP should use for an authorization code callback"
+},
+{
+"method":"GET",
+"path":"/auth/groups",
+"tag":"auth",
+"summary":"List all authentication groups"
+},
+{
+"method":"POST",
+"path":"/auth/invites/accept/{inviteId}",
+"tag":"auth",
+"summary":"Accept an organization invite"
+},
+{
+"method":"POST",
+"path":"/auth/invites/verify/{inviteId}",
+"tag":"auth",
+"summary":"Verify an organization invite"
+},
+{
+"method":"POST",
+"path":"/auth/login",
+"tag":"auth",
+"summary":"Log in and fetch an authentication token"
+},
+{
+"method":"POST",
+"path":"/auth/logout",
+"tag":"auth",
+"summary":"Log out the current user"
+},
+{
+"method":"GET",
+"path":"/auth/metadata",
+"tag":"auth",
+"summary":"Get service provider metadata"
+},
+{
+"method":"GET",
+"path":"/auth/multi-factor",
+"tag":"auth",
+"summary":"Get Personal Identity Verification (PIV) configuration"
+},
+{
+"method":"GET",
+"path":"/auth/slo",
+"tag":"auth",
+"summary":"Redirect user to IDP with logout request"
+},
+{
+"method":"GET",
+"path":"/auth/slo/callback",
+"tag":"auth",
+"summary":"Accepts a logout request from an IDP and logs out the user"
+},
+{
+"method":"POST",
+"path":"/auth/slo/callback",
+"tag":"auth",
+"summary":"API call that the IDP should use for a logout request"
+},
+{
+"method":"GET",
+"path":"/auth/sso",
+"tag":"auth",
+"summary":"Obtain redirect information"
+},
+{
+"method":"GET",
+"path":"/auth/sso/callback",
+"tag":"auth",
+"summary":"Accepts an authentication request from an IDP and authenticates the user"
+},
+{
+"method":"POST",
+"path":"/auth/sso/callback",
+"tag":"auth",
+"summary":"API call that the IDP should use for an authentication request"
+},
+{
+"method":"DELETE",
+"path":"/auth/users/{id}/invalidation",
+"tag":"auth",
+"summary":"Remove token invalidation for a user"
+},
+{
+"method":"DELETE",
+"path":"/auth/users/{id}/token",
+"tag":"auth",
+"summary":"Invalidate a user token"
+},
+{
+"method":"GET",
+"path":"/authorize/policy",
+"tag":"authorize",
+"summary":"Get the authorization policy"
+},
+{
+"method":"GET",
+"path":"/authorize/roles",
+"tag":"authorize",
+"summary":"List authorization roles"
+},
+{
+"method":"GET",
+"path":"/changelog/viewed",
+"tag":"changelog",
+"summary":"Get the viewed state for changelogs"
+},
+{
+"method":"PATCH",
+"path":"/changelog/viewed",
+"tag":"changelog",
+"summary":"Update the viewed state for changelogs"
+},
+{
+"method":"GET",
+"path":"/changelog/whats-new",
+"tag":"changelog",
+"summary":"Get What's New page HTML from docs.cribl.io"
+},
+{
+"method":"GET",
+"path":"/clui",
+"tag":"clui",
+"summary":"Search the CLI"
+},
+{
+"method":"GET",
+"path":"/collectors",
+"tag":"collectors",
+"summary":"List all Collectors"
+},
+{
+"method":"GET",
+"path":"/collectors/{id}",
+"tag":"collectors",
+"summary":"Get a Collector"
+},
+{
+"method":"GET",
+"path":"/conditions",
+"tag":"conditions",
+"summary":"List all Conditions"
+},
+{
+"method":"GET",
+"path":"/conditions/{id}",
+"tag":"conditions",
+"summary":"Get a Condition"
+},
+{
+"method":"GET",
+"path":"/edge/appscope/processes",
+"tag":"edgeAppScopeProcesses",
+"summary":"List all AppScope Processes"
+},
+{
+"method":"POST",
+"path":"/edge/appscope/processes",
+"tag":"edgeAppScopeProcesses",
+"summary":"Attach AppScope to a Process"
+},
+{
+"method":"DELETE",
+"path":"/edge/appscope/processes/{pid}",
+"tag":"edgeAppScopeProcesses",
+"summary":"Detach AppScope from a Process"
+},
+{
+"method":"GET",
+"path":"/edge/appscope/processes/{pid}",
+"tag":"edgeAppScopeProcesses",
+"summary":"Get an AppScope Process"
+},
+{
+"method":"PUT",
+"path":"/edge/appscope/processes/{pid}",
+"tag":"edgeAppScopeProcesses",
+"summary":"Update an AppScope Process"
+},
+{
+"method":"GET",
+"path":"/edge/containers",
+"tag":"edgeContainers",
+"summary":"List all Containers"
+},
+{
+"method":"GET",
+"path":"/edge/containers/{id}",
+"tag":"edgeContainers",
+"summary":"Get a Container"
+},
+{
+"method":"GET",
+"path":"/edge/events/collectors",
+"tag":"edgeEvents",
+"summary":"List all Collectors"
+},
+{
+"method":"GET",
+"path":"/edge/events/query",
+"tag":"edgeEvents",
+"summary":"Query Edge events"
+},
+{
+"method":"POST",
+"path":"/edge/file/ingest",
+"tag":"edge",
+"summary":"Ingest a file on the Edge Node"
+},
+{
+"method":"GET",
+"path":"/edge/file/sample",
+"tag":"edge",
+"summary":"Get a sample number of bytes from a file"
+},
+{
+"method":"GET",
+"path":"/edge/fileinspect",
+"tag":"edge",
+"summary":"Get details about a file on the Edge host"
+},
+{
+"method":"POST",
+"path":"/edge/kube-logs",
+"tag":"kube-logs",
+"summary":"Request Kubernetes container logs"
+},
+{
+"method":"GET",
+"path":"/edge/kube-proxy/{kubeApiPath}",
+"tag":"kube-proxy",
+"summary":"Proxy a Kubernetes API request"
+},
+{
+"method":"GET",
+"path":"/edge/logs",
+"tag":"edge",
+"summary":"List all Edge Log Files"
+},
+{
+"method":"GET",
+"path":"/edge/ls{path}",
+"tag":"edge",
+"summary":"List directory entries on the Edge host"
+},
+{
+"method":"GET",
+"path":"/edge/metadata",
+"tag":"edge",
+"summary":"Get Metadata for the Edge host"
+},
+{
+"method":"POST",
+"path":"/edge/metrics/query",
+"tag":"edge",
+"summary":"Query Edge system metrics"
+},
+{
+"method":"GET",
+"path":"/edge/processes",
+"tag":"edgeProcesses",
+"summary":"List all Processes"
+},
+{
+"method":"GET",
+"path":"/edge/processes/{pid}",
+"tag":"edgeProcesses",
+"summary":"Get a Process"
+},
+{
+"method":"POST",
+"path":"/edge/search/file",
+"tag":"edge",
+"summary":"Search a file on the Edge host"
+},
+{
+"method":"GET",
+"path":"/executors",
+"tag":"executors",
+"summary":"List all Executors"
+},
+{
+"method":"GET",
+"path":"/executors/{id}",
+"tag":"executors",
+"summary":"Get an Executor"
+},
+{
+"method":"GET",
+"path":"/functions",
+"tag":"functions",
+"summary":"List all Functions"
+},
+{
+"method":"GET",
+"path":"/functions/{id}",
+"tag":"functions",
+"summary":"Get a Function"
+},
+{
+"method":"GET",
+"path":"/health",
+"tag":"health",
+"summary":"Get the health status of the server"
+},
+{
+"method":"GET",
+"path":"/health/workers",
+"tag":"health",
+"summary":"Get the health status of Worker Processes"
+},
+{
+"method":"POST",
+"path":"/insights/metrics/query",
+"tag":"insights",
+"summary":"Query Data Insights metrics (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/jobs",
+"tag":"jobs",
+"summary":"List all jobs"
+},
+{
+"method":"POST",
+"path":"/jobs",
+"tag":"jobs",
+"summary":"Create a job"
+},
+{
+"method":"DELETE",
+"path":"/jobs/{id}",
+"tag":"jobs",
+"summary":"Delete a job"
+},
+{
+"method":"GET",
+"path":"/jobs/{id}",
+"tag":"jobs",
+"summary":"Get a job"
+},
+{
+"method":"PATCH",
+"path":"/jobs/{id}/cancel",
+"tag":"jobs",
+"summary":"Cancel a job"
+},
+{
+"method":"GET",
+"path":"/jobs/{id}/diagnostics",
+"tag":"jobs",
+"summary":"Get diagnostic events for a job"
+},
+{
+"method":"GET",
+"path":"/jobs/{id}/diagnostics/{group}",
+"tag":"jobs",
+"summary":"Get diagnostic events for a job by Worker Group or Edge Fleet"
+},
+{
+"method":"GET",
+"path":"/jobs/{id}/errors",
+"tag":"jobs",
+"summary":"Get task errors for a job"
+},
+{
+"method":"GET",
+"path":"/jobs/{id}/errors/{group}",
+"tag":"jobs",
+"summary":"Get task errors for a job by Worker Group or Edge Fleet"
+},
+{
+"method":"PATCH",
+"path":"/jobs/{id}/keep",
+"tag":"jobs",
+"summary":"Keep a job"
+},
+{
+"method":"PATCH",
+"path":"/jobs/{id}/pause",
+"tag":"jobs",
+"summary":"Pause a job"
+},
+{
+"method":"GET",
+"path":"/jobs/{id}/results",
+"tag":"jobs",
+"summary":"Get job results"
+},
+{
+"method":"GET",
+"path":"/jobs/{id}/results/{group}",
+"tag":"jobs",
+"summary":"Get job results by Worker Group or Edge Fleet"
+},
+{
+"method":"PATCH",
+"path":"/jobs/{id}/resume",
+"tag":"jobs",
+"summary":"Resume a job"
+},
+{
+"method":"POST",
+"path":"/kvstore/bulk",
+"tag":"apps",
+"summary":"Write multiple App KV store entries"
+},
+{
+"method":"POST",
+"path":"/kvstore/scan",
+"tag":"apps",
+"summary":"Read a page of App KV store entries"
+},
+{
+"method":"POST",
+"path":"/lake/erasure-requests",
+"tag":"lake",
+"summary":"Create a Lake Record Erasure request (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/lake/erasure-requests/{id}",
+"tag":"lake",
+"summary":"Get a Lake Record Erasure request (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/lake/erasure-requests/{id}/cancel",
+"tag":"lake",
+"summary":"Cancel a Lake Record Erasure request (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/lib/appscope-configs",
+"tag":"appscope-configs",
+"summary":"Get a list of AppScope Config objects"
+},
+{
+"method":"POST",
+"path":"/lib/appscope-configs",
+"tag":"appscope-configs",
+"summary":"Create an AppScope Config"
+},
+{
+"method":"DELETE",
+"path":"/lib/appscope-configs/{id}",
+"tag":"appscope-configs",
+"summary":"Delete an AppScope Config"
+},
+{
+"method":"GET",
+"path":"/lib/appscope-configs/{id}",
+"tag":"appscope-configs",
+"summary":"Get an AppScope Config"
+},
+{
+"method":"PATCH",
+"path":"/lib/appscope-configs/{id}",
+"tag":"appscope-configs",
+"summary":"Update an AppScope Config"
+},
+{
+"method":"GET",
+"path":"/lib/breakers",
+"tag":"eventBreakerRules",
+"summary":"List all Event Breaker Rulesets"
+},
+{
+"method":"POST",
+"path":"/lib/breakers",
+"tag":"eventBreakerRules",
+"summary":"Create an Event Breaker Ruleset"
+},
+{
+"method":"DELETE",
+"path":"/lib/breakers/{id}",
+"tag":"eventBreakerRules",
+"summary":"Delete an Event Breaker Ruleset"
+},
+{
+"method":"GET",
+"path":"/lib/breakers/{id}",
+"tag":"eventBreakerRules",
+"summary":"Get an Event Breaker Ruleset"
+},
+{
+"method":"PATCH",
+"path":"/lib/breakers/{id}",
+"tag":"eventBreakerRules",
+"summary":"Update an Event Breaker Ruleset"
+},
+{
+"method":"PUT",
+"path":"/lib/breakers/{id}/move",
+"tag":"eventBreakerRules",
+"summary":"Move an Event Breaker Ruleset"
+},
+{
+"method":"GET",
+"path":"/lib/database-connections",
+"tag":"databaseConnections",
+"summary":"List all Database Connections"
+},
+{
+"method":"POST",
+"path":"/lib/database-connections",
+"tag":"databaseConnections",
+"summary":"Create a Database Connection"
+},
+{
+"method":"POST",
+"path":"/lib/database-connections/test",
+"tag":"databaseConnections",
+"summary":"Test a database connection"
+},
+{
+"method":"DELETE",
+"path":"/lib/database-connections/{id}",
+"tag":"databaseConnections",
+"summary":"Delete a Database Connection"
+},
+{
+"method":"GET",
+"path":"/lib/database-connections/{id}",
+"tag":"databaseConnections",
+"summary":"Get a Database Connection"
+},
+{
+"method":"PATCH",
+"path":"/lib/database-connections/{id}",
+"tag":"databaseConnections",
+"summary":"Update a Database Connection"
+},
+{
+"method":"POST",
+"path":"/lib/expression",
+"tag":"expressions",
+"summary":"Evaluate JavaScript expressions"
+},
+{
+"method":"GET",
+"path":"/lib/grok",
+"tag":"grokfiles",
+"summary":"List all Grok files"
+},
+{
+"method":"POST",
+"path":"/lib/grok",
+"tag":"grokfiles",
+"summary":"Create a Grok file"
+},
+{
+"method":"DELETE",
+"path":"/lib/grok/{id}",
+"tag":"grokfiles",
+"summary":"Delete a Grok file"
+},
+{
+"method":"GET",
+"path":"/lib/grok/{id}",
+"tag":"grokfiles",
+"summary":"Get a Grok file"
+},
+{
+"method":"PATCH",
+"path":"/lib/grok/{id}",
+"tag":"grokfiles",
+"summary":"Update a Grok file"
+},
+{
+"method":"GET",
+"path":"/lib/hmac-functions",
+"tag":"hmacFunctions",
+"summary":"List all HMAC Functions"
+},
+{
+"method":"POST",
+"path":"/lib/hmac-functions",
+"tag":"hmacFunctions",
+"summary":"Create an HMAC Function"
+},
+{
+"method":"DELETE",
+"path":"/lib/hmac-functions/{id}",
+"tag":"hmacFunctions",
+"summary":"Delete an HMAC Function"
+},
+{
+"method":"GET",
+"path":"/lib/hmac-functions/{id}",
+"tag":"hmacFunctions",
+"summary":"Get an HMAC Function"
+},
+{
+"method":"PATCH",
+"path":"/lib/hmac-functions/{id}",
+"tag":"hmacFunctions",
+"summary":"Update an HMAC Function"
+},
+{
+"method":"GET",
+"path":"/lib/jobs",
+"tag":"collectors",
+"summary":"List all Collectors"
+},
+{
+"method":"POST",
+"path":"/lib/jobs",
+"tag":"collectors",
+"summary":"Create a Collector"
+},
+{
+"method":"DELETE",
+"path":"/lib/jobs/{id}",
+"tag":"collectors",
+"summary":"Delete a Collector"
+},
+{
+"method":"GET",
+"path":"/lib/jobs/{id}",
+"tag":"collectors",
+"summary":"Get a Collector"
+},
+{
+"method":"PATCH",
+"path":"/lib/jobs/{id}",
+"tag":"collectors",
+"summary":"Update a Collector"
+},
+{
+"method":"GET",
+"path":"/lib/mdt-devices",
+"tag":"mdtDevices",
+"summary":"List all MDT device configurations"
+},
+{
+"method":"GET",
+"path":"/lib/mdt-devices/{id}",
+"tag":"mdtDevices",
+"summary":"Get an MDT device configuration"
+},
+{
+"method":"GET",
+"path":"/lib/parquet-schemas",
+"tag":"parquetschemas",
+"summary":"List all Parquet schemas"
+},
+{
+"method":"POST",
+"path":"/lib/parquet-schemas",
+"tag":"parquetschemas",
+"summary":"Create a Parquet schema"
+},
+{
+"method":"DELETE",
+"path":"/lib/parquet-schemas/{id}",
+"tag":"parquetschemas",
+"summary":"Delete a Parquet schema"
+},
+{
+"method":"GET",
+"path":"/lib/parquet-schemas/{id}",
+"tag":"parquetschemas",
+"summary":"Get a Parquet schema"
+},
+{
+"method":"PATCH",
+"path":"/lib/parquet-schemas/{id}",
+"tag":"parquetschemas",
+"summary":"Update a Parquet schema"
+},
+{
+"method":"GET",
+"path":"/lib/parsers",
+"tag":"parsers",
+"summary":"List all Parsers"
+},
+{
+"method":"POST",
+"path":"/lib/parsers",
+"tag":"parsers",
+"summary":"Create a Parser"
+},
+{
+"method":"DELETE",
+"path":"/lib/parsers/{id}",
+"tag":"parsers",
+"summary":"Delete a Parser"
+},
+{
+"method":"GET",
+"path":"/lib/parsers/{id}",
+"tag":"parsers",
+"summary":"Get a Parser"
+},
+{
+"method":"PATCH",
+"path":"/lib/parsers/{id}",
+"tag":"parsers",
+"summary":"Update a Parser"
+},
+{
+"method":"GET",
+"path":"/lib/protobuf-libraries",
+"tag":"protobuflibraries",
+"summary":"List all Protobuf libraries"
+},
+{
+"method":"GET",
+"path":"/lib/protobuf-libraries/{id}",
+"tag":"protobuflibraries",
+"summary":"Get a Protobuf library"
+},
+{
+"method":"GET",
+"path":"/lib/protobuf-libraries/{id}/encodings",
+"tag":"protobuflibraries",
+"summary":"List encodings for a Protobuf library"
+},
+{
+"method":"GET",
+"path":"/lib/protobuf-libraries/{id}/encodings/{encid}",
+"tag":"protobuflibraries",
+"summary":"Get an encoding for a Protobuf library"
+},
+{
+"method":"GET",
+"path":"/lib/regex",
+"tag":"regexes",
+"summary":"List all Regex Library entries"
+},
+{
+"method":"POST",
+"path":"/lib/regex",
+"tag":"regexes",
+"summary":"Create a Regex Library entry"
+},
+{
+"method":"DELETE",
+"path":"/lib/regex/{id}",
+"tag":"regexes",
+"summary":"Delete a Regex Library entry"
+},
+{
+"method":"GET",
+"path":"/lib/regex/{id}",
+"tag":"regexes",
+"summary":"Get a Regex Library entry"
+},
+{
+"method":"PATCH",
+"path":"/lib/regex/{id}",
+"tag":"regexes",
+"summary":"Update a Regex Library entry"
+},
+{
+"method":"GET",
+"path":"/lib/schemas",
+"tag":"schemas",
+"summary":"List all JSON schemas"
+},
+{
+"method":"POST",
+"path":"/lib/schemas",
+"tag":"schemas",
+"summary":"Create a JSON schema"
+},
+{
+"method":"DELETE",
+"path":"/lib/schemas/{id}",
+"tag":"schemas",
+"summary":"Delete a JSON schema"
+},
+{
+"method":"GET",
+"path":"/lib/schemas/{id}",
+"tag":"schemas",
+"summary":"Get a JSON schema"
+},
+{
+"method":"PATCH",
+"path":"/lib/schemas/{id}",
+"tag":"schemas",
+"summary":"Update a JSON schema"
+},
+{
+"method":"GET",
+"path":"/lib/sds-rules",
+"tag":"sdsRules",
+"summary":"List all sensitive data scanning (SDS) rules"
+},
+{
+"method":"POST",
+"path":"/lib/sds-rules",
+"tag":"sdsRules",
+"summary":"Create a sensitive data scanning (SDS) rule"
+},
+{
+"method":"DELETE",
+"path":"/lib/sds-rules/{id}",
+"tag":"sdsRules",
+"summary":"Delete a sensitive data scanning (SDS) rule"
+},
+{
+"method":"GET",
+"path":"/lib/sds-rules/{id}",
+"tag":"sdsRules",
+"summary":"Get a sensitive data scanning (SDS) rule"
+},
+{
+"method":"PATCH",
+"path":"/lib/sds-rules/{id}",
+"tag":"sdsRules",
+"summary":"Update a sensitive data scanning (SDS) rule"
+},
+{
+"method":"GET",
+"path":"/lib/sds-rulesets",
+"tag":"sds-rulesets",
+"summary":"Get a list of SDS rulesets"
+},
+{
+"method":"DELETE",
+"path":"/lib/sds-rulesets/{id}",
+"tag":"sds-rulesets",
+"summary":"Delete an SDS ruleset"
+},
+{
+"method":"GET",
+"path":"/lib/sds-rulesets/{id}",
+"tag":"sds-rulesets",
+"summary":"Get an SDS ruleset by ID"
+},
+{
+"method":"GET",
+"path":"/lib/vars",
+"tag":"globalVariables",
+"summary":"List all Global Variables"
+},
+{
+"method":"POST",
+"path":"/lib/vars",
+"tag":"globalVariables",
+"summary":"Create a Global Variable"
+},
+{
+"method":"DELETE",
+"path":"/lib/vars/{id}",
+"tag":"globalVariables",
+"summary":"Delete a Global Variable"
+},
+{
+"method":"GET",
+"path":"/lib/vars/{id}",
+"tag":"globalVariables",
+"summary":"Get a Global Variable"
+},
+{
+"method":"PATCH",
+"path":"/lib/vars/{id}",
+"tag":"globalVariables",
+"summary":"Update a Global Variable"
+},
+{
+"method":"GET",
+"path":"/master/bundles/{group}/lookups/{context}/{file}",
+"tag":"distributed",
+"summary":"Download a lookup bundle"
+},
+{
+"method":"GET",
+"path":"/master/bundles/{group}/{version}",
+"tag":"distributed",
+"summary":"Download a config bundle"
+},
+{
+"method":"GET",
+"path":"/master/groups",
+"tag":"groups",
+"summary":"Get a list of ConfigGroup objects"
+},
+{
+"method":"POST",
+"path":"/master/groups",
+"tag":"groups",
+"summary":"Create a Fleet, Worker Group, or Outpost Group"
+},
+{
+"method":"DELETE",
+"path":"/master/groups/{id}",
+"tag":"groups",
+"summary":"Delete a Worker Group, Outpost Group, or Edge Fleet"
+},
+{
+"method":"GET",
+"path":"/master/groups/{id}",
+"tag":"groups",
+"summary":"Get a Worker Group, Outpost Group, or Edge Fleet"
+},
+{
+"method":"PATCH",
+"path":"/master/groups/{id}",
+"tag":"groups",
+"summary":"Update a Worker Group, Outpost Group, or Edge Fleet"
+},
+{
+"method":"GET",
+"path":"/master/groups/{id}/acl",
+"tag":"groups",
+"summary":"Get the Access Control List for a Worker Group, Outpost Group, or Edge Fleet"
+},
+{
+"method":"POST",
+"path":"/master/groups/{id}/acl/apply",
+"tag":"groups",
+"summary":"Modify ConfigGroup ACL"
+},
+{
+"method":"GET",
+"path":"/master/groups/{id}/acl/teams",
+"tag":"groups",
+"summary":"Get ConfigGroup Teams"
+},
+{
+"method":"POST",
+"path":"/master/groups/{id}/acl/teams/apply",
+"tag":"groups",
+"summary":"Modify ConfigGroup Teams ACL"
+},
+{
+"method":"GET",
+"path":"/master/groups/{id}/configVersion",
+"tag":"groups",
+"summary":"Get the configuration version for a Worker Group, Outpost Group, or Edge Fleet"
+},
+{
+"method":"PATCH",
+"path":"/master/groups/{id}/deploy",
+"tag":"groups",
+"summary":"Deploy commits to a Worker Group, Outpost Group, or Edge Fleet"
+},
+{
+"method":"GET",
+"path":"/master/outposts",
+"tag":"outpost",
+"summary":"List all Outpost Nodes"
+},
+{
+"method":"PATCH",
+"path":"/master/outposts/restart",
+"tag":"outpost",
+"summary":"Restart Outpost Nodes"
+},
+{
+"method":"PATCH",
+"path":"/master/outposts/upgrade",
+"tag":"outpost",
+"summary":"Upgrade Outpost Nodes"
+},
+{
+"method":"GET",
+"path":"/master/outposts/{id}",
+"tag":"outpost",
+"summary":"Get an Outpost Node"
+},
+{
+"method":"GET",
+"path":"/master/summary",
+"tag":"distributed",
+"summary":"Get a summary of the Distributed deployment"
+},
+{
+"method":"GET",
+"path":"/master/summary/workers",
+"tag":"workers",
+"summary":"Get a count of Worker and Edge Nodes"
+},
+{
+"method":"GET",
+"path":"/master/workers",
+"tag":"workers",
+"summary":"Get detailed metadata for Worker and Edge Nodes"
+},
+{
+"method":"PATCH",
+"path":"/master/workers/restart",
+"tag":"workers",
+"summary":"Restart Worker and Edge Nodes"
+},
+{
+"method":"GET",
+"path":"/master/workers/{id}",
+"tag":"workers",
+"summary":"Get a specific Worker or Edge Node for the specified Cribl product"
+},
+{
+"method":"GET",
+"path":"/notification-targets",
+"tag":"notification-targets",
+"summary":"List all Notification targets"
+},
+{
+"method":"POST",
+"path":"/notification-targets",
+"tag":"notification-targets",
+"summary":"Create a Notification target"
+},
+{
+"method":"DELETE",
+"path":"/notification-targets/{id}",
+"tag":"notification-targets",
+"summary":"Delete a Notification target"
+},
+{
+"method":"GET",
+"path":"/notification-targets/{id}",
+"tag":"notification-targets",
+"summary":"Get a Notification target"
+},
+{
+"method":"PATCH",
+"path":"/notification-targets/{id}",
+"tag":"notification-targets",
+"summary":"Update a Notification target"
+},
+{
+"method":"POST",
+"path":"/notification-targets/{id}/test",
+"tag":"notification-targets",
+"summary":"Test a Notification target"
+},
+{
+"method":"GET",
+"path":"/notifications",
+"tag":"notifications",
+"summary":"List all Notifications"
+},
+{
+"method":"POST",
+"path":"/notifications",
+"tag":"notifications",
+"summary":"Create a Notification"
+},
+{
+"method":"DELETE",
+"path":"/notifications/{id}",
+"tag":"notifications",
+"summary":"Delete a Notification"
+},
+{
+"method":"GET",
+"path":"/notifications/{id}",
+"tag":"notifications",
+"summary":"Get a Notification"
+},
+{
+"method":"PATCH",
+"path":"/notifications/{id}",
+"tag":"notifications",
+"summary":"Update a Notification"
+},
+{
+"method":"POST",
+"path":"/output/click-house/describe-table",
+"tag":"click-house",
+"summary":"Describe a ClickHouse table"
+},
+{
+"method":"GET",
+"path":"/overlay",
+"tag":"overlay",
+"summary":"List available overlay updates"
+},
+{
+"method":"GET",
+"path":"/overlay/artifacts/{binaryVersion}/{overlayId}",
+"tag":"distributed",
+"summary":"Download overlay artifact tarball"
+},
+{
+"method":"GET",
+"path":"/overlay/artifacts/{binaryVersion}/{overlayId}/metadata",
+"tag":"distributed",
+"summary":"Download overlay-metadata.json for a given (binaryVersion, overlayId) pair"
+},
+{
+"method":"POST",
+"path":"/overlay/refresh",
+"tag":"overlay",
+"summary":"Refresh available overlay updates"
+},
+{
+"method":"DELETE",
+"path":"/overlay/sideload",
+"tag":"overlay",
+"summary":"Delete all overlay sideloads"
+},
+{
+"method":"DELETE",
+"path":"/overlay/sideload/current",
+"tag":"overlay",
+"summary":"Delete the active sideloaded overlay"
+},
+{
+"method":"DELETE",
+"path":"/overlay/sideload/{binaryVersion}/{overlayId}",
+"tag":"overlay",
+"summary":"Delete a sideloaded overlay"
+},
+{
+"method":"PUT",
+"path":"/overlay/sideload/{binaryVersion}/{overlayId}",
+"tag":"overlay",
+"summary":"Upload an overlay bundle"
+},
+{
+"method":"GET",
+"path":"/overlay/status",
+"tag":"overlay",
+"summary":"Get active overlay status by worker group"
+},
+{
+"method":"GET",
+"path":"/overlay/{binaryVersion}/{overlayId}",
+"tag":"overlay",
+"summary":"Get an available overlay update"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/collectors",
+"tag":"collectors",
+"summary":"List all Collectors within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/collectors/{id}",
+"tag":"collectors",
+"summary":"Get a Collector within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/executors",
+"tag":"executors",
+"summary":"List all Executors within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/executors/{id}",
+"tag":"executors",
+"summary":"Get an Executor within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/functions",
+"tag":"functions",
+"summary":"List all Functions within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/functions/{id}",
+"tag":"functions",
+"summary":"Get a Function within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/jobs",
+"tag":"jobs",
+"summary":"List all jobs within a Pack"
+},
+{
+"method":"POST",
+"path":"/p/{pack}/jobs",
+"tag":"jobs",
+"summary":"Create a job within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/lib/breakers",
+"tag":"eventBreakerRules",
+"summary":"List all Event Breaker Rulesets within a Pack"
+},
+{
+"method":"POST",
+"path":"/p/{pack}/lib/breakers",
+"tag":"eventBreakerRules",
+"summary":"Create an Event Breaker Ruleset within a Pack"
+},
+{
+"method":"DELETE",
+"path":"/p/{pack}/lib/breakers/{id}",
+"tag":"eventBreakerRules",
+"summary":"Delete an Event Breaker Ruleset within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/lib/breakers/{id}",
+"tag":"eventBreakerRules",
+"summary":"Get an Event Breaker Ruleset within a Pack"
+},
+{
+"method":"PATCH",
+"path":"/p/{pack}/lib/breakers/{id}",
+"tag":"eventBreakerRules",
+"summary":"Update an Event Breaker Ruleset within a Pack"
+},
+{
+"method":"PUT",
+"path":"/p/{pack}/lib/breakers/{id}/move",
+"tag":"eventBreakerRules",
+"summary":"Move an Event Breaker Ruleset from a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/lib/database-connections",
+"tag":"databaseConnections",
+"summary":"List all Database Connections within a Pack"
+},
+{
+"method":"POST",
+"path":"/p/{pack}/lib/database-connections",
+"tag":"databaseConnections",
+"summary":"Create a Database Connection within a Pack"
+},
+{
+"method":"DELETE",
+"path":"/p/{pack}/lib/database-connections/{id}",
+"tag":"databaseConnections",
+"summary":"Delete a Database Connection within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/lib/database-connections/{id}",
+"tag":"databaseConnections",
+"summary":"Get a Database Connection within a Pack"
+},
+{
+"method":"PATCH",
+"path":"/p/{pack}/lib/database-connections/{id}",
+"tag":"databaseConnections",
+"summary":"Update a Database Connection within a Pack"
+},
+{
+"method":"POST",
+"path":"/p/{pack}/lib/expression",
+"tag":"expressions",
+"summary":"Evaluate JavaScript expressions within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/lib/grok",
+"tag":"grokfiles",
+"summary":"List all Grok files within a Pack"
+},
+{
+"method":"POST",
+"path":"/p/{pack}/lib/grok",
+"tag":"grokfiles",
+"summary":"Create a Grok file within a Pack"
+},
+{
+"method":"DELETE",
+"path":"/p/{pack}/lib/grok/{id}",
+"tag":"grokfiles",
+"summary":"Delete a Grok file within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/lib/grok/{id}",
+"tag":"grokfiles",
+"summary":"Get a Grok file within a Pack"
+},
+{
+"method":"PATCH",
+"path":"/p/{pack}/lib/grok/{id}",
+"tag":"grokfiles",
+"summary":"Update a Grok file within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/lib/hmac-functions",
+"tag":"hmacFunctions",
+"summary":"List all HMAC Functions within a Pack"
+},
+{
+"method":"POST",
+"path":"/p/{pack}/lib/hmac-functions",
+"tag":"hmacFunctions",
+"summary":"Create an HMAC Function within a Pack"
+},
+{
+"method":"DELETE",
+"path":"/p/{pack}/lib/hmac-functions/{id}",
+"tag":"hmacFunctions",
+"summary":"Delete an HMAC Function within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/lib/hmac-functions/{id}",
+"tag":"hmacFunctions",
+"summary":"Get an HMAC Function within a Pack"
+},
+{
+"method":"PATCH",
+"path":"/p/{pack}/lib/hmac-functions/{id}",
+"tag":"hmacFunctions",
+"summary":"Update an HMAC Function within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/lib/jobs",
+"tag":"collectors",
+"summary":"List all Collectors within a Pack"
+},
+{
+"method":"POST",
+"path":"/p/{pack}/lib/jobs",
+"tag":"collectors",
+"summary":"Create a Collector within a Pack"
+},
+{
+"method":"DELETE",
+"path":"/p/{pack}/lib/jobs/{id}",
+"tag":"collectors",
+"summary":"Delete a Collector within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/lib/jobs/{id}",
+"tag":"collectors",
+"summary":"Get a Collector within a Pack"
+},
+{
+"method":"PATCH",
+"path":"/p/{pack}/lib/jobs/{id}",
+"tag":"collectors",
+"summary":"Update a Collector within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/lib/parsers",
+"tag":"parsers",
+"summary":"List all Parsers within a Pack"
+},
+{
+"method":"POST",
+"path":"/p/{pack}/lib/parsers",
+"tag":"parsers",
+"summary":"Create a Parser within a Pack"
+},
+{
+"method":"DELETE",
+"path":"/p/{pack}/lib/parsers/{id}",
+"tag":"parsers",
+"summary":"Delete a Parser within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/lib/parsers/{id}",
+"tag":"parsers",
+"summary":"Get a Parser within a Pack"
+},
+{
+"method":"PATCH",
+"path":"/p/{pack}/lib/parsers/{id}",
+"tag":"parsers",
+"summary":"Update a Parser within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/lib/regex",
+"tag":"regexes",
+"summary":"List all Regex Library entries within a Pack"
+},
+{
+"method":"POST",
+"path":"/p/{pack}/lib/regex",
+"tag":"regexes",
+"summary":"Create a Regex Library entry within a Pack"
+},
+{
+"method":"DELETE",
+"path":"/p/{pack}/lib/regex/{id}",
+"tag":"regexes",
+"summary":"Delete a Regex Library entry within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/lib/regex/{id}",
+"tag":"regexes",
+"summary":"Get a Regex Library entry within a Pack"
+},
+{
+"method":"PATCH",
+"path":"/p/{pack}/lib/regex/{id}",
+"tag":"regexes",
+"summary":"Update a Regex Library entry within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/lib/schemas",
+"tag":"schemas",
+"summary":"List all JSON schemas within a Pack"
+},
+{
+"method":"POST",
+"path":"/p/{pack}/lib/schemas",
+"tag":"schemas",
+"summary":"Create a JSON schema within a Pack"
+},
+{
+"method":"DELETE",
+"path":"/p/{pack}/lib/schemas/{id}",
+"tag":"schemas",
+"summary":"Delete a JSON schema within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/lib/schemas/{id}",
+"tag":"schemas",
+"summary":"Get a JSON schema within a Pack"
+},
+{
+"method":"PATCH",
+"path":"/p/{pack}/lib/schemas/{id}",
+"tag":"schemas",
+"summary":"Update a JSON schema within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/lib/sds-rules",
+"tag":"sdsRules",
+"summary":"List all sensitive data scanning (SDS) rules within a Pack"
+},
+{
+"method":"POST",
+"path":"/p/{pack}/lib/sds-rules",
+"tag":"sdsRules",
+"summary":"Create a sensitive data scanning (SDS) rule within a Pack"
+},
+{
+"method":"DELETE",
+"path":"/p/{pack}/lib/sds-rules/{id}",
+"tag":"sdsRules",
+"summary":"Delete a sensitive data scanning (SDS) rule within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/lib/sds-rules/{id}",
+"tag":"sdsRules",
+"summary":"Get a sensitive data scanning (SDS) rule within a Pack"
+},
+{
+"method":"PATCH",
+"path":"/p/{pack}/lib/sds-rules/{id}",
+"tag":"sdsRules",
+"summary":"Update a sensitive data scanning (SDS) rule within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/lib/vars",
+"tag":"globalVariables",
+"summary":"List all Global Variables within a Pack"
+},
+{
+"method":"POST",
+"path":"/p/{pack}/lib/vars",
+"tag":"globalVariables",
+"summary":"Create a Global Variable within a Pack"
+},
+{
+"method":"DELETE",
+"path":"/p/{pack}/lib/vars/{id}",
+"tag":"globalVariables",
+"summary":"Delete a Global Variable within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/lib/vars/{id}",
+"tag":"globalVariables",
+"summary":"Get a Global Variable within a Pack"
+},
+{
+"method":"PATCH",
+"path":"/p/{pack}/lib/vars/{id}",
+"tag":"globalVariables",
+"summary":"Update a Global Variable within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/notifications",
+"tag":"notifications",
+"summary":"List all Notifications within a Pack"
+},
+{
+"method":"POST",
+"path":"/p/{pack}/notifications",
+"tag":"notifications",
+"summary":"Create a Notification within a Pack"
+},
+{
+"method":"DELETE",
+"path":"/p/{pack}/notifications/{id}",
+"tag":"notifications",
+"summary":"Delete a Notification within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/notifications/{id}",
+"tag":"notifications",
+"summary":"Get a Notification within a Pack"
+},
+{
+"method":"PATCH",
+"path":"/p/{pack}/notifications/{id}",
+"tag":"notifications",
+"summary":"Update a Notification within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/pipelines",
+"tag":"pipelines",
+"summary":"List all Pipelines within a Pack"
+},
+{
+"method":"POST",
+"path":"/p/{pack}/pipelines",
+"tag":"pipelines",
+"summary":"Create a Pipeline within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/pipelines/__import__",
+"tag":"pipelines",
+"summary":"Import a Pipeline from a URL within a Pack"
+},
+{
+"method":"DELETE",
+"path":"/p/{pack}/pipelines/{id}",
+"tag":"pipelines",
+"summary":"Delete a Pipeline within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/pipelines/{id}",
+"tag":"pipelines",
+"summary":"Get a Pipeline within a Pack"
+},
+{
+"method":"PATCH",
+"path":"/p/{pack}/pipelines/{id}",
+"tag":"pipelines",
+"summary":"Update a Pipeline within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/routes",
+"tag":"routes",
+"summary":"List all Routes within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/routes/{id}",
+"tag":"routes",
+"summary":"Get a Routing table within a Pack"
+},
+{
+"method":"PATCH",
+"path":"/p/{pack}/routes/{id}",
+"tag":"routes",
+"summary":"Update a Routing table within a Pack"
+},
+{
+"method":"POST",
+"path":"/p/{pack}/routes/{id}/append",
+"tag":"routes",
+"summary":"Add a Route to the end of the Routing table within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/search/dashboards",
+"tag":"dashboards",
+"summary":"List all Dashboards within a Pack"
+},
+{
+"method":"POST",
+"path":"/p/{pack}/search/dashboards",
+"tag":"dashboards",
+"summary":"Create a Dashboard within a Pack"
+},
+{
+"method":"DELETE",
+"path":"/p/{pack}/search/dashboards/__cache__",
+"tag":"dashboards",
+"summary":"Invalidate the Dashboard list cache within a Pack"
+},
+{
+"method":"DELETE",
+"path":"/p/{pack}/search/dashboards/{id}",
+"tag":"dashboards",
+"summary":"Delete a Dashboard within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/search/dashboards/{id}",
+"tag":"dashboards",
+"summary":"Get a Dashboard within a Pack"
+},
+{
+"method":"PATCH",
+"path":"/p/{pack}/search/dashboards/{id}",
+"tag":"dashboards",
+"summary":"Update a Dashboard within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/search/dashboards/{id}/acl",
+"tag":"dashboards",
+"summary":"Get SearchDashboard ACL (Cribl.Cloud only) within a Pack"
+},
+{
+"method":"POST",
+"path":"/p/{pack}/search/dashboards/{id}/acl/apply",
+"tag":"dashboards",
+"summary":"Modify SearchDashboard ACL (Cribl.Cloud only) within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/search/dashboards/{id}/acl/teams",
+"tag":"dashboards",
+"summary":"Get SearchDashboard Teams (Cribl.Cloud only) within a Pack"
+},
+{
+"method":"POST",
+"path":"/p/{pack}/search/dashboards/{id}/acl/teams/apply",
+"tag":"dashboards",
+"summary":"Modify SearchDashboard Teams ACL (Cribl.Cloud only) within a Pack"
+},
+{
+"method":"PUT",
+"path":"/p/{pack}/search/dashboards/{id}/move",
+"tag":"dashboards",
+"summary":"Move a Dashboard from a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/search/datatypes",
+"tag":"datatypes",
+"summary":"List all Datatypes (Cribl.Cloud only) within a Pack"
+},
+{
+"method":"POST",
+"path":"/p/{pack}/search/datatypes",
+"tag":"datatypes",
+"summary":"Create a Datatype (Cribl.Cloud only) within a Pack"
+},
+{
+"method":"DELETE",
+"path":"/p/{pack}/search/datatypes/{id}",
+"tag":"datatypes",
+"summary":"Delete a Datatype (Cribl.Cloud only) within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/search/datatypes/{id}",
+"tag":"datatypes",
+"summary":"Get a Datatype (Cribl.Cloud only) within a Pack"
+},
+{
+"method":"PATCH",
+"path":"/p/{pack}/search/datatypes/{id}",
+"tag":"datatypes",
+"summary":"Update a Datatype (Cribl.Cloud only) within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/search/macros",
+"tag":"macros",
+"summary":"List all search Macros (Cribl.Cloud only) within a Pack"
+},
+{
+"method":"POST",
+"path":"/p/{pack}/search/macros",
+"tag":"macros",
+"summary":"Create a search Macro (Cribl.Cloud only) within a Pack"
+},
+{
+"method":"DELETE",
+"path":"/p/{pack}/search/macros/{id}",
+"tag":"macros",
+"summary":"Delete a search Macro (Cribl.Cloud only) within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/search/macros/{id}",
+"tag":"macros",
+"summary":"Get a search Macro (Cribl.Cloud only) within a Pack"
+},
+{
+"method":"PATCH",
+"path":"/p/{pack}/search/macros/{id}",
+"tag":"macros",
+"summary":"Update a search Macro (Cribl.Cloud only) within a Pack"
+},
+{
+"method":"PUT",
+"path":"/p/{pack}/search/macros/{id}/move",
+"tag":"macros",
+"summary":"Move a search Macro from a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/search/saved",
+"tag":"savedQueries",
+"summary":"List all Saved Searches (Cribl.Cloud only) within a Pack"
+},
+{
+"method":"POST",
+"path":"/p/{pack}/search/saved",
+"tag":"savedQueries",
+"summary":"Create a Saved Search (Cribl.Cloud only) within a Pack"
+},
+{
+"method":"DELETE",
+"path":"/p/{pack}/search/saved/{id}",
+"tag":"savedQueries",
+"summary":"Delete a Saved Search (Cribl.Cloud only) within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/search/saved/{id}",
+"tag":"savedQueries",
+"summary":"Get a Saved Search (Cribl.Cloud only) within a Pack"
+},
+{
+"method":"PATCH",
+"path":"/p/{pack}/search/saved/{id}",
+"tag":"savedQueries",
+"summary":"Update a Saved Search (Cribl.Cloud only) within a Pack"
+},
+{
+"method":"PUT",
+"path":"/p/{pack}/search/saved/{id}/move",
+"tag":"savedQueries",
+"summary":"Move a Saved Search from a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/system/inputs",
+"tag":"sources",
+"summary":"List all Sources within a Pack"
+},
+{
+"method":"POST",
+"path":"/p/{pack}/system/inputs",
+"tag":"sources",
+"summary":"Create a Source within a Pack"
+},
+{
+"method":"DELETE",
+"path":"/p/{pack}/system/inputs/{id}",
+"tag":"sources",
+"summary":"Delete a Source within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/system/inputs/{id}",
+"tag":"sources",
+"summary":"Get a Source within a Pack"
+},
+{
+"method":"PATCH",
+"path":"/p/{pack}/system/inputs/{id}",
+"tag":"sources",
+"summary":"Update a Source within a Pack"
+},
+{
+"method":"POST",
+"path":"/p/{pack}/system/inputs/{id}/hectoken",
+"tag":"sources",
+"summary":"Add an HEC token and optional metadata to a Splunk HEC Source within a Pack"
+},
+{
+"method":"PATCH",
+"path":"/p/{pack}/system/inputs/{id}/hectoken/{token}",
+"tag":"sources",
+"summary":"Update metadata for an HEC token for a Splunk HEC Source within a Pack"
+},
+{
+"method":"DELETE",
+"path":"/p/{pack}/system/inputs/{id}/pq",
+"tag":"sources",
+"summary":"Clear the persistent queue for a Source within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/system/inputs/{id}/pq",
+"tag":"sources",
+"summary":"Get information about the latest job to clear the persistent queue for a Source within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/system/lookups",
+"tag":"lookups",
+"summary":"List all Lookups within a Pack"
+},
+{
+"method":"POST",
+"path":"/p/{pack}/system/lookups",
+"tag":"lookups",
+"summary":"Create a Lookup within a Pack"
+},
+{
+"method":"PUT",
+"path":"/p/{pack}/system/lookups",
+"tag":"lookups",
+"summary":"Upload a Lookup file within a Pack"
+},
+{
+"method":"DELETE",
+"path":"/p/{pack}/system/lookups/{id}",
+"tag":"lookups",
+"summary":"Delete a Lookup within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/system/lookups/{id}",
+"tag":"lookups",
+"summary":"Get a Lookup within a Pack"
+},
+{
+"method":"PATCH",
+"path":"/p/{pack}/system/lookups/{id}",
+"tag":"lookups",
+"summary":"Update a Lookup within a Pack"
+},
+{
+"method":"PUT",
+"path":"/p/{pack}/system/lookups/{id}/clone",
+"tag":"lookups",
+"summary":"Clone a Lookup within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/system/lookups/{id}/content",
+"tag":"lookups",
+"summary":"Get Lookup file content within a Pack"
+},
+{
+"method":"PATCH",
+"path":"/p/{pack}/system/lookups/{id}/content",
+"tag":"lookups",
+"summary":"Update Lookup file content within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/system/lookups/{id}/fields",
+"tag":"lookups",
+"summary":"Get Lookup field names within a Pack"
+},
+{
+"method":"PUT",
+"path":"/p/{pack}/system/lookups/{id}/move",
+"tag":"lookups",
+"summary":"Move a Lookup from a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/system/outputs",
+"tag":"destinations",
+"summary":"List all Destinations within a Pack"
+},
+{
+"method":"POST",
+"path":"/p/{pack}/system/outputs",
+"tag":"destinations",
+"summary":"Create a Destination within a Pack"
+},
+{
+"method":"DELETE",
+"path":"/p/{pack}/system/outputs/{id}",
+"tag":"destinations",
+"summary":"Delete a Destination within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/system/outputs/{id}",
+"tag":"destinations",
+"summary":"Get a Destination within a Pack"
+},
+{
+"method":"PATCH",
+"path":"/p/{pack}/system/outputs/{id}",
+"tag":"destinations",
+"summary":"Update a Destination within a Pack"
+},
+{
+"method":"DELETE",
+"path":"/p/{pack}/system/outputs/{id}/pq",
+"tag":"destinations",
+"summary":"Clear the persistent queue for a Destination within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/system/outputs/{id}/pq",
+"tag":"destinations",
+"summary":"Get information about the latest job to clear the persistent queue for a Destination within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/system/outputs/{id}/samples",
+"tag":"destinations",
+"summary":"Get sample event data for a Destination within a Pack"
+},
+{
+"method":"POST",
+"path":"/p/{pack}/system/outputs/{id}/test",
+"tag":"destinations",
+"summary":"Send sample event data to a Destination within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/system/samples",
+"tag":"samples",
+"summary":"List all data samples within a Pack"
+},
+{
+"method":"POST",
+"path":"/p/{pack}/system/samples",
+"tag":"samples",
+"summary":"Create a data sample within a Pack"
+},
+{
+"method":"DELETE",
+"path":"/p/{pack}/system/samples/{id}",
+"tag":"samples",
+"summary":"Delete a data sample within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/system/samples/{id}",
+"tag":"samples",
+"summary":"Get a data sample within a Pack"
+},
+{
+"method":"PATCH",
+"path":"/p/{pack}/system/samples/{id}",
+"tag":"samples",
+"summary":"Update a data sample within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/system/samples/{id}/content",
+"tag":"samples",
+"summary":"Get data sample content within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/system/status/inputs",
+"tag":"sources",
+"summary":"List the status of all Sources within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/system/status/inputs/{id}",
+"tag":"sources",
+"summary":"Get the status of a Source within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/system/status/outputs",
+"tag":"destinations",
+"summary":"List the status of all Destinations within a Pack"
+},
+{
+"method":"GET",
+"path":"/p/{pack}/system/status/outputs/{id}",
+"tag":"destinations",
+"summary":"Get the status of a Destination within a Pack"
+},
+{
+"method":"GET",
+"path":"/packs",
+"tag":"packs",
+"summary":"List all Packs"
+},
+{
+"method":"POST",
+"path":"/packs",
+"tag":"packs",
+"summary":"Install a Pack"
+},
+{
+"method":"PUT",
+"path":"/packs",
+"tag":"packs",
+"summary":"Upload a Pack file"
+},
+{
+"method":"POST",
+"path":"/packs/__clone__",
+"tag":"packs",
+"summary":"Clone a Pack"
+},
+{
+"method":"DELETE",
+"path":"/packs/{id}",
+"tag":"packs",
+"summary":"Uninstall a Pack"
+},
+{
+"method":"GET",
+"path":"/packs/{id}",
+"tag":"packs",
+"summary":"Get a Pack"
+},
+{
+"method":"PATCH",
+"path":"/packs/{id}",
+"tag":"packs",
+"summary":"Upgrade a Pack"
+},
+{
+"method":"GET",
+"path":"/packs/{id}/export",
+"tag":"packs",
+"summary":"Export a Pack"
+},
+{
+"method":"POST",
+"path":"/packs/{id}/publish",
+"tag":"packs",
+"summary":"Publish a Pack"
+},
+{
+"method":"GET",
+"path":"/packs/{id}/refs",
+"tag":"packs",
+"summary":"Get Pack references"
+},
+{
+"method":"GET",
+"path":"/pipelines",
+"tag":"pipelines",
+"summary":"List all Pipelines"
+},
+{
+"method":"POST",
+"path":"/pipelines",
+"tag":"pipelines",
+"summary":"Create a Pipeline"
+},
+{
+"method":"GET",
+"path":"/pipelines/__import__",
+"tag":"pipelines",
+"summary":"Import a Pipeline from a URL"
+},
+{
+"method":"DELETE",
+"path":"/pipelines/{id}",
+"tag":"pipelines",
+"summary":"Delete a Pipeline"
+},
+{
+"method":"GET",
+"path":"/pipelines/{id}",
+"tag":"pipelines",
+"summary":"Get a Pipeline"
+},
+{
+"method":"PATCH",
+"path":"/pipelines/{id}",
+"tag":"pipelines",
+"summary":"Update a Pipeline"
+},
+{
+"method":"POST",
+"path":"/preview",
+"tag":"preview",
+"summary":"Send sample events through a Pipeline and review results"
+},
+{
+"method":"POST",
+"path":"/products/edge/map/query",
+"tag":"edge",
+"summary":"Query Edge map data"
+},
+{
+"method":"POST",
+"path":"/products/insights/insights-apps/{appId}/acl/apply",
+"tag":"users",
+"summary":"Apply user ACLs for an Insights sub-product"
+},
+{
+"method":"POST",
+"path":"/products/insights/insights-apps/{appId}/acl/teams/apply",
+"tag":"teams",
+"summary":"Apply team ACLs for an Insights sub-product"
+},
+{
+"method":"GET",
+"path":"/products/lake/highside/caller-identity",
+"tag":"lake",
+"summary":"Get the running Cribl process's IAM role ARN"
+},
+{
+"method":"GET",
+"path":"/products/lake/lakes/{lakeId}/buckets",
+"tag":"lake",
+"summary":"List all Cribl Lake buckets (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/products/lake/lakes/{lakeId}/buckets",
+"tag":"lake",
+"summary":"Create a Cribl Lake bucket (Cribl.Cloud only)"
+},
+{
+"method":"DELETE",
+"path":"/products/lake/lakes/{lakeId}/buckets/{id}",
+"tag":"lake",
+"summary":"Delete a Cribl Lake bucket (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/products/lake/lakes/{lakeId}/buckets/{id}",
+"tag":"lake",
+"summary":"Get a Cribl Lake bucket (Cribl.Cloud only)"
+},
+{
+"method":"PATCH",
+"path":"/products/lake/lakes/{lakeId}/buckets/{id}",
+"tag":"lake",
+"summary":"Update a Cribl Lake bucket (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/products/lake/lakes/{lakeId}/config",
+"tag":"lake",
+"summary":"List all configuration limits for a Lake (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/products/lake/lakes/{lakeId}/config/{configId}",
+"tag":"lake",
+"summary":"Get a configuration limit for a Lake (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/products/lake/lakes/{lakeId}/datasets",
+"tag":"lake",
+"summary":"List all Lake Datasets (Cribl.Cloud only)"
+},
+{
+"method":"PATCH",
+"path":"/products/lake/lakes/{lakeId}/datasets",
+"tag":"lake",
+"summary":"Updates a list of Lake Datasets in a Lake (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/products/lake/lakes/{lakeId}/datasets",
+"tag":"lake",
+"summary":"Create Lake Datasets (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/products/lake/lakes/{lakeId}/datasets/batch-delete",
+"tag":"lake",
+"summary":"Batch delete Lake Datasets (Cribl.Cloud only)"
+},
+{
+"method":"DELETE",
+"path":"/products/lake/lakes/{lakeId}/datasets/{id}",
+"tag":"lake",
+"summary":"Delete a Lake Dataset (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/products/lake/lakes/{lakeId}/datasets/{id}",
+"tag":"lake",
+"summary":"Get a Lake Dataset (Cribl.Cloud only)"
+},
+{
+"method":"PATCH",
+"path":"/products/lake/lakes/{lakeId}/datasets/{id}",
+"tag":"lake",
+"summary":"Update a Lake Dataset (Cribl.Cloud only)"
+},
+{
+"method":"DELETE",
+"path":"/products/lake/lakes/{lakeId}/direct-access",
+"tag":"lake",
+"summary":"Delete the Lake Direct Access HTTP Source for a Lake (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/products/lake/lakes/{lakeId}/direct-access",
+"tag":"lake",
+"summary":"Get the Direct Access HTTP Source for a Lake (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/products/lake/lakes/{lakeId}/direct-access",
+"tag":"lake",
+"summary":"Create a Direct Access HTTP Source for a Lake (Cribl.Cloud only)"
+},
+{
+"method":"PUT",
+"path":"/products/lake/lakes/{lakeId}/direct-access",
+"tag":"lake",
+"summary":"Update the Direct Access HTTP Source for a Lake (Cribl.Cloud only)"
+},
+{
+"method":"DELETE",
+"path":"/products/lake/lakes/{lakeId}/lakehouses/{cacheId}/datasets/{datasetId}/connections",
+"tag":"lake",
+"summary":"Detach a Dataset from a Lakehouse (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/products/lake/lakes/{lakeId}/sources",
+"tag":"lake",
+"summary":"List all Lake Sources (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/products/lake/lakes/{lakeId}/sources",
+"tag":"lake",
+"summary":"Create a Lake Source (Cribl.Cloud only)"
+},
+{
+"method":"DELETE",
+"path":"/products/lake/lakes/{lakeId}/sources/{id}",
+"tag":"lake",
+"summary":"Delete a Lake Source (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/products/lake/lakes/{lakeId}/sources/{id}",
+"tag":"lake",
+"summary":"Get a Lake Source (Cribl.Cloud only)"
+},
+{
+"method":"PATCH",
+"path":"/products/lake/lakes/{lakeId}/sources/{id}",
+"tag":"lake",
+"summary":"Update a Lake Source (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/products/lake/lakes/{lakeId}/storage-locations",
+"tag":"lake",
+"summary":"List all Storage Locations (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/products/lake/lakes/{lakeId}/storage-locations",
+"tag":"lake",
+"summary":"Create a Storage Location (Cribl.Cloud only)"
+},
+{
+"method":"DELETE",
+"path":"/products/lake/lakes/{lakeId}/storage-locations/{id}",
+"tag":"lake",
+"summary":"Delete a Storage Location (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/products/lake/lakes/{lakeId}/storage-locations/{id}",
+"tag":"lake",
+"summary":"Get a Storage Location (Cribl.Cloud only)"
+},
+{
+"method":"PATCH",
+"path":"/products/lake/lakes/{lakeId}/storage-locations/{id}",
+"tag":"lake",
+"summary":"Update a Storage Location (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/products/lake/lakes/{lakeId}/storage-locations/{provider}/access-status",
+"tag":"lake",
+"summary":"Get Azure storage account access status for the Cribl service principal (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/products/lake/lakes/{lakeId}/storage-locations/{provider}/info",
+"tag":"lake",
+"summary":"Get Storage Location Provider Info (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/products/lake/lakes/{lakeId}/storage-locations/{provider}/sp-status",
+"tag":"lake",
+"summary":"Get service principal status (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/products/lake/lakes/{lakeId}/storage-locations/{provider}/token",
+"tag":"lake",
+"summary":"Get the principal object ID for the Cribl service principal (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/catalog-settings",
+"tag":"search.metrics",
+"summary":"Get catalog settings (Cribl.Cloud only)"
+},
+{
+"method":"PUT",
+"path":"/products/lakehouse_engine_metrics/catalog-settings",
+"tag":"search.metrics",
+"summary":"Update catalog settings (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/config-profiles",
+"tag":"configProfiles",
+"summary":"List all Monitor Configuration Profiles"
+},
+{
+"method":"POST",
+"path":"/products/lakehouse_engine_metrics/config-profiles",
+"tag":"configProfiles",
+"summary":"Create a Monitor Configuration Profile"
+},
+{
+"method":"DELETE",
+"path":"/products/lakehouse_engine_metrics/config-profiles/{id}",
+"tag":"configProfiles",
+"summary":"Delete a Monitor Configuration Profile"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/config-profiles/{id}",
+"tag":"configProfiles",
+"summary":"Get a Monitor Configuration Profile"
+},
+{
+"method":"PATCH",
+"path":"/products/lakehouse_engine_metrics/config-profiles/{id}",
+"tag":"configProfiles",
+"summary":"Update a Monitor Configuration Profile"
+},
+{
+"method":"POST",
+"path":"/products/lakehouse_engine_metrics/config-profiles/{id}/configs",
+"tag":"configProfiles",
+"summary":"Attach a SharedConfig to a profile"
+},
+{
+"method":"DELETE",
+"path":"/products/lakehouse_engine_metrics/config-profiles/{id}/configs/{configId}",
+"tag":"configProfiles",
+"summary":"Detach a SharedConfig from a profile"
+},
+{
+"method":"POST",
+"path":"/products/lakehouse_engine_metrics/config-profiles/{id}/link",
+"tag":"configProfiles",
+"summary":"Link a profile under a parent"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/config-profiles/{id}/resolved",
+"tag":"configProfiles",
+"summary":"Resolve effective config for a profile"
+},
+{
+"method":"POST",
+"path":"/products/lakehouse_engine_metrics/config-profiles/{id}/unlink",
+"tag":"configProfiles",
+"summary":"Unlink a profile from its parent"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/dataset-access",
+"tag":"datasetAccess",
+"summary":"List all Dataset Access records"
+},
+{
+"method":"POST",
+"path":"/products/lakehouse_engine_metrics/dataset-access",
+"tag":"datasetAccess",
+"summary":"Create a Dataset Access record"
+},
+{
+"method":"DELETE",
+"path":"/products/lakehouse_engine_metrics/dataset-access/{id}",
+"tag":"datasetAccess",
+"summary":"Delete a Dataset Access record"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/dataset-access/{id}",
+"tag":"datasetAccess",
+"summary":"Get a Dataset Access record"
+},
+{
+"method":"PATCH",
+"path":"/products/lakehouse_engine_metrics/dataset-access/{id}",
+"tag":"datasetAccess",
+"summary":"Update a Dataset Access record"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/engines/{engineId}/datasets/{datasetId}/alert_activity",
+"tag":"alertActivity",
+"summary":"List alert activity (paginated)"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/engines/{engineId}/datasets/{datasetId}/alert_activity/current",
+"tag":"alertActivity",
+"summary":"Current per-instance monitor state"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/engines/{engineId}/datasets/{datasetId}/alert_activity/state",
+"tag":"alertActivity",
+"summary":"Monitor state history (windowed)"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/engines/{engineId}/datasets/{datasetId}/alert_activity/stats",
+"tag":"alertActivity",
+"summary":"Monitor activity statistics (time-bucketed)"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/engines/{engineId}/datasets/{datasetId}/metrics/summary",
+"tag":"search.metrics",
+"summary":"Catalog-wide metrics summary (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/engines/{engineId}/datasets/{datasetId}/metrics/{name}/activity",
+"tag":"search.metrics",
+"summary":"Per-metric activity feed (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/engines/{engineId}/datasets/{datasetId}/metrics/{name}/labels",
+"tag":"search.metrics",
+"summary":"Per-metric label dimensions (Cribl.Cloud only)"
+},
+{
+"method":"PUT",
+"path":"/products/lakehouse_engine_metrics/engines/{engineId}/datasets/{datasetId}/metrics/{name}/metadata",
+"tag":"search.metrics",
+"summary":"Update editable metric metadata (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/engines/{engineId}/datasets/{datasetId}/prom/api/v1/label/{name}/values",
+"tag":"search.metrics",
+"summary":"List values for a label (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/engines/{engineId}/datasets/{datasetId}/prom/api/v1/labels",
+"tag":"search.metrics",
+"summary":"List label names (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/engines/{engineId}/datasets/{datasetId}/prom/api/v1/metadata",
+"tag":"search.metrics",
+"summary":"List metric metadata (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/engines/{engineId}/datasets/{datasetId}/prom/api/v1/query",
+"tag":"search.metrics",
+"summary":"Evaluate an instant PromQL query (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/engines/{engineId}/datasets/{datasetId}/prom/api/v1/query_range",
+"tag":"search.metrics",
+"summary":"Evaluate a range PromQL query (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/engines/{engineId}/datasets/{datasetId}/prom/api/v1/series",
+"tag":"search.metrics",
+"summary":"Find matching series (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/engines/{engineId}/datasets/{datasetId}/prom/api/v1/status/buildinfo",
+"tag":"search.metrics",
+"summary":"Get build information (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/health",
+"tag":"aetos",
+"summary":"Check if Aetos is healthy"
+},
+{
+"method":"POST",
+"path":"/products/lakehouse_engine_metrics/migration/connections/{id}/test",
+"tag":"migration",
+"summary":"Test a migration source connection"
+},
+{
+"method":"DELETE",
+"path":"/products/lakehouse_engine_metrics/migration/runs/{id}",
+"tag":"migration",
+"summary":"Delete a terminal migration run and its snapshots"
+},
+{
+"method":"POST",
+"path":"/products/lakehouse_engine_metrics/migration/runs/{id}/apply",
+"tag":"migration",
+"summary":"Apply a migration run's reviewed plan"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/migration/runs/{id}/apply-results",
+"tag":"migration",
+"summary":"Get a migration run's per-item apply results"
+},
+{
+"method":"POST",
+"path":"/products/lakehouse_engine_metrics/migration/runs/{id}/assess",
+"tag":"migration",
+"summary":"Start assessing a migration run into a new plan revision"
+},
+{
+"method":"POST",
+"path":"/products/lakehouse_engine_metrics/migration/runs/{id}/cancel",
+"tag":"migration",
+"summary":"Request cancellation of a migration run"
+},
+{
+"method":"POST",
+"path":"/products/lakehouse_engine_metrics/migration/runs/{id}/discover",
+"tag":"migration",
+"summary":"Start or resume discovery for a migration run"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/migration/runs/{id}/findings/candidates",
+"tag":"migration",
+"summary":"Rank catalog replacement candidates for a missing metric"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/migration/runs/{id}/findings/overrides",
+"tag":"migration",
+"summary":"Get a migration run's finding decisions"
+},
+{
+"method":"PATCH",
+"path":"/products/lakehouse_engine_metrics/migration/runs/{id}/findings/overrides",
+"tag":"migration",
+"summary":"Replace a migration run's finding decisions"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/migration/runs/{id}/graph",
+"tag":"migration",
+"summary":"Get a migration run's dependency graph"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/migration/runs/{id}/inventory",
+"tag":"migration",
+"summary":"Page through a migration run's discovered inventory"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/migration/runs/{id}/mapping",
+"tag":"migration",
+"summary":"Get a migration run's datasource/folder \u2192 dataset/Collection mapping"
+},
+{
+"method":"PATCH",
+"path":"/products/lakehouse_engine_metrics/migration/runs/{id}/mapping",
+"tag":"migration",
+"summary":"Replace a migration run's mapping"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/migration/runs/{id}/mapping/candidates",
+"tag":"migration",
+"summary":"Get the mapping step's candidate targets and discovered sources"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/migration/runs/{id}/plan",
+"tag":"migration",
+"summary":"Get a migration run's latest plan revision"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/migration/runs/{id}/plan/{revision}",
+"tag":"migration",
+"summary":"Get a specific immutable plan revision"
+},
+{
+"method":"POST",
+"path":"/products/lakehouse_engine_metrics/migration/runs/{id}/selection",
+"tag":"migration",
+"summary":"Set the dashboards selected for migration"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/migration/runs/{id}/snapshot",
+"tag":"migration",
+"summary":"Get the raw source snapshot for one discovered resource"
+},
+{
+"method":"POST",
+"path":"/products/lakehouse_engine_metrics/migration/runs/{id}/upload",
+"tag":"migration",
+"summary":"Upload a Grafana dashboard JSON export to a draft migration run"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/monitors",
+"tag":"monitors",
+"summary":"List all Monitor Configurations"
+},
+{
+"method":"POST",
+"path":"/products/lakehouse_engine_metrics/monitors",
+"tag":"monitors",
+"summary":"Create a Monitor Configuration"
+},
+{
+"method":"POST",
+"path":"/products/lakehouse_engine_metrics/monitors/preview",
+"tag":"monitors",
+"summary":"Preview the model a monitor draft would evaluate against"
+},
+{
+"method":"DELETE",
+"path":"/products/lakehouse_engine_metrics/monitors/{id}",
+"tag":"monitors",
+"summary":"Delete a Monitor Configuration"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/monitors/{id}",
+"tag":"monitors",
+"summary":"Get a Monitor Configuration"
+},
+{
+"method":"PATCH",
+"path":"/products/lakehouse_engine_metrics/monitors/{id}",
+"tag":"monitors",
+"summary":"Update a Monitor Configuration"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/shared-configs",
+"tag":"sharedConfigs",
+"summary":"List all Shared Configurations"
+},
+{
+"method":"POST",
+"path":"/products/lakehouse_engine_metrics/shared-configs",
+"tag":"sharedConfigs",
+"summary":"Create a Shared Configuration"
+},
+{
+"method":"DELETE",
+"path":"/products/lakehouse_engine_metrics/shared-configs/{id}",
+"tag":"sharedConfigs",
+"summary":"Delete a Shared Configuration"
+},
+{
+"method":"GET",
+"path":"/products/lakehouse_engine_metrics/shared-configs/{id}",
+"tag":"sharedConfigs",
+"summary":"Get a Shared Configuration"
+},
+{
+"method":"PATCH",
+"path":"/products/lakehouse_engine_metrics/shared-configs/{id}",
+"tag":"sharedConfigs",
+"summary":"Update a Shared Configuration"
+},
+{
+"method":"GET",
+"path":"/products/stream/groups/{id}/collectors-ha/eligibility",
+"tag":"groups",
+"summary":"Check Collectors HA eligibility for a Worker Group"
+},
+{
+"method":"GET",
+"path":"/products/{product}/groups",
+"tag":"groups",
+"summary":"List all Worker Groups, Outpost Groups, or Edge Fleets"
+},
+{
+"method":"POST",
+"path":"/products/{product}/groups",
+"tag":"groups",
+"summary":"Create a Worker Group, Outpost Group, or Edge Fleet"
+},
+{
+"method":"GET",
+"path":"/products/{product}/groups/{group}/summary",
+"tag":"distributed",
+"summary":"Get a summary of the Distributed deployment for a specific Worker Group, Edge Fleet, or Outpost Group"
+},
+{
+"method":"DELETE",
+"path":"/products/{product}/groups/{id}",
+"tag":"groups",
+"summary":"Delete a Worker Group, Outpost Group, or Edge Fleet"
+},
+{
+"method":"GET",
+"path":"/products/{product}/groups/{id}",
+"tag":"groups",
+"summary":"Get a Worker Group, Outpost Group, or Edge Fleet"
+},
+{
+"method":"PATCH",
+"path":"/products/{product}/groups/{id}",
+"tag":"groups",
+"summary":"Update a Worker Group, Outpost Group, or Edge Fleet"
+},
+{
+"method":"GET",
+"path":"/products/{product}/groups/{id}/acl",
+"tag":"groups",
+"summary":"Get the user access control list for a Worker Group, Outpost Group, or Edge Fleet"
+},
+{
+"method":"GET",
+"path":"/products/{product}/groups/{id}/acl/teams",
+"tag":"teams",
+"summary":"Get the team access control list for a Worker Group, Outpost Group, or Edge Fleet"
+},
+{
+"method":"GET",
+"path":"/products/{product}/groups/{id}/configVersion",
+"tag":"groups",
+"summary":"Get the configuration version for a Worker Group, Outpost Group, or Edge Fleet"
+},
+{
+"method":"PATCH",
+"path":"/products/{product}/groups/{id}/deploy",
+"tag":"groups",
+"summary":"Deploy commits to a Worker Group, Outpost Group, or Edge Fleet"
+},
+{
+"method":"GET",
+"path":"/products/{product}/summary",
+"tag":"distributed",
+"summary":"Get a summary of the deployment for a Cribl product"
+},
+{
+"method":"GET",
+"path":"/products/{product}/summary/workers",
+"tag":"workers",
+"summary":"Get a count of Worker, Edge, or Outpost Nodes"
+},
+{
+"method":"GET",
+"path":"/products/{product}/users",
+"tag":"users",
+"summary":"List all users who have access to a Cribl product"
+},
+{
+"method":"GET",
+"path":"/products/{product}/users/{id}/acl",
+"tag":"users",
+"summary":"Get the access control list for a user of a Cribl product"
+},
+{
+"method":"GET",
+"path":"/products/{product}/workers",
+"tag":"workers",
+"summary":"Get detailed metadata for Worker, Edge, or Outpost Nodes"
+},
+{
+"method":"PATCH",
+"path":"/products/{product}/workers/restart",
+"tag":"workers",
+"summary":"Restart Worker, Edge, or Outpost Nodes"
+},
+{
+"method":"POST",
+"path":"/products/{product}/workers/rotate-token",
+"tag":"workers",
+"summary":"Rotate the provisioning token on multiple Worker, Edge, or Outpost Nodes"
+},
+{
+"method":"GET",
+"path":"/products/{product}/workers/{id}",
+"tag":"workers",
+"summary":"Get detailed metadata for a Worker, Edge, or Outpost Node"
+},
+{
+"method":"POST",
+"path":"/products/{product}/workers/{id}/rotate-token",
+"tag":"workers",
+"summary":"Rotate the provisioning token on a Worker, Edge, or Outpost Node"
+},
+{
+"method":"GET",
+"path":"/routes",
+"tag":"routes",
+"summary":"List all Routes"
+},
+{
+"method":"GET",
+"path":"/routes/{id}",
+"tag":"routes",
+"summary":"Get a Routing table"
+},
+{
+"method":"PATCH",
+"path":"/routes/{id}",
+"tag":"routes",
+"summary":"Update a Routing table"
+},
+{
+"method":"POST",
+"path":"/routes/{id}/append",
+"tag":"routes",
+"summary":"Add a Route to the end of the Routing table"
+},
+{
+"method":"GET",
+"path":"/search/dashboard-categories",
+"tag":"dashboardCategories",
+"summary":"List all Dashboard Collections (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/dashboard-categories",
+"tag":"dashboardCategories",
+"summary":"Create a Dashboard Collection (Cribl.Cloud only)"
+},
+{
+"method":"DELETE",
+"path":"/search/dashboard-categories/{id}",
+"tag":"dashboardCategories",
+"summary":"Delete a Dashboard Collection (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/dashboard-categories/{id}",
+"tag":"dashboardCategories",
+"summary":"Get a Dashboard Collection (Cribl.Cloud only)"
+},
+{
+"method":"PATCH",
+"path":"/search/dashboard-categories/{id}",
+"tag":"dashboardCategories",
+"summary":"Update a Dashboard Collection (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/dashboards",
+"tag":"dashboards",
+"summary":"List all Dashboards"
+},
+{
+"method":"POST",
+"path":"/search/dashboards",
+"tag":"dashboards",
+"summary":"Create a Dashboard"
+},
+{
+"method":"DELETE",
+"path":"/search/dashboards/__cache__",
+"tag":"dashboards",
+"summary":"Invalidate the Dashboard list cache"
+},
+{
+"method":"DELETE",
+"path":"/search/dashboards/{id}",
+"tag":"dashboards",
+"summary":"Delete a Dashboard"
+},
+{
+"method":"GET",
+"path":"/search/dashboards/{id}",
+"tag":"dashboards",
+"summary":"Get a Dashboard"
+},
+{
+"method":"PATCH",
+"path":"/search/dashboards/{id}",
+"tag":"dashboards",
+"summary":"Update a Dashboard"
+},
+{
+"method":"GET",
+"path":"/search/dashboards/{id}/acl",
+"tag":"dashboards",
+"summary":"Get SearchDashboard ACL (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/dashboards/{id}/acl/apply",
+"tag":"dashboards",
+"summary":"Modify SearchDashboard ACL (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/dashboards/{id}/acl/teams",
+"tag":"dashboards",
+"summary":"Get SearchDashboard Teams (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/dashboards/{id}/acl/teams/apply",
+"tag":"dashboards",
+"summary":"Modify SearchDashboard Teams ACL (Cribl.Cloud only)"
+},
+{
+"method":"PUT",
+"path":"/search/dashboards/{id}/move",
+"tag":"dashboards",
+"summary":"Move a Dashboard"
+},
+{
+"method":"GET",
+"path":"/search/dataset-provider-types",
+"tag":"datasets",
+"summary":"List all Dataset Provider Types (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/dataset-provider-types/{id}",
+"tag":"datasets",
+"summary":"Get a Dataset Provider Type (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/dataset-providers",
+"tag":"datasets",
+"summary":"List all Dataset Providers (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/dataset-providers",
+"tag":"datasets",
+"summary":"Create a Dataset Provider (Cribl.Cloud only)"
+},
+{
+"method":"DELETE",
+"path":"/search/dataset-providers/{id}",
+"tag":"datasets",
+"summary":"Delete a Dataset Provider (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/dataset-providers/{id}",
+"tag":"datasets",
+"summary":"Get a Dataset Provider (Cribl.Cloud only)"
+},
+{
+"method":"PATCH",
+"path":"/search/dataset-providers/{id}",
+"tag":"datasets",
+"summary":"Update a Dataset Provider (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/dataset-providers/{id}/acl",
+"tag":"",
+"summary":"Get DatasetProvider ACL (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/dataset-providers/{id}/acl/apply",
+"tag":"",
+"summary":"Modify DatasetProvider ACL (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/dataset-providers/{id}/acl/teams",
+"tag":"",
+"summary":"Get DatasetProvider Teams (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/dataset-providers/{id}/acl/teams/apply",
+"tag":"",
+"summary":"Modify DatasetProvider Teams ACL (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/dataset-providers/{id}/details",
+"tag":"datasets",
+"summary":"Get discovery data for a Dataset Provider (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/dataset-providers/{id}/test",
+"tag":"datasets",
+"summary":"Test connectivity for a Prometheus Dataset Provider (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/datasets",
+"tag":"datasets",
+"summary":"List all Datasets (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/datasets",
+"tag":"datasets",
+"summary":"Create a Dataset (Cribl.Cloud only)"
+},
+{
+"method":"DELETE",
+"path":"/search/datasets/{id}",
+"tag":"datasets",
+"summary":"Delete a Dataset (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/datasets/{id}",
+"tag":"datasets",
+"summary":"Get a Dataset (Cribl.Cloud only)"
+},
+{
+"method":"PATCH",
+"path":"/search/datasets/{id}",
+"tag":"datasets",
+"summary":"Update a Dataset (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/datasets/{id}/acl",
+"tag":"datasets",
+"summary":"Get Dataset ACL (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/datasets/{id}/acl/apply",
+"tag":"datasets",
+"summary":"Modify Dataset ACL (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/datasets/{id}/acl/teams",
+"tag":"datasets",
+"summary":"Get Dataset Teams (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/datasets/{id}/acl/teams/apply",
+"tag":"datasets",
+"summary":"Modify Dataset Teams ACL (Cribl.Cloud only)"
+},
+{
+"method":"DELETE",
+"path":"/search/datasets/{id}/data",
+"tag":"datasets",
+"summary":"Remove ingested events from a Cribl Search Dataset (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/datasets/{id}/datasetStats",
+"tag":"datasets",
+"summary":"Get lakehouse engine Dataset statistics (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/datasets/{id}/dimensionStats",
+"tag":"datasets",
+"summary":"Get dimension statistics for a customer-metrics Dataset (Cribl.Cloud only)"
+},
+{
+"method":"DELETE",
+"path":"/search/datasets/{id}/favorites",
+"tag":"datasets",
+"summary":"Remove a Dataset favorite (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/datasets/{id}/favorites",
+"tag":"datasets",
+"summary":"List Dataset favorites (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/datasets/{id}/favorites",
+"tag":"datasets",
+"summary":"Add a Dataset favorite (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/datasets/{id}/fieldStats",
+"tag":"datasets",
+"summary":"Get lakehouse engine Dataset field statistics (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/datasets/{id}/fields",
+"tag":"datasets",
+"summary":"Get lakehouse engine Dataset field names (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/datasets/{id}/usageStats",
+"tag":"datasets",
+"summary":"Get lakehouse engine Dataset query usage statistics (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/datatype-v2-preview",
+"tag":"search",
+"summary":"Preview Datatype v2 output (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/datatypes",
+"tag":"datatypes",
+"summary":"List all Datatypes (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/datatypes",
+"tag":"datatypes",
+"summary":"Create a Datatype (Cribl.Cloud only)"
+},
+{
+"method":"DELETE",
+"path":"/search/datatypes/{id}",
+"tag":"datatypes",
+"summary":"Delete a Datatype (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/datatypes/{id}",
+"tag":"datatypes",
+"summary":"Get a Datatype (Cribl.Cloud only)"
+},
+{
+"method":"PATCH",
+"path":"/search/datatypes/{id}",
+"tag":"datatypes",
+"summary":"Update a Datatype (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/docs",
+"tag":"search",
+"summary":"Get Search documentation (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/event-breaker-preview",
+"tag":"search",
+"summary":"Preview Event Breaker output (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/federated_search/engines",
+"tag":"search",
+"summary":"List all federated search engines (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/federated_search/engines/{id}",
+"tag":"search",
+"summary":"Get a federated search engine (Cribl.Cloud only)"
+},
+{
+"method":"PATCH",
+"path":"/search/federated_search/engines/{id}",
+"tag":"search",
+"summary":"Update a federated search engine (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/healthcheck",
+"tag":"search",
+"summary":"Get a search health check status (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/job-metrics",
+"tag":"search",
+"summary":"List metrics for all search jobs (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/jobs",
+"tag":"search",
+"summary":"List all search jobs (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/jobs",
+"tag":"search",
+"summary":"Create a search job (Cribl.Cloud only)"
+},
+{
+"method":"DELETE",
+"path":"/search/jobs/{id}",
+"tag":"search",
+"summary":"Delete a search job (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/jobs/{id}",
+"tag":"search",
+"summary":"Get a search job (Cribl.Cloud only)"
+},
+{
+"method":"PATCH",
+"path":"/search/jobs/{id}",
+"tag":"search",
+"summary":"Update a search job (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/jobs/{id}/cancel",
+"tag":"search",
+"summary":"Cancel a search job (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/jobs/{id}/diag",
+"tag":"search",
+"summary":"Download a diagnostic bundle for a search job (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/jobs/{id}/field-summaries",
+"tag":"search",
+"summary":"Get field summaries for a search job (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/jobs/{id}/logs",
+"tag":"search",
+"summary":"List log files for a search job (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/jobs/{id}/logs/{filename}",
+"tag":"search",
+"summary":"Download a log file for a search job (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/jobs/{id}/metrics",
+"tag":"search",
+"summary":"Get metrics for a search job (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/jobs/{id}/results",
+"tag":"search",
+"summary":"List Paginated Search Results (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/jobs/{id}/results-poll",
+"tag":"search",
+"summary":"List Search Results (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/jobs/{id}/settings",
+"tag":"search",
+"summary":"Get search job settings (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/jobs/{id}/settings",
+"tag":"search",
+"summary":"Update search job settings (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/jobs/{id}/status",
+"tag":"search",
+"summary":"Get search job status (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/jobs/{id}/timeline",
+"tag":"search",
+"summary":"Get search job timeline (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/lake-destinations",
+"tag":"search",
+"summary":"List all Data Lake Amazon S3 Destinations"
+},
+{
+"method":"DELETE",
+"path":"/search/local-search/group-size-override",
+"tag":"search",
+"summary":"Delete the lakehouse worker group size override (Cribl.Cloud only)"
+},
+{
+"method":"PATCH",
+"path":"/search/local-search/group-size-override",
+"tag":"search",
+"summary":"Update the lakehouse worker group size override (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/local-search/group-size-override",
+"tag":"search",
+"summary":"Create the lakehouse worker group size override (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/local_search",
+"tag":"search",
+"summary":"Get lakehouse service status (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/local_search/capture",
+"tag":"search",
+"summary":"Start a lakehouse engine capture (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/local_search/capture/stop",
+"tag":"search",
+"summary":"Stop a lakehouse engine capture (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/local_search/config",
+"tag":"search",
+"summary":"Get operator-only lakehouse service infrastructure sync payload (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/local_search/dataset-rulesets",
+"tag":"search",
+"summary":"List all lakehouse engine Dataset rulesets (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/local_search/dataset-rulesets",
+"tag":"search",
+"summary":"Create a lakehouse engine Dataset ruleset (Cribl.Cloud only)"
+},
+{
+"method":"DELETE",
+"path":"/search/local_search/dataset-rulesets/{id}",
+"tag":"search",
+"summary":"Delete a lakehouse engine Dataset ruleset (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/local_search/dataset-rulesets/{id}",
+"tag":"search",
+"summary":"Get a lakehouse engine Dataset ruleset (Cribl.Cloud only)"
+},
+{
+"method":"PATCH",
+"path":"/search/local_search/dataset-rulesets/{id}",
+"tag":"search",
+"summary":"Update a lakehouse engine Dataset ruleset (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/local_search/datatype-rulesets",
+"tag":"search",
+"summary":"List all lakehouse engine Datatype rulesets (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/local_search/datatype-rulesets",
+"tag":"search",
+"summary":"Create a lakehouse engine Datatype ruleset (Cribl.Cloud only)"
+},
+{
+"method":"DELETE",
+"path":"/search/local_search/datatype-rulesets/{id}",
+"tag":"search",
+"summary":"Delete a lakehouse engine Datatype ruleset (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/local_search/datatype-rulesets/{id}",
+"tag":"search",
+"summary":"Get a lakehouse engine Datatype ruleset (Cribl.Cloud only)"
+},
+{
+"method":"PATCH",
+"path":"/search/local_search/datatype-rulesets/{id}",
+"tag":"search",
+"summary":"Update a lakehouse engine Datatype ruleset (Cribl.Cloud only)"
+},
+{
+"method":"PATCH",
+"path":"/search/local_search/deploy",
+"tag":"search",
+"summary":"Deploy lakehouse service configuration (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/local_search/engines",
+"tag":"search",
+"summary":"List all lakehouse engines (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/local_search/engines",
+"tag":"search",
+"summary":"Create a lakehouse engine (Cribl.Cloud only)"
+},
+{
+"method":"DELETE",
+"path":"/search/local_search/engines/{id}",
+"tag":"search",
+"summary":"Delete a lakehouse engine (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/local_search/engines/{id}",
+"tag":"search",
+"summary":"Get a lakehouse engine (Cribl.Cloud only)"
+},
+{
+"method":"PATCH",
+"path":"/search/local_search/engines/{id}",
+"tag":"search",
+"summary":"Update a lakehouse engine (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/local_search/sample_ingest",
+"tag":"search",
+"summary":"Submit sample events to Local Search ingest (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/local_search/source-docs/{sourceType}",
+"tag":"search",
+"summary":"Get lakehouse engine source documentation (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/local_search/sources",
+"tag":"search",
+"summary":"List all lakehouse engine sources (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/local_search/sources",
+"tag":"search",
+"summary":"Create a lakehouse engine source (Cribl.Cloud only)"
+},
+{
+"method":"DELETE",
+"path":"/search/local_search/sources/{id}",
+"tag":"search",
+"summary":"Delete a lakehouse engine source (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/local_search/sources/{id}",
+"tag":"search",
+"summary":"Get a lakehouse engine source (Cribl.Cloud only)"
+},
+{
+"method":"PATCH",
+"path":"/search/local_search/sources/{id}",
+"tag":"search",
+"summary":"Update a lakehouse engine source (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/local_search/sources/{id}/hectoken",
+"tag":"search",
+"summary":"Add an HEC token to a Splunk HEC lakehouse engine source (Cribl.Cloud only)"
+},
+{
+"method":"PATCH",
+"path":"/search/local_search/sources/{id}/hectoken/{token}",
+"tag":"search",
+"summary":"Update the HEC token for a Splunk HEC lakehouse engine source (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/macros",
+"tag":"macros",
+"summary":"List all search Macros (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/macros",
+"tag":"macros",
+"summary":"Create a search Macro (Cribl.Cloud only)"
+},
+{
+"method":"DELETE",
+"path":"/search/macros/{id}",
+"tag":"macros",
+"summary":"Delete a search Macro (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/macros/{id}",
+"tag":"macros",
+"summary":"Get a search Macro (Cribl.Cloud only)"
+},
+{
+"method":"PATCH",
+"path":"/search/macros/{id}",
+"tag":"macros",
+"summary":"Update a search Macro (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/macros/{id}/acl",
+"tag":"macros",
+"summary":"Get user ACLs for a search Macro (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/macros/{id}/acl/apply",
+"tag":"macros",
+"summary":"Apply user ACLs for a search Macro (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/macros/{id}/acl/teams",
+"tag":"macros",
+"summary":"Get team ACLs for a search Macro (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/macros/{id}/acl/teams/apply",
+"tag":"macros",
+"summary":"Apply team ACLs for a search Macro (Cribl.Cloud only)"
+},
+{
+"method":"PUT",
+"path":"/search/macros/{id}/move",
+"tag":"macros",
+"summary":"Move a search Macro (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/metrics/query",
+"tag":"query",
+"summary":"Run a customer metrics panel query (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/notebook-templates",
+"tag":"notebook-templates",
+"summary":"List all Notebook templates"
+},
+{
+"method":"POST",
+"path":"/search/notebook-templates",
+"tag":"notebook-templates",
+"summary":"Create a Notebook template"
+},
+{
+"method":"DELETE",
+"path":"/search/notebook-templates/{id}",
+"tag":"notebook-templates",
+"summary":"Delete a Notebook template"
+},
+{
+"method":"GET",
+"path":"/search/notebook-templates/{id}",
+"tag":"notebook-templates",
+"summary":"Get a Notebook template"
+},
+{
+"method":"PATCH",
+"path":"/search/notebook-templates/{id}",
+"tag":"notebook-templates",
+"summary":"Update a Notebook template"
+},
+{
+"method":"GET",
+"path":"/search/notebook-templates/{id}/acl",
+"tag":"notebook-templates",
+"summary":"Get NotebookTemplate ACL (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/notebook-templates/{id}/acl/apply",
+"tag":"notebook-templates",
+"summary":"Modify NotebookTemplate ACL (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/notebook-templates/{id}/acl/teams",
+"tag":"notebook-templates",
+"summary":"Get NotebookTemplate Teams (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/notebook-templates/{id}/acl/teams/apply",
+"tag":"notebook-templates",
+"summary":"Modify NotebookTemplate Teams ACL (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/notebooks",
+"tag":"notebooks",
+"summary":"List all Notebooks"
+},
+{
+"method":"POST",
+"path":"/search/notebooks",
+"tag":"notebooks",
+"summary":"Create a Notebook"
+},
+{
+"method":"DELETE",
+"path":"/search/notebooks/__cache__",
+"tag":"notebooks",
+"summary":"Invalidate the Notebook list cache"
+},
+{
+"method":"DELETE",
+"path":"/search/notebooks/{id}",
+"tag":"notebooks",
+"summary":"Delete a Notebook"
+},
+{
+"method":"GET",
+"path":"/search/notebooks/{id}",
+"tag":"notebooks",
+"summary":"Get a Notebook"
+},
+{
+"method":"PATCH",
+"path":"/search/notebooks/{id}",
+"tag":"notebooks",
+"summary":"Update a Notebook"
+},
+{
+"method":"GET",
+"path":"/search/notebooks/{id}/acl",
+"tag":"notebooks",
+"summary":"Get Notebook ACL (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/notebooks/{id}/acl/apply",
+"tag":"notebooks",
+"summary":"Modify Notebook ACL (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/notebooks/{id}/acl/teams",
+"tag":"notebooks",
+"summary":"Get Notebook Teams (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/notebooks/{id}/acl/teams/apply",
+"tag":"notebooks",
+"summary":"Modify Notebook Teams ACL (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/notebooks/{id}/activity",
+"tag":"notebooks",
+"summary":"Get Notebook activity history (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/notebooks/{id}/activity",
+"tag":"notebooks",
+"summary":"Log Notebook activity (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/notifications",
+"tag":"searchNotifications",
+"summary":"Forward a Search Notification (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/preview",
+"tag":"search",
+"summary":"Preview a Search query (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/query",
+"tag":"query",
+"summary":"Run a Search Query (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/saved",
+"tag":"savedQueries",
+"summary":"List all Saved Searches (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/saved",
+"tag":"savedQueries",
+"summary":"Create a Saved Search (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/saved/__schema__",
+"tag":"savedQueries",
+"summary":"Get the JSON schema for Saved Searches (Cribl.Cloud only)"
+},
+{
+"method":"DELETE",
+"path":"/search/saved/{id}",
+"tag":"savedQueries",
+"summary":"Delete a Saved Search (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/saved/{id}",
+"tag":"savedQueries",
+"summary":"Get a Saved Search (Cribl.Cloud only)"
+},
+{
+"method":"PATCH",
+"path":"/search/saved/{id}",
+"tag":"savedQueries",
+"summary":"Update a Saved Search (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/saved/{id}/__schema__",
+"tag":"savedQueries",
+"summary":"Get the JSON schema for Saved Searches (Cribl.Cloud only)"
+},
+{
+"method":"PUT",
+"path":"/search/saved/{id}/move",
+"tag":"savedQueries",
+"summary":"Move a Saved Search (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/saved/{id}/notifications",
+"tag":"savedQueries",
+"summary":"Create a Notification (Cribl.Cloud only)"
+},
+{
+"method":"DELETE",
+"path":"/search/saved/{id}/notifications/{notificationId}",
+"tag":"savedQueries",
+"summary":"Delete a Notification (Cribl.Cloud only)"
+},
+{
+"method":"PATCH",
+"path":"/search/saved/{id}/notifications/{notificationId}",
+"tag":"savedQueries",
+"summary":"Update a Notification (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/trust-policies",
+"tag":"trust-policies",
+"summary":"List all Trust Policies (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/trust-policies/{id}",
+"tag":"trust-policies",
+"summary":"Get a Trust Policy (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/ui-metrics",
+"tag":"search",
+"summary":"Send UI metrics (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/usage-groups",
+"tag":"usage-groups",
+"summary":"List all Usage Groups (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/search/usage-groups",
+"tag":"usage-groups",
+"summary":"Create a Usage Group (Cribl.Cloud only)"
+},
+{
+"method":"DELETE",
+"path":"/search/usage-groups/{id}",
+"tag":"usage-groups",
+"summary":"Delete a Usage Group (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/usage-groups/{id}",
+"tag":"usage-groups",
+"summary":"Get a Usage Group (Cribl.Cloud only)"
+},
+{
+"method":"PATCH",
+"path":"/search/usage-groups/{id}",
+"tag":"usage-groups",
+"summary":"Update a Usage Group (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/search/vpc-endpoint-ids",
+"tag":"search",
+"summary":"List all S3 interface VPC endpoint IDs (Cribl.Cloud only)"
+},
+{
+"method":"PUT",
+"path":"/security/detection-rules",
+"tag":"security",
+"summary":"Replace all Detection Rules (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/security/kms/config",
+"tag":"security",
+"summary":"Get the KMS configuration"
+},
+{
+"method":"PATCH",
+"path":"/security/kms/config",
+"tag":"security",
+"summary":"Update the KMS configuration"
+},
+{
+"method":"GET",
+"path":"/security/kms/health",
+"tag":"security",
+"summary":"Get KMS health status"
+},
+{
+"method":"GET",
+"path":"/settings/features",
+"tag":"features",
+"summary":"List all features"
+},
+{
+"method":"GET",
+"path":"/settings/features/{id}",
+"tag":"features",
+"summary":"Get a feature"
+},
+{
+"method":"GET",
+"path":"/system-insights/healthcheck",
+"tag":"insights",
+"summary":"Get System Insights health status"
+},
+{
+"method":"GET",
+"path":"/system-insights/metrics",
+"tag":"insights",
+"summary":"List System Insights metric names"
+},
+{
+"method":"GET",
+"path":"/system-insights/metrics/{id}",
+"tag":"insights",
+"summary":"Get labels for a System Insights metric"
+},
+{
+"method":"GET",
+"path":"/system-insights/ttl",
+"tag":"insights",
+"summary":"Get the data retention period for System Insights"
+},
+{
+"method":"GET",
+"path":"/system/api-limits",
+"tag":"system",
+"summary":"Get API limits"
+},
+{
+"method":"PATCH",
+"path":"/system/api-limits",
+"tag":"system",
+"summary":"Update API limits"
+},
+{
+"method":"GET",
+"path":"/system/banners",
+"tag":"banners",
+"summary":"List all Banners"
+},
+{
+"method":"POST",
+"path":"/system/banners",
+"tag":"banners",
+"summary":"Create a Banner"
+},
+{
+"method":"DELETE",
+"path":"/system/banners/{id}",
+"tag":"banners",
+"summary":"Delete a Banner"
+},
+{
+"method":"GET",
+"path":"/system/banners/{id}",
+"tag":"banners",
+"summary":"Get a Banner"
+},
+{
+"method":"PATCH",
+"path":"/system/banners/{id}",
+"tag":"banners",
+"summary":"Update a Banner"
+},
+{
+"method":"POST",
+"path":"/system/capture",
+"tag":"preview",
+"summary":"Capture live data"
+},
+{
+"method":"GET",
+"path":"/system/certificates",
+"tag":"certificates",
+"summary":"List all Certificates"
+},
+{
+"method":"POST",
+"path":"/system/certificates",
+"tag":"certificates",
+"summary":"Create a Certificate"
+},
+{
+"method":"DELETE",
+"path":"/system/certificates/{id}",
+"tag":"certificates",
+"summary":"Delete a Certificate"
+},
+{
+"method":"GET",
+"path":"/system/certificates/{id}",
+"tag":"certificates",
+"summary":"Get a Certificate"
+},
+{
+"method":"PATCH",
+"path":"/system/certificates/{id}",
+"tag":"certificates",
+"summary":"Update a Certificate"
+},
+{
+"method":"GET",
+"path":"/system/certificates/{id}/refs",
+"tag":"certificates",
+"summary":"List references to a Certificate"
+},
+{
+"method":"GET",
+"path":"/system/credentials",
+"tag":"credentials",
+"summary":"List all API Credentials within the Workspace (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/system/credentials/{id}",
+"tag":"credentials",
+"summary":"Get an API Credential within the Workspace (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/system/credentials/{id}/acl",
+"tag":"credentials",
+"summary":"Get the access control list for an API Credential within the Workspace (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/system/credentials/{id}/reveal-secret",
+"tag":"credentials",
+"summary":"Get the client secret for an API Credential within the Workspace (Cribl.Cloud only)"
+},
+{
+"method":"DELETE",
+"path":"/system/diag",
+"tag":"diag",
+"summary":"Remove a diagnostic bundle"
+},
+{
+"method":"GET",
+"path":"/system/diag",
+"tag":"diag",
+"summary":"List all diagnostic bundles"
+},
+{
+"method":"GET",
+"path":"/system/diag/download",
+"tag":"diag",
+"summary":"Download a diagnostic bundle (tar.gz archive)"
+},
+{
+"method":"POST",
+"path":"/system/diag/send",
+"tag":"diag",
+"summary":"Send a diagnostic bundle (tar.gz archive) to Cribl"
+},
+{
+"method":"GET",
+"path":"/system/distributed/upgrade",
+"tag":"system",
+"summary":"List the upgrade statuses and version summaries for all Worker Groups and Edge Fleets"
+},
+{
+"method":"GET",
+"path":"/system/distributed/upgrade-next-check",
+"tag":"system",
+"summary":"Get the timestamp for the next automatic upgrade check"
+},
+{
+"method":"POST",
+"path":"/system/distributed/upgrade/cancel/{group}",
+"tag":"system",
+"summary":"Cancel upgrade for a Worker Group or Edge Node"
+},
+{
+"method":"GET",
+"path":"/system/distributed/upgrade/download/{file}",
+"tag":"system",
+"summary":"Get an upgrade package"
+},
+{
+"method":"POST",
+"path":"/system/distributed/upgrade/stage/{group}",
+"tag":"system",
+"summary":"Stage upgrade for a Worker Group"
+},
+{
+"method":"POST",
+"path":"/system/distributed/upgrade/{group}",
+"tag":"system",
+"summary":"Execute a Worker Group upgrade"
+},
+{
+"method":"GET",
+"path":"/system/distributed/upgrade/{id}",
+"tag":"system",
+"summary":"Get the upgrade status and version summary for a Worker Group or Edge Fleet"
+},
+{
+"method":"GET",
+"path":"/system/dsd/available-log-sources",
+"tag":"data-source-discovery",
+"summary":"List all discovered log sources (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/system/dsd/configure-inputs",
+"tag":"data-source-discovery",
+"summary":"Run Data Source Discovery configure-inputs orchestration (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/system/dsd/configure-inputs/jobs/{jobId}",
+"tag":"data-source-discovery",
+"summary":"Get configure-inputs batch job progress and results (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/system/dsd/connections",
+"tag":"data-source-discovery",
+"summary":"List all Data Source Discovery connections (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/system/dsd/connections",
+"tag":"data-source-discovery",
+"summary":"Register a Data Source Discovery connection (Cribl.Cloud only)"
+},
+{
+"method":"DELETE",
+"path":"/system/dsd/connections/{connectionId}",
+"tag":"data-source-discovery",
+"summary":"Delete a Data Source Discovery connection (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/system/dsd/connections/{connectionId}",
+"tag":"data-source-discovery",
+"summary":"Get a Data Source Discovery connection (Cribl.Cloud only)"
+},
+{
+"method":"PATCH",
+"path":"/system/dsd/connections/{connectionId}",
+"tag":"data-source-discovery",
+"summary":"Update a Data Source Discovery connection (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/system/dsd/connections/{connectionId}/ai-config-suggestions",
+"tag":"data-source-discovery",
+"summary":"Start an AI config-prefill suggestion job for a source selection (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/system/dsd/connections/{connectionId}/ai-config-suggestions/{selectionHash}",
+"tag":"data-source-discovery",
+"summary":"Read AI config-prefill suggestions for a committed selection (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/system/dsd/connections/{connectionId}/ai-source-suggestions",
+"tag":"data-source-discovery",
+"summary":"Get cached AI source-priority suggestions for a connection (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/system/dsd/connections/{connectionId}/log-sources",
+"tag":"data-source-discovery",
+"summary":"List discovered log sources across an org connection's member accounts (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/system/dsd/connections/{connectionId}/org-membership/scan",
+"tag":"data-source-discovery",
+"summary":"Start an account inventory scan for an AWS Organizations connection (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/system/dsd/connections/{connectionId}/org-scans",
+"tag":"data-source-discovery",
+"summary":"Start an org data-scan campaign (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/system/dsd/connections/{connectionId}/org-scans/{campaignId}",
+"tag":"data-source-discovery",
+"summary":"Get an org data-scan campaign (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/system/dsd/connections/{connectionId}/org-scans/{campaignId}/accounts",
+"tag":"data-source-discovery",
+"summary":"List per-account status for an org data-scan campaign (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/system/dsd/connections/{connectionId}/org-scans/{campaignId}/cancel",
+"tag":"data-source-discovery",
+"summary":"Cancel an org data-scan campaign (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/system/dsd/connections/{connectionId}/org-scans/{campaignId}/retry",
+"tag":"data-source-discovery",
+"summary":"Retry failed accounts in an org data-scan campaign (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/system/dsd/connections/{connectionId}/scan",
+"tag":"data-source-discovery",
+"summary":"Start a Data Source Discovery data scan (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/system/dsd/connections/{connectionId}/scan-summary",
+"tag":"data-source-discovery",
+"summary":"Get a connection's org data-scan rollup summary (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/system/dsd/connections/{connectionId}/scan/status",
+"tag":"data-source-discovery",
+"summary":"Get Data Source Discovery scan status (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/system/dsd/connections/{connectionId}/source-summary",
+"tag":"data-source-discovery",
+"summary":"Get a per-account log-source rollup for an org connection (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/system/dsd/connections/{connectionId}/validate-access",
+"tag":"data-source-discovery",
+"summary":"Validate Data Source Discovery connection access (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/system/dsd/templates/connection/cloudformation",
+"tag":"data-source-discovery",
+"summary":"Generate CloudFormation template for Data Source Discovery read permissions (Cribl.Cloud only)"
+},
+{
+"method":"POST",
+"path":"/system/dsd/templates/connection/terraform",
+"tag":"data-source-discovery",
+"summary":"Generate Terraform template for Data Source Discovery read permissions (Cribl.Cloud only)"
+},
+{
+"method":"GET",
+"path":"/system/info",
+"tag":"diag",
+"summary":"Get system information"
+},
+{
+"method":"GET",
+"path":"/system/inputs",
+"tag":"sources",
+"summary":"List all Sources"
+},
+{
+"method":"POST",
+"path":"/system/inputs",
+"tag":"sources",
+"summary":"Create a Source"
+},
+{
+"method":"DELETE",
+"path":"/system/inputs/{id}",
+"tag":"sources",
+"summary":"Delete a Source"
+},
+{
+"method":"GET",
+"path":"/system/inputs/{id}",
+"tag":"sources",
+"summary":"Get a Source"
+},
+{
+"method":"PATCH",
+"path":"/system/inputs/{id}",
+"tag":"sources",
+"summary":"Update a Source"
+},
+{
+"method":"POST",
+"path":"/system/inputs/{id}/hectoken",
+"tag":"sources",
+"summary":"Add an HEC token and optional metadata to a Splunk HEC Source"
+},
+{
+"method":"PATCH",
+"path":"/system/inputs/{id}/hectoken/{token}",
+"tag":"sources",
+"summary":"Update metadata for an HEC token for a Splunk HEC Source"
+},
+{
+"method":"DELETE",
+"path":"/system/inputs/{id}/pq",
+"tag":"sources",
+"summary":"Clear the persistent queue for a Source"
+},
+{
+"method":"GET",
+"path":"/system/inputs/{id}/pq",
+"tag":"sources",
+"summary":"Get information about the latest job to clear the persistent queue for a Source"
+},
+{
+"method":"GET",
+"path":"/system/instance",
+"tag":"system",
+"summary":"List all Instance Settings"
+},
+{
+"method":"GET",
+"path":"/system/iometrics",
+"tag":"iometrics",
+"summary":"Get a list of I/O metrics configuration entries"
+},
+{
+"method":"DELETE",
+"path":"/system/iometrics/{id}",
+"tag":"iometrics",
+"summary":"Delete an I/O metrics configuration entry"
+},
+{
+"method":"GET",
+"path":"/system/iometrics/{id}",
+"tag":"iometrics",
+"summary":"Get an I/O metrics configuration entry by ID"
+},
+{
+"method":"PATCH",
+"path":"/system/iometrics/{id}",
+"tag":"iometrics",
+"summary":"Update an I/O metrics configuration entry"
+},
+{
+"method":"GET",
+"path":"/system/job-limits",
+"tag":"system",
+"summary":"Get job limits"
+},
+{
+"method":"PATCH",
+"path":"/system/job-limits",
+"tag":"system",
+"summary":"Update job limits"
+},
+{
+"method":"GET",
+"path":"/system/jobs/logs/{id}/{groupId}",
+"tag":"logging",
+"summary":"Get job log output"
+},
+{
+"method":"GET",
+"path":"/system/keys",
+"tag":"keys",
+"summary":"List all encryption keys"
+},
+{
+"method":"POST",
+"path":"/system/keys",
+"tag":"keys",
+"summary":"Create an encryption key"
+},
+{
+"method":"GET",
+"path":"/system/keys/download",
+"tag":"keys",
+"summary":"Download an encryption key bundle"
+},
+{
+"method":"DELETE",
+"path":"/system/keys/{id}",
+"tag":"keys",
+"summary":"Delete an encryption key"
+},
+{
+"method":"GET",
+"path":"/system/keys/{id}",
+"tag":"keys",
+"summary":"Get an encryption key"
+},
+{
+"method":"PATCH",
+"path":"/system/keys/{id}",
+"tag":"keys",
+"summary":"Update an encryption key"
+},
+{
+"method":"GET",
+"path":"/system/licenses",
+"tag":"licenses",
+"summary":"List all Licenses (on-prem only)"
+},
+{
+"method":"POST",
+"path":"/system/licenses",
+"tag":"licenses",
+"summary":"Add a license (on-prem only)"
+},
+{
+"method":"POST",
+"path":"/system/licenses/__register__",
+"tag":"licenses",
+"summary":"Register a new Cribl License (on-prem only)"
+},
+{
+"method":"GET",
+"path":"/system/licenses/usage",
+"tag":"licenses",
+"summary":"Get License usage metrics (on-prem only)"
+},
+{
+"method":"DELETE",
+"path":"/system/licenses/{id}",
+"tag":"licenses",
+"summary":"Delete a License (on-prem only)"
+},
+{
+"method":"GET",
+"path":"/system/licenses/{id}",
+"tag":"licenses",
+"summary":"Get a License (on-prem only)"
+},
+{
+"method":"GET",
+"path":"/system/limits",
+"tag":"system",
+"summary":"Get system limits"
+},
+{
+"method":"PATCH",
+"path":"/system/limits",
+"tag":"system",
+"summary":"Update system limits"
+},
+{
+"method":"GET",
+"path":"/system/logger",
+"tag":"logger",
+"summary":"List all Logger configurations"
+},
+{
+"method":"PATCH",
+"path":"/system/logger",
+"tag":"logger",
+"summary":"Update Logger configurations"
+},
+{
+"method":"DELETE",
+"path":"/system/logger/{id}",
+"tag":"logger",
+"summary":"Delete a Logger configuration"
+},
+{
+"method":"GET",
+"path":"/system/logs",
+"tag":"logging",
+"summary":"List all log files"
+},
+{
+"method":"GET",
+"path":"/system/logs/search",
+"tag":"logging",
+"summary":"Search log files"
+},
+{
+"method":"GET",
+"path":"/system/logs/{id}",
+"tag":"logging",
+"summary":"Get log events from a log file"
+},
+{
+"method":"GET",
+"path":"/system/lookups",
+"tag":"lookups",
+"summary":"List all Lookups"
+},
+{
+"method":"POST",
+"path":"/system/lookups",
+"tag":"lookups",
+"summary":"Create a Lookup"
+},
+{
+"method":"PUT",
+"path":"/system/lookups",
+"tag":"lookups",
+"summary":"Upload a Lookup file"
+},
+{
+"method":"DELETE",
+"path":"/system/lookups/{id}",
+"tag":"lookups",
+"summary":"Delete a Lookup"
+},
+{
+"method":"GET",
+"path":"/system/lookups/{id}",
+"tag":"lookups",
+"summary":"Get a Lookup"
+},
+{
+"method":"PATCH",
+"path":"/system/lookups/{id}",
+"tag":"lookups",
+"summary":"Update a Lookup"
+},
+{
+"method":"PUT",
+"path":"/system/lookups/{id}/clone",
+"tag":"lookups",
+"summary":"Clone a Lookup"
+},
+{
+"method":"GET",
+"path":"/system/lookups/{id}/content",
+"tag":"lookups",
+"summary":"Get Lookup file content"
+},
+{
+"method":"PATCH",
+"path":"/system/lookups/{id}/content",
+"tag":"lookups",
+"summary":"Update Lookup file content"
+},
+{
+"method":"GET",
+"path":"/system/lookups/{id}/fields",
+"tag":"lookups",
+"summary":"Get Lookup field names"
+},
+{
+"method":"PUT",
+"path":"/system/lookups/{id}/move",
+"tag":"lookups",
+"summary":"Move a Lookup"
+},
+{
+"method":"GET",
+"path":"/system/messages",
+"tag":"messages",
+"summary":"List all Messages"
+},
+{
+"method":"POST",
+"path":"/system/messages",
+"tag":"messages",
+"summary":"Create a Message"
+},
+{
+"method":"DELETE",
+"path":"/system/messages/{id}",
+"tag":"messages",
+"summary":"Delete a Message"
+},
+{
+"method":"GET",
+"path":"/system/messages/{id}",
+"tag":"messages",
+"summary":"Get a Message"
+},
+{
+"method":"GET",
+"path":"/system/metrics",
+"tag":"metrics",
+"summary":"Query system metrics"
+},
+{
+"method":"POST",
+"path":"/system/metrics/enum",
+"tag":"metrics",
+"summary":"Enumerate system metrics and dimensions"
+},
+{
+"method":"POST",
+"path":"/system/metrics/query",
+"tag":"metrics",
+"summary":"Aggregate raw system metrics"
+},
+{
+"method":"GET",
+"path":"/system/metrics/telemetry",
+"tag":"metrics",
+"summary":"Get telemetry metrics"
+},
+{
+"method":"POST",
+"path":"/system/network",
+"tag":"network",
+"summary":"Capture a Worker Node's active network connections"
+},
+{
+"method":"GET",
+"path":"/system/outpost",
+"tag":"outpost",
+"summary":"Get Outpost Node configuration"
+},
+{
+"method":"PATCH",
+"path":"/system/outpost",
+"tag":"outpost",
+"summary":"Update Outpost Node configuration"
+},
+{
+"method":"GET",
+"path":"/system/outputs",
+"tag":"destinations",
+"summary":"List all Destinations"
+},
+{
+"method":"POST",
+"path":"/system/outputs",
+"tag":"destinations",
+"summary":"Create a Destination"
+},
+{
+"method":"DELETE",
+"path":"/system/outputs/{id}",
+"tag":"destinations",
+"summary":"Delete a Destination"
+},
+{
+"method":"GET",
+"path":"/system/outputs/{id}",
+"tag":"destinations",
+"summary":"Get a Destination"
+},
+{
+"method":"PATCH",
+"path":"/system/outputs/{id}",
+"tag":"destinations",
+"summary":"Update a Destination"
+},
+{
+"method":"DELETE",
+"path":"/system/outputs/{id}/pq",
+"tag":"destinations",
+"summary":"Clear the persistent queue for a Destination"
+},
+{
+"method":"GET",
+"path":"/system/outputs/{id}/pq",
+"tag":"destinations",
+"summary":"Get information about the latest job to clear the persistent queue for a Destination"
+},
+{
+"method":"GET",
+"path":"/system/outputs/{id}/samples",
+"tag":"destinations",
+"summary":"Get sample event data for a Destination"
+},
+{
+"method":"POST",
+"path":"/system/outputs/{id}/test",
+"tag":"destinations",
+"summary":"Send sample event data to a Destination"
+},
+{
+"method":"GET",
+"path":"/system/policies",
+"tag":"policies",
+"summary":"List all Policies"
+},
+{
+"method":"POST",
+"path":"/system/policies",
+"tag":"policies",
+"summary":"Create a Policy"
+},
+{
+"method":"DELETE",
+"path":"/system/policies/{id}",
+"tag":"policies",
+"summary":"Delete a Policy"
+},
+{
+"method":"GET",
+"path":"/system/policies/{id}",
+"tag":"policies",
+"summary":"Get a Policy"
+},
+{
+"method":"PATCH",
+"path":"/system/policies/{id}",
+"tag":"policies",
+"summary":"Update a Policy"
+},
+{
+"method":"GET",
+"path":"/system/pq/orphan-management",
+"tag":"pqorphanmanagement",
+"summary":"Get PQ orphan management configuration"
+},
+{
+"method":"PATCH",
+"path":"/system/pq/orphan-management",
+"tag":"pqorphanmanagement",
+"summary":"Update PQ orphan management configuration"
+},
+{
+"method":"GET",
+"path":"/system/pq/storage",
+"tag":"pqstorage",
+"summary":"Get the persistent queue storage configuration"
+},
+{
+"method":"PATCH",
+"path":"/system/pq/storage",
+"tag":"pqstorage",
+"summary":"Update the persistent queue storage configuration"
+},
+{
+"method":"GET",
+"path":"/system/private-keys",
+"tag":"private-keys",
+"summary":"List all PrivateKeys"
+},
+{
+"method":"POST",
+"path":"/system/private-keys",
+"tag":"private-keys",
+"summary":"Create a PrivateKey"
+},
+{
+"method":"DELETE",
+"path":"/system/private-keys/{id}",
+"tag":"private-keys",
+"summary":"Delete a PrivateKey"
+},
+{
+"method":"GET",
+"path":"/system/private-keys/{id}",
+"tag":"private-keys",
+"summary":"Get a PrivateKey"
+},
+{
+"method":"PATCH",
+"path":"/system/private-keys/{id}",
+"tag":"private-keys",
+"summary":"Update a PrivateKey"
+},
+{
+"method":"GET",
+"path":"/system/private-keys/{id}/refs",
+"tag":"private-keys",
+"summary":"List references to a PrivateKey"
+},
+{
+"method":"GET",
+"path":"/system/processes",
+"tag":"processes",
+"summary":"List all Processes"
+},
+{
+"method":"DELETE",
+"path":"/system/processes/{id}",
+"tag":"processes",
+"summary":"Terminate a Process"
+},
+{
+"method":"GET",
+"path":"/system/processes/{id}",
+"tag":"processes",
+"summary":"Get a Process"
+},
+{
+"method":"GET",
+"path":"/system/profiler",
+"tag":"profiler",
+"summary":"List all Profiler captures"
+},
+{
+"method":"POST",
+"path":"/system/profiler",
+"tag":"profiler",
+"summary":"Create a Profiler capture"
+},
+{
+"method":"DELETE",
+"path":"/system/profiler/{id}",
+"tag":"profiler",
+"summary":"Delete a Profiler capture"
+},
+{
+"method":"GET",
+"path":"/system/profiler/{id}",
+"tag":"profiler",
+"summary":"Get a Profiler capture"
+},
+{
+"method":"PATCH",
+"path":"/system/profiler/{id}",
+"tag":"profiler",
+"summary":"Update a Profiler capture"
+},
+{
+"method":"GET",
+"path":"/system/projects",
+"tag":"projects",
+"summary":"Get a list of Project objects"
+},
+{
+"method":"POST",
+"path":"/system/projects",
+"tag":"projects",
+"summary":"Create a Project"
+},
+{
+"method":"DELETE",
+"path":"/system/projects/{id}",
+"tag":"projects",
+"summary":"Delete a Project"
+},
+{
+"method":"GET",
+"path":"/system/projects/{id}",
+"tag":"projects",
+"summary":"Get a Project"
+},
+{
+"method":"PATCH",
+"path":"/system/projects/{id}",
+"tag":"projects",
+"summary":"Update a Project"
+},
+{
+"method":"GET",
+"path":"/system/projects/{id}/acl",
+"tag":"projects",
+"summary":"Get Project ACL"
+},
+{
+"method":"POST",
+"path":"/system/projects/{id}/acl/apply",
+"tag":"projects",
+"summary":"Modify Project ACL"
+},
+{
+"method":"GET",
+"path":"/system/projects/{id}/acl/teams",
+"tag":"projects",
+"summary":"Get Project Teams"
+},
+{
+"method":"POST",
+"path":"/system/projects/{id}/acl/teams/apply",
+"tag":"projects",
+"summary":"Modify Project Teams ACL"
+},
+{
+"method":"POST",
+"path":"/system/projects/{projectId}/capture",
+"tag":"preview",
+"summary":"Capture live data at the Destination"
+},
+{
+"method":"GET",
+"path":"/system/projects/{projectId}/destinations",
+"tag":"projects",
+"summary":"List Project Destinations"
+},
+{
+"method":"GET",
+"path":"/system/projects/{projectId}/pipelines",
+"tag":"pipelines",
+"summary":"List all Pipelines within a Project"
+},
+{
+"method":"POST",
+"path":"/system/projects/{projectId}/pipelines",
+"tag":"pipelines",
+"summary":"Create a Pipeline within a Project"
+},
+{
+"method":"GET",
+"path":"/system/projects/{projectId}/pipelines/__import__",
+"tag":"pipelines",
+"summary":"Import a Pipeline from a URL within a Project"
+},
+{
+"method":"DELETE",
+"path":"/system/projects/{projectId}/pipelines/{id}",
+"tag":"pipelines",
+"summary":"Delete a Pipeline within a Project"
+},
+{
+"method":"GET",
+"path":"/system/projects/{projectId}/pipelines/{id}",
+"tag":"pipelines",
+"summary":"Get a Pipeline within a Project"
+},
+{
+"method":"PATCH",
+"path":"/system/projects/{projectId}/pipelines/{id}",
+"tag":"pipelines",
+"summary":"Update a Pipeline within a Project"
+},
+{
+"method":"POST",
+"path":"/system/projects/{projectId}/preview",
+"tag":"preview",
+"summary":"Send sample events through a Pipeline and review results within a Project"
+},
+{
+"method":"GET",
+"path":"/system/projects/{projectId}/subscriptions",
+"tag":"subscriptions",
+"summary":"List Project Subscriptions"
+},
+{
+"method":"POST",
+"path":"/system/projects/{projectId}/subscriptions/{subId}/capture",
+"tag":"preview",
+"summary":"Capture live data at a Subscription"
+},
+{
+"method":"POST",
+"path":"/system/projects/{project}/version/commit",
+"tag":"versioning",
+"summary":"Commit Project Changes"
+},
+{
+"method":"GET",
+"path":"/system/projects/{project}/version/count",
+"tag":"versioning",
+"summary":"Get changed file count for a Project"
+},
+{
+"method":"GET",
+"path":"/system/projects/{project}/version/diff",
+"tag":"versioning",
+"summary":"Get the diff for a Project"
+},
+{
+"method":"GET",
+"path":"/system/projects/{project}/version/files",
+"tag":"versioning",
+"summary":"List changed files for a Project"
+},
+{
+"method":"POST",
+"path":"/system/projects/{project}/version/revert",
+"tag":"versioning",
+"summary":"Revert Project changes"
+},
+{
+"method":"GET",
+"path":"/system/projects/{project}/version/show",
+"tag":"versioning",
+"summary":"List Project changes"
+},
+{
+"method":"GET",
+"path":"/system/provisioning-tokens",
+"tag":"provisioning-tokens",
+"summary":"List all provisioning tokens"
+},
+{
+"method":"POST",
+"path":"/system/provisioning-tokens",
+"tag":"provisioning-tokens",
+"summary":"Create a provisioning token"
+},
+{
+"method":"DELETE",
+"path":"/system/provisioning-tokens/{id}",
+"tag":"provisioning-tokens",
+"summary":"Delete a provisioning token"
+},
+{
+"method":"GET",
+"path":"/system/provisioning-tokens/{id}",
+"tag":"provisioning-tokens",
+"summary":"Get a provisioning token"
+},
+{
+"method":"PATCH",
+"path":"/system/provisioning-tokens/{id}",
+"tag":"provisioning-tokens",
+"summary":"Update a provisioning token"
+},
+{
+"method":"POST",
+"path":"/system/provisioning-tokens/{id}/reveal",
+"tag":"provisioning-tokens",
+"summary":"Reveal a legacy provisioning token"
+},
+{
+"method":"POST",
+"path":"/system/provisioning-tokens/{id}/revoke",
+"tag":"provisioning-tokens",
+"summary":"Revoke a provisioning token"
+},
+{
+"method":"GET",
+"path":"/system/redis-cache-limits",
+"tag":"system",
+"summary":"Get Redis cache limits"
+},
+{
+"method":"PATCH",
+"path":"/system/redis-cache-limits",
+"tag":"system",
+"summary":"Update Redis cache limits"
+},
+{
+"method":"GET",
+"path":"/system/redis-limits",
+"tag":"system",
+"summary":"Get Redis limits"
+},
+{
+"method":"PATCH",
+"path":"/system/redis-limits",
+"tag":"system",
+"summary":"Update Redis limits"
+},
+{
+"method":"GET",
+"path":"/system/roles",
+"tag":"roles",
+"summary":"List all Roles (on-prem only)"
+},
+{
+"method":"POST",
+"path":"/system/roles",
+"tag":"roles",
+"summary":"Create a Role (on-prem only)"
+},
+{
+"method":"DELETE",
+"path":"/system/roles/{id}",
+"tag":"roles",
+"summary":"Delete a Role (on-prem only)"
+},
+{
+"method":"GET",
+"path":"/system/roles/{id}",
+"tag":"roles",
+"summary":"Get a Role (on-prem only)"
+},
+{
+"method":"PATCH",
+"path":"/system/roles/{id}",
+"tag":"roles",
+"summary":"Update a Role (on-prem only)"
+},
+{
+"method":"GET",
+"path":"/system/samples",
+"tag":"samples",
+"summary":"List all data samples"
+},
+{
+"method":"POST",
+"path":"/system/samples",
+"tag":"samples",
+"summary":"Create a data sample"
+},
+{
+"method":"DELETE",
+"path":"/system/samples/{id}",
+"tag":"samples",
+"summary":"Delete a data sample"
+},
+{
+"method":"GET",
+"path":"/system/samples/{id}",
+"tag":"samples",
+"summary":"Get a data sample"
+},
+{
+"method":"PATCH",
+"path":"/system/samples/{id}",
+"tag":"samples",
+"summary":"Update a data sample"
+},
+{
+"method":"GET",
+"path":"/system/samples/{id}/content",
+"tag":"samples",
+"summary":"Get data sample content"
+},
+{
+"method":"GET",
+"path":"/system/scripts",
+"tag":"scripts",
+"summary":"List all scripts (on-prem only)"
+},
+{
+"method":"POST",
+"path":"/system/scripts",
+"tag":"scripts",
+"summary":"Create a script (on-prem only)"
+},
+{
+"method":"DELETE",
+"path":"/system/scripts/{id}",
+"tag":"scripts",
+"summary":"Delete a script (on-prem only)"
+},
+{
+"method":"GET",
+"path":"/system/scripts/{id}",
+"tag":"scripts",
+"summary":"Get a script (on-prem only)"
+},
+{
+"method":"PATCH",
+"path":"/system/scripts/{id}",
+"tag":"scripts",
+"summary":"Update a script (on-prem only)"
+},
+{
+"method":"POST",
+"path":"/system/scripts/{id}/run",
+"tag":"scripts",
+"summary":"Run a script (on-prem only)"
+},
+{
+"method":"GET",
+"path":"/system/search-limits",
+"tag":"system",
+"summary":"Get search limits"
+},
+{
+"method":"PATCH",
+"path":"/system/search-limits",
+"tag":"system",
+"summary":"Update search limits"
+},
+{
+"method":"GET",
+"path":"/system/secret-folders",
+"tag":"secretFolders",
+"summary":"List all secret folders shared with the Worker Group or Edge Fleet"
+},
+{
+"method":"GET",
+"path":"/system/secret-folders/{folderId}/secrets",
+"tag":"secrets",
+"summary":"List all global secrets in a secret folder"
+},
+{
+"method":"POST",
+"path":"/system/secret-folders/{folderId}/secrets",
+"tag":"secrets",
+"summary":"Create a global secret"
+},
+{
+"method":"DELETE",
+"path":"/system/secret-folders/{folderId}/secrets/{id}",
+"tag":"secrets",
+"summary":"Delete a global secret"
+},
+{
+"method":"GET",
+"path":"/system/secret-folders/{folderId}/secrets/{id}",
+"tag":"secrets",
+"summary":"Get a global secret"
+},
+{
+"method":"PATCH",
+"path":"/system/secret-folders/{folderId}/secrets/{id}",
+"tag":"secrets",
+"summary":"Update a global secret"
+},
+{
+"method":"GET",
+"path":"/system/secret-folders/{folderId}/secrets/{id}/refs",
+"tag":"secrets",
+"summary":"List references to a global secret"
+},
+{
+"method":"DELETE",
+"path":"/system/secret-folders/{id}",
+"tag":"secretFolders",
+"summary":"Delete a secret folder"
+},
+{
+"method":"GET",
+"path":"/system/secret-folders/{id}",
+"tag":"secretFolders",
+"summary":"Get a secret folder"
+},
+{
+"method":"PATCH",
+"path":"/system/secret-folders/{id}",
+"tag":"secretFolders",
+"summary":"Update a secret folder"
+},
+{
+"method":"GET",
+"path":"/system/secret-folders/{id}/acl",
+"tag":"secretFolders",
+"summary":"Get SecretFolder ACL"
+},
+{
+"method":"POST",
+"path":"/system/secret-folders/{id}/acl/apply",
+"tag":"secretFolders",
+"summary":"Modify SecretFolder ACL"
+},
+{
+"method":"GET",
+"path":"/system/secret-folders/{id}/acl/teams",
+"tag":"secretFolders",
+"summary":"Get SecretFolder Teams"
+},
+{
+"method":"POST",
+"path":"/system/secret-folders/{id}/acl/teams/apply",
+"tag":"secretFolders",
+"summary":"Modify SecretFolder Teams ACL"
+},
+{
+"method":"POST",
+"path":"/system/secret-folders/{id}/clone",
+"tag":"secretFolders",
+"summary":"Clone a secret folder"
+},
+{
+"method":"POST",
+"path":"/system/secret-folders/{id}/reload",
+"tag":"secretFolders",
+"summary":"Reload a secret folder"
+},
+{
+"method":"POST",
+"path":"/system/secret-promotions/execute",
+"tag":"secrets",
+"summary":"Promote selected group secrets to global secrets"
+},
+{
+"method":"POST",
+"path":"/system/secret-promotions/scan",
+"tag":"secrets",
+"summary":"Scan a group for promotable secrets"
+},
+{
+"method":"GET",
+"path":"/system/secret-stores",
+"tag":"secretStores",
+"summary":"List all secret stores"
+},
+{
+"method":"POST",
+"path":"/system/secret-stores",
+"tag":"secretStores",
+"summary":"Create a secret store"
+},
+{
+"method":"DELETE",
+"path":"/system/secret-stores/{id}",
+"tag":"secretStores",
+"summary":"Delete a secret store"
+},
+{
+"method":"GET",
+"path":"/system/secret-stores/{id}",
+"tag":"secretStores",
+"summary":"Get a secret store"
+},
+{
+"method":"PATCH",
+"path":"/system/secret-stores/{id}",
+"tag":"secretStores",
+"summary":"Update a secret store"
+},
+{
+"method":"GET",
+"path":"/system/secret-stores/{id}/health",
+"tag":"secretStores",
+"summary":"Check secret store health"
+},
+{
+"method":"GET",
+"path":"/system/secrets",
+"tag":"secrets",
+"summary":"List all secrets"
+},
+{
+"method":"POST",
+"path":"/system/secrets",
+"tag":"secrets",
+"summary":"Create a legacy secret"
+},
+{
+"method":"DELETE",
+"path":"/system/secrets/{id}",
+"tag":"secrets",
+"summary":"Delete a legacy secret"
+},
+{
+"method":"GET",
+"path":"/system/secrets/{id}",
+"tag":"secrets",
+"summary":"Get a secret"
+},
+{
+"method":"PATCH",
+"path":"/system/secrets/{id}",
+"tag":"secrets",
+"summary":"Update a legacy secret"
+},
+{
+"method":"GET",
+"path":"/system/secrets/{id}/refs",
+"tag":"secrets",
+"summary":"List references to a secret"
+},
+{
+"method":"GET",
+"path":"/system/services-limits",
+"tag":"system",
+"summary":"Get services limits"
+},
+{
+"method":"PATCH",
+"path":"/system/services-limits",
+"tag":"system",
+"summary":"Update services limits"
+},
+{
+"method":"GET",
+"path":"/system/settings",
+"tag":"system",
+"summary":"Get system settings"
+},
+{
+"method":"PATCH",
+"path":"/system/settings",
+"tag":"system",
+"summary":"Update Cribl system settings"
+},
+{
+"method":"GET",
+"path":"/system/settings/auth",
+"tag":"system",
+"summary":"Get authentication settings"
+},
+{
+"method":"PATCH",
+"path":"/system/settings/auth",
+"tag":"system",
+"summary":"Update authentication settings"
+},
+{
+"method":"GET",
+"path":"/system/settings/conf",
+"tag":"system",
+"summary":"Get system settings"
+},
+{
+"method":"PATCH",
+"path":"/system/settings/conf",
+"tag":"system",
+"summary":"Update system settings"
+},
+{
+"method":"GET",
+"path":"/system/settings/cribl",
+"tag":"system",
+"summary":"Get public system settings for Cribl"
+},
+{
+"method":"GET",
+"path":"/system/settings/git-settings",
+"tag":"git",
+"summary":"Get git settings"
+},
+{
+"method":"PATCH",
+"path":"/system/settings/git-settings",
+"tag":"git",
+"summary":"Update git settings"
+},
+{
+"method":"GET",
+"path":"/system/settings/insights",
+"tag":"system",
+"summary":"Get Cribl Insights collection settings"
+},
+{
+"method":"PATCH",
+"path":"/system/settings/insights",
+"tag":"system",
+"summary":"Update Cribl Insights collection settings"
+},
+{
+"method":"POST",
+"path":"/system/settings/reload",
+"tag":"system",
+"summary":"Reload Cribl settings"
+},
+{
+"method":"POST",
+"path":"/system/settings/restart",
+"tag":"system",
+"summary":"Restart the Cribl server"
+},
+{
+"method":"GET",
+"path":"/system/settings/upgrade",
+"tag":"system",
+"summary":"List Cribl versions available for upgrade"
+},
+{
+"method":"POST",
+"path":"/system/settings/upgrade-from-package",
+"tag":"system",
+"summary":"Upgrade with a package"
+},
+{
+"method":"POST",
+"path":"/system/settings/upgrade/{version}",
+"tag":"system",
+"summary":"Upgrade Cribl to a specific version"
+},
+{
+"method":"GET",
+"path":"/system/status/inputs",
+"tag":"sources",
+"summary":"List the status of all Sources"
+},
+{
+"method":"GET",
+"path":"/system/status/inputs/{id}",
+"tag":"sources",
+"summary":"Get the status of a Source"
+},
+{
+"method":"GET",
+"path":"/system/status/outputs",
+"tag":"destinations",
+"summary":"List the status of all Destinations"
+},
+{
+"method":"GET",
+"path":"/system/status/outputs/{id}",
+"tag":"destinations",
+"summary":"Get the status of a Destination"
+},
+{
+"method":"GET",
+"path":"/system/subscriptions",
+"tag":"subscriptions",
+"summary":"List all Subscriptions"
+},
+{
+"method":"POST",
+"path":"/system/subscriptions",
+"tag":"subscriptions",
+"summary":"Create a Subscription"
+},
+{
+"method":"DELETE",
+"path":"/system/subscriptions/{id}",
+"tag":"subscriptions",
+"summary":"Delete a Subscription"
+},
+{
+"method":"GET",
+"path":"/system/subscriptions/{id}",
+"tag":"subscriptions",
+"summary":"Get a Subscription"
+},
+{
+"method":"PATCH",
+"path":"/system/subscriptions/{id}",
+"tag":"subscriptions",
+"summary":"Update a Subscription"
+},
+{
+"method":"GET",
+"path":"/system/teams",
+"tag":"teams",
+"summary":"List all Teams"
+},
+{
+"method":"POST",
+"path":"/system/teams",
+"tag":"teams",
+"summary":"Create a Team"
+},
+{
+"method":"GET",
+"path":"/system/teams/users/{id}/roles",
+"tag":"teams",
+"summary":"List Roles for a user"
+},
+{
+"method":"DELETE",
+"path":"/system/teams/{id}",
+"tag":"teams",
+"summary":"Delete a Team"
+},
+{
+"method":"GET",
+"path":"/system/teams/{id}",
+"tag":"teams",
+"summary":"Get a Team"
+},
+{
+"method":"PATCH",
+"path":"/system/teams/{id}",
+"tag":"teams",
+"summary":"Update a Team"
+},
+{
+"method":"GET",
+"path":"/system/teams/{id}/acl",
+"tag":"teams",
+"summary":"Get the Access Control List for a Team"
+},
+{
+"method":"GET",
+"path":"/system/teams/{id}/users",
+"tag":"teams",
+"summary":"List Team Members"
+},
+{
+"method":"POST",
+"path":"/system/teams/{id}/users",
+"tag":"teams",
+"summary":"Add or remove Team Members"
+},
+{
+"method":"GET",
+"path":"/system/users",
+"tag":"users",
+"summary":"List all users"
+},
+{
+"method":"POST",
+"path":"/system/users",
+"tag":"users",
+"summary":"Create a user"
+},
+{
+"method":"DELETE",
+"path":"/system/users/{id}",
+"tag":"users",
+"summary":"Delete a user"
+},
+{
+"method":"GET",
+"path":"/system/users/{id}",
+"tag":"users",
+"summary":"Get a user"
+},
+{
+"method":"PATCH",
+"path":"/system/users/{id}",
+"tag":"users",
+"summary":"Update a user"
+},
+{
+"method":"PATCH",
+"path":"/system/users/{id}/info",
+"tag":"users",
+"summary":"Update user profile information"
+},
+{
+"method":"GET",
+"path":"/ui/{key}",
+"tag":"uiState",
+"summary":"Get UI state"
+},
+{
+"method":"PATCH",
+"path":"/ui/{key}",
+"tag":"uiState",
+"summary":"Update UI State"
+},
+{
+"method":"GET",
+"path":"/version",
+"tag":"versioning",
+"summary":"List the commit history"
+},
+{
+"method":"GET",
+"path":"/version/branch",
+"tag":"versioning",
+"summary":"List all branches in the Git repository used for Cribl configuration"
+},
+{
+"method":"POST",
+"path":"/version/commit",
+"tag":"versioning",
+"summary":"Create a new commit for pending changes to the Cribl configuration"
+},
+{
+"method":"GET",
+"path":"/version/count",
+"tag":"versioning",
+"summary":"Get a count of files that changed since a commit"
+},
+{
+"method":"GET",
+"path":"/version/current-branch",
+"tag":"versioning",
+"summary":"Get the name of the Git branch that the Cribl configuration is checked out to"
+},
+{
+"method":"GET",
+"path":"/version/diff",
+"tag":"versioning",
+"summary":"Get the diff for a commit"
+},
+{
+"method":"GET",
+"path":"/version/files",
+"tag":"versioning",
+"summary":"Get the names and statuses of files that changed since a commit"
+},
+{
+"method":"GET",
+"path":"/version/info",
+"tag":"versioning",
+"summary":"Get the configuration and status for the Git integration"
+},
+{
+"method":"POST",
+"path":"/version/push",
+"tag":"versioning",
+"summary":"Push local commits to the remote repository"
+},
+{
+"method":"POST",
+"path":"/version/revert",
+"tag":"versioning",
+"summary":"Revert a commit in the local repository"
+},
+{
+"method":"GET",
+"path":"/version/show",
+"tag":"versioning",
+"summary":"Get the diff and log message for a commit"
+},
+{
+"method":"GET",
+"path":"/version/status",
+"tag":"versioning",
+"summary":"Get the status of the current working tree"
+},
+{
+"method":"POST",
+"path":"/version/sync",
+"tag":"versioning",
+"summary":"Synchronize the local branch with the remote repository"
+},
+{
+"method":"POST",
+"path":"/version/undo",
+"tag":"versioning",
+"summary":"Discard uncommitted (staged) changes"
+},
+{
+"method":"GET",
+"path":"/workspaces/system/users/{userId}/teams",
+"tag":"authorize",
+"summary":"List teams for a user across all workspaces (Cribl.Cloud only)"
+}
+]
+}

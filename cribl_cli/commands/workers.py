@@ -7,8 +7,10 @@ from urllib.parse import urlparse
 import click
 
 from cribl_cli.api.client import get_client
-from cribl_cli.api.endpoints.workers import list_worker_groups, list_worker_nodes, get_worker_group, deploy_group
-from cribl_cli.config.loader import load_config
+from cribl_cli.api.endpoints.workers import (
+    deploy_group, get_worker_group, list_all_nodes, list_worker_groups, list_worker_nodes,
+)
+from cribl_cli.config.loader import config_from_context, load_config
 from cribl_cli.output.formatter import format_output
 from cribl_cli.utils.errors import handle_error
 
@@ -27,11 +29,21 @@ def _format_bytes(n: int | float) -> str:
 
 
 @workers_group.command("list")
+@click.option(
+    "--type", "group_type", default=None,
+    type=click.Choice(["stream", "edge", "search", "outpost"]),
+    help="Only groups of this product type (edge = fleets).",
+)
 @click.option("--table", "use_table", is_flag=True)
-def workers_list(use_table):
+def workers_list(group_type, use_table):
+    """List every group: Stream worker groups, Edge fleets, and the search
+    and outpost groups. Narrow with --type."""
     try:
         client = get_client()
         data = list_worker_groups(client)
+        if group_type and isinstance(data, dict):
+            items = [g for g in data.get("items", []) if g.get("type", "stream") == group_type]
+            data = {**data, "items": items, "count": len(items)}
         click.echo(format_output(data, table=use_table))
     except Exception as e:
         handle_error(e)
@@ -39,12 +51,17 @@ def workers_list(use_table):
 
 @workers_group.command("nodes")
 @click.option("-g", "--group", default=None, help="Worker group to filter by.")
+@click.option("--all", "all_products", is_flag=True, help="Include Edge nodes too (every connected node).")
 @click.option("--table", "use_table", is_flag=True, help="Output as table.")
-def workers_nodes(group, use_table):
-    """List worker nodes (optionally filtered by group)."""
+def workers_nodes(group, all_products, use_table):
+    """List Stream worker nodes (optionally filtered by group).
+
+    Edge nodes are listed by `edge nodes`; pass --all here to see every
+    connected node, Stream and Edge, in one list.
+    """
     try:
         client = get_client()
-        nodes = list_worker_nodes(client, group)
+        nodes = list_all_nodes(client, group) if all_products else list_worker_nodes(client, group)
         summary = [
             {
                 "id": n["id"],
@@ -77,7 +94,15 @@ def workers_get(group_id, use_table):
 
 @workers_group.command("deploy", help="Deploy committed config to a worker group.")
 @click.argument("group")
-def workers_deploy(group):
+@click.option("--yes", is_flag=True, help="Confirm deployment. Required to proceed.")
+def workers_deploy(group, yes):
+    if not yes:
+        click.echo(
+            f"WARNING: This will deploy configuration to live workers in '{group}'.\n"
+            "Pass --yes to confirm deployment, or preview with: cribl --dry-run workers deploy ... --yes",
+            err=True,
+        )
+        raise SystemExit(1)
     try:
         client = get_client()
         data = deploy_group(client, group)
@@ -106,8 +131,9 @@ def workers_add(group, token, cribl_version, port, container_name, show_only, im
       cribl workers add default --token <TOKEN> --version 4.16.1 --port 9420
     """
     try:
-        # Resolve leader host from config
-        cfg = load_config()
+        # Resolve leader host from the config this invocation is using, so
+        # -p/--profile and --base-url apply here too.
+        cfg = config_from_context() or load_config()
         parsed = urlparse(cfg.base_url)
         leader_host = parsed.hostname
 

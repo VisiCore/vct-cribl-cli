@@ -54,7 +54,7 @@ def get_search_field_summary(
     client: httpx.Client, group: str, job_id: str
 ) -> Any:
     """Get the field summary for a search job."""
-    resp = client.get(f"{_base(group)}/{job_id}/field-summary")
+    resp = client.get(f"{_base(group)}/{job_id}/field-summaries")
     resp.raise_for_status()
     return resp.json()
 

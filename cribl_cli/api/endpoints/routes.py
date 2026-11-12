@@ -26,11 +26,15 @@ def _fetch_route_table(client: httpx.Client, group: str) -> dict[str, Any]:
     """Fetch the current route table.
 
     Handles two API response formats:
-    - Stream groups: ``{"id": "default", "items": [...routes...]}``
-    - Edge groups: ``{"items": [{"id": "default", "routes": [...]}], "count": 1}``
+    - Wrapped (what Stream groups and Edge fleets return today):
+      ``{"items": [{"id": "default", "routes": [...], "groups": {...},
+      "comments": [...]}], "count": 1}``
+    - Flat (legacy): ``{"id": "default", "items": [...routes...]}``
 
-    Returns a normalised dict with ``"items"`` containing the routes array
-    and ``"_edge_format"`` set to True if the edge-style wrapper was detected.
+    Returns a normalised dict with ``"items"`` containing the routes array.
+    For the wrapped format ``"_edge_format"`` is True and ``"_wrapper"`` holds
+    the original table document, so its other fields (``groups``,
+    ``comments``, …) can be sent back unchanged on a PATCH.
     """
     resp = client.get(_base(group))
     resp.raise_for_status()
@@ -44,12 +48,13 @@ def _fetch_route_table(client: httpx.Client, group: str) -> dict[str, Any]:
         and "routes" in items[0]
         and not any(isinstance(i, dict) and "filter" in i for i in items)
     ):
-        # Edge format — unwrap
+        # Wrapped format — unwrap, keeping the original document
         wrapper = items[0]
         return {
             "id": wrapper.get("id", "default"),
             "items": wrapper.get("routes", []),
             "_edge_format": True,
+            "_wrapper": wrapper,
         }
 
     return data
@@ -60,15 +65,19 @@ def _patch_route_table(
 ) -> Any:
     """PATCH the full route table back to the server.
 
-    Re-wraps into edge format if the table was originally fetched from an
-    edge group (indicated by ``_edge_format``).
+    Re-wraps into the wrapped format if the table was fetched that way
+    (indicated by ``_edge_format``). Only ``routes`` is replaced: every other
+    field of the fetched table document (``groups``, ``comments``, …) is sent
+    back as it was, so editing a route never drops route groups or comments.
     """
     payload = dict(table)
     is_edge = payload.pop("_edge_format", False)
+    wrapper = payload.pop("_wrapper", None) or {}
     if is_edge:
-        # Edge groups require PATCH to /routes/{tableId} with the wrapped format
+        # Wrapped tables require PATCH to /routes/{tableId}
         table_id = payload.get("id", "default")
         edge_payload = {
+            **wrapper,
             "id": table_id,
             "routes": payload["items"],
         }

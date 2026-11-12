@@ -50,6 +50,7 @@ def list_nodes(
         nodes.append({
             "id": w.get("id", ""),
             "status": w.get("status", ""),
+            "disconnected": bool(w.get("disconnected", False)),
             "group": grp,
             "hostname": info.get("hostname", ""),
             "cpus": info.get("cpus", 0),

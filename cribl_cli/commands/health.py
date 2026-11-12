@@ -2,22 +2,29 @@
 from __future__ import annotations
 
 import json as _json
+import re
+import sys
+from collections import Counter
 import time as _time
+from urllib.parse import quote
 from datetime import datetime, timezone
 
 import click
+import httpx
 
 from cribl_cli.api.client import get_client
 from cribl_cli.api.endpoint_factory import EndpointConfig, create_endpoints
 from cribl_cli.api.endpoints.edge_nodes import (
     get_node_metrics,
     list_worker_logs,
+    metrics_coverage,
     search_worker_log,
 )
 from cribl_cli.api.endpoints.system import get_system_info
 from cribl_cli.api.endpoints.version import get_version_status
-from cribl_cli.api.endpoints.workers import list_worker_groups
+from cribl_cli.api.endpoints.workers import list_all_nodes, list_worker_groups
 from cribl_cli.output.formatter import format_output
+from cribl_cli.utils.concurrency import map_concurrent
 from cribl_cli.utils.errors import handle_error
 from cribl_cli.utils.group_resolver import resolve_group
 
@@ -52,83 +59,355 @@ def _check_items(client, url: str, label: str) -> list[dict]:
     return problems
 
 
+UNHEALTHY = ("Red", "Yellow", "Error")
+_KINDS = (("source", "system/inputs"), ("destination", "system/outputs"))
+# Above this many nodes the per-node breakdown is skipped unless asked for:
+# it costs two requests per node.
+_NODE_DETAIL_MAX = 20
+
+
+def _health_of(item: dict) -> str:
+    status = item.get("status")
+    return status.get("health", "") if isinstance(status, dict) else ""
+
+
+_INIT_BOILERPLATE = (
+    ", please check your configuration, or ensure that your Worker is on the same version as the Leader"
+)
+
+
+def _error_text(error) -> str:
+    """Flatten a status ``error`` object into one line: message, cause, hint."""
+    if not isinstance(error, dict):
+        return str(error) if error else ""
+    msg = str(error.get("message") or "")
+    # Drop Cribl's generic advice; the cause that follows is the useful part.
+    msg = msg.replace(_INIT_BOILERPLATE, "")
+    details = error.get("details")
+    inner = details.get("error") if isinstance(details, dict) else None
+    cause = str((inner.get("message") if isinstance(inner, dict) else inner) or "")
+    hint = str(inner.get("hint") or "") if isinstance(inner, dict) else ""
+    # Skip a cause the message already quotes ("Initialization error: bind EACCES ...").
+    text = msg if (not cause or cause in msg) else (f"{msg}: {cause}" if msg else cause)
+    return f"{text} ({hint})" if hint else text
+
+
+def _status_reason(status) -> str:
+    """Why an input/output is unhealthy, from a node's own status.
+
+    The reason is either on the item itself (``status.error``) or on one of its
+    parts under ``status.metrics.items`` — a listener such as "UDP 0.0.0.0:514"
+    or a downstream host such as "splunk.example.com:9997".
+    """
+    if not isinstance(status, dict):
+        return ""
+    reasons: list[str] = []
+    own = _error_text(status.get("error"))
+    if own:
+        reasons.append(own)
+    metrics = status.get("metrics")
+    parts = metrics.get("items") if isinstance(metrics, dict) else None
+    for part in parts if isinstance(parts, list) else []:
+        sub = part.get("status") if isinstance(part, dict) else None
+        if not isinstance(sub, dict) or sub.get("health") not in UNHEALTHY:
+            continue
+        name = " ".join(str(part[k]) for k in ("name", "address") if part.get(k)) or "part"
+        text = _error_text(sub.get("error")) or sub["health"]
+        reasons.append(f"{name}: {text}")
+    if not reasons:
+        # No error recorded (typical for Yellow): fall back to parts that have
+        # counted send errors, e.g. one endpoint of a load-balanced destination.
+        for part in parts if isinstance(parts, list) else []:
+            sub = part.get("status") if isinstance(part, dict) else None
+            sub_metrics = sub.get("metrics") if isinstance(sub, dict) else None
+            count = sub_metrics.get("errorCount") if isinstance(sub_metrics, dict) else None
+            if count:
+                reasons.append(f"{part.get('name', 'part')}: {count} send error(s)")
+    return "; ".join(reasons)[:300]
+
+
+def _per_node_health(client, nodes: list[dict], path: str) -> tuple[dict, list[str]]:
+    """Ask each node for its own view of the group's inputs or outputs.
+
+    The leader's list reports the worst health across nodes, but not which
+    nodes and not why; the node's own status has both. Returns
+    ``({item_id: {hostname: {"health", "reason"}}}, [unreadable hostnames])``.
+    """
+    def fetch(node):
+        resp = client.get(f"/api/v1/w/{quote(node['id'], safe='')}/{path}")
+        resp.raise_for_status()
+        return resp.json().get("items", [])
+
+    by_item: dict[str, dict[str, str]] = {}
+    unreachable: list[str] = []
+    for node, items, err in map_concurrent(fetch, nodes):
+        host = node["hostname"] or node["id"]
+        if err is not None:
+            unreachable.append(host)
+            continue
+        for item in items:
+            if isinstance(item, dict) and not item.get("disabled"):
+                by_item.setdefault(item.get("id", "?"), {})[host] = {
+                    "health": _health_of(item) or "?",
+                    "reason": _status_reason(item.get("status")),
+                }
+    return by_item, unreachable
+
+
+def check_group(client, group: str, nodes: list[dict], *, node_detail: bool | None = None) -> dict:
+    """Check one group's sources and destinations.
+
+    Returns ``{group, nodes, healthy, summary, unhealthy, items, warnings}``.
+    With no connected nodes nothing is running the config, so the leader's
+    statuses are placeholders (the UI shows these as "No Metrics"): they are
+    counted as ``no_metrics`` and ``healthy`` is None rather than True.
+
+    ``node_detail``: None = per-node breakdown for groups up to
+    ``_NODE_DETAIL_MAX`` nodes, True = always, False = never.
+    """
+    has_nodes = len(nodes) > 0
+    warnings: list[str] = []
+    if not has_nodes:
+        warnings.append(
+            f"Group '{group}' has no connected nodes, so nothing is running this config. "
+            "Its sources and destinations have no health data (the UI shows them as "
+            "\"No Metrics\"); this is not a healthy result."
+        )
+
+    summary: dict[str, dict[str, int]] = {}
+    unhealthy: list[dict] = []
+    all_items: list[dict] = []
+    fetched: dict[str, list[dict]] = {}
+    for kind, path in _KINDS:
+        resp = client.get(f"/api/v1/m/{group}/{path}")
+        resp.raise_for_status()
+        items = [i for i in resp.json().get("items", []) if isinstance(i, dict)]
+        fetched[kind] = items
+        counts = {"total": len(items), "disabled": 0, "healthy": 0, "warning": 0, "critical": 0, "no_metrics": 0}
+        for item in items:
+            if item.get("disabled"):
+                counts["disabled"] += 1
+                continue
+            health = _health_of(item) if has_nodes else ""
+            if has_nodes and not health and item.get("type") == "default":
+                # The "Default" destination is only a pointer to another one and
+                # has no status of its own; the UI counts it as healthy.
+                health = "Green"
+            if health == "Green":
+                counts["healthy"] += 1
+            elif health == "Yellow":
+                counts["warning"] += 1
+            elif health in ("Red", "Error"):
+                counts["critical"] += 1
+            else:
+                counts["no_metrics"] += 1
+            status = item.get("status") if isinstance(item.get("status"), dict) else {}
+            row = {
+                "group": group,
+                "kind": kind,
+                "id": item.get("id", "?"),
+                "type": item.get("type", "?"),
+                "health": health or "No Metrics",
+            }
+            all_items.append(row)
+            if health in UNHEALTHY:
+                metrics = status.get("metrics") or {}
+                unhealthy.append({
+                    **row,
+                    "message": status.get("message", ""),
+                    "metrics": {k: v for k, v in metrics.items() if v},
+                })
+        summary[f"{kind}s"] = counts
+
+    # Saved collectors: the UI lists them with sources, always as "No Metrics"
+    # (they run as jobs and have no standing health).
+    try:
+        resp = client.get(f"/api/v1/m/{group}/lib/jobs")
+        resp.raise_for_status()
+        jobs = resp.json().get("items", [])
+        summary["collectors"] = {"total": sum(1 for j in jobs if isinstance(j, dict) and j.get("type") == "collection")}
+    except Exception:  # noqa: BLE001 -- informational only (fleets have none)
+        summary["collectors"] = {"total": 0}
+
+    # Which nodes is each problem on? (worst-of-all-nodes alone cannot say.)
+    if unhealthy and has_nodes:
+        if node_detail is False:
+            pass
+        elif node_detail is None and len(nodes) > _NODE_DETAIL_MAX:
+            warnings.append(
+                f"Per-node breakdown skipped: '{group}' has {len(nodes)} nodes "
+                f"(limit {_NODE_DETAIL_MAX}). Pass --by-node to fetch it anyway."
+            )
+        else:
+            _attach_node_detail(client, nodes, unhealthy, warnings)
+
+    return {
+        "group": group,
+        "nodes": len(nodes),
+        "healthy": (not unhealthy) if has_nodes else None,
+        "summary": summary,
+        "unhealthy": unhealthy,
+        "items": all_items,
+        "warnings": warnings,
+    }
+
+
+def _attach_node_detail(client, nodes: list[dict], unhealthy: list[dict], warnings: list[str]) -> None:
+    unreachable: set[str] = set()
+    for kind, path in _KINDS:
+        rows = [r for r in unhealthy if r["kind"] == kind]
+        if not rows:
+            continue
+        by_item, failed = _per_node_health(client, nodes, path)
+        unreachable.update(failed)
+        for row in rows:
+            per_node = by_item.get(row["id"], {})
+            affected = sorted(h for h, v in per_node.items() if v["health"] in UNHEALTHY)
+            row["nodes_total"] = len(nodes)
+            row["nodes_affected"] = affected
+            row["node_health"] = {h: v["health"] for h, v in sorted(per_node.items())}
+            reasons = [per_node[h]["reason"] for h in affected if per_node[h]["reason"]]
+            if reasons and not row.get("message"):
+                # Most common reason first; note when nodes disagree.
+                top, n = Counter(reasons).most_common(1)[0]
+                row["message"] = top + (f" (+{len(set(reasons)) - 1} other reason(s))" if len(set(reasons)) > 1 else "")
+            if not affected and per_node and not unreachable:
+                row["message"] = row.get("message") or (
+                    f"The leader reports {row['health']}, but all {len(per_node)} node(s) "
+                    "report this item healthy. Check it in the UI."
+                )
+    if unreachable:
+        warnings.append(
+            "Could not read per-node status from: " + ", ".join(sorted(unreachable))
+            + " (try a higher --timeout)."
+        )
+
+
+def _affected(row: dict) -> str:
+    if "nodes_total" not in row:
+        return ""
+    hosts = row.get("nodes_affected", [])
+    label = f"{len(hosts)}/{row['nodes_total']}"
+    if hosts and len(hosts) < row["nodes_total"]:
+        label += ": " + ", ".join(hosts)
+    return label
+
+
 @health_group.command("check", help="Show unhealthy sources and destinations.")
-@click.option("-g", "--group", default=None, help="Worker group.")
+@click.option("-g", "--group", default=None, help="Worker group or fleet (default: the first group listed).")
+@click.option("--all-groups", is_flag=True, help="Check every group that has connected nodes.")
+@click.option("--all", "show_all", is_flag=True, help="List every active item with its health, not just unhealthy ones.")
+@click.option("--summary", "as_summary", is_flag=True,
+              help="Output per-group counts, node count and warnings along with the unhealthy items.")
+@click.option("--by-node/--no-by-node", "by_node", default=None,
+              help="Show which nodes each problem is on (default: on for groups of up to "
+                   f"{_NODE_DETAIL_MAX} nodes).")
+@click.option("--fail-on-unhealthy", is_flag=True,
+              help="Exit 2 if anything is unhealthy, 3 if a checked group has no connected nodes.")
 @click.option("--table", "use_table", is_flag=True, help="Output as table.")
-@click.option("--all", "show_all", is_flag=True, help="Show all items, not just unhealthy.")
-def health_check(group, use_table, show_all):
-    """Check health of sources and destinations in a worker group."""
+def health_check(group, all_groups, show_all, as_summary, by_node, fail_on_unhealthy, use_table):
+    """Check health of sources and destinations in a worker group or fleet.
+
+    Prints a JSON list of unhealthy items ([] when there are none); notes go
+    to stderr. Each item says which nodes it is unhealthy on (nodes_affected).
+    Health is the worst state across the group's nodes, the same as the
+    Critical / Warning counts in the UI.
+
+    A group with no connected nodes has no health data: that is reported as a
+    warning, never as healthy. Use --summary for counts per group, and
+    --fail-on-unhealthy to get a non-zero exit code for scripts.
+    """
     try:
         client = get_client()
-        g = resolve_group(client, group)
+        # Like the UI, only count nodes that are currently connected.
+        all_nodes = [n for n in list_all_nodes(client) if not n.get("disconnected")]
 
-        src_url = f"/api/v1/m/{g}/system/inputs"
-        dst_url = f"/api/v1/m/{g}/system/outputs"
+        if all_groups:
+            if group:
+                raise click.UsageError("Pass either -g/--group or --all-groups, not both.")
+            with_nodes = {n["group"] for n in all_nodes}
+            listed = [g.get("id") for g in list_worker_groups(client).get("items", [])]
+            targets = [g for g in listed if g in with_nodes]
+            skipped = len(listed) - len(targets)
+            if skipped:
+                click.echo(f"Skipping {skipped} group(s) with no connected nodes.", err=True)
+        else:
+            if not group:
+                group = resolve_group(client, None)
+                click.echo(f"No -g given; checking '{group}'.", err=True)
+            targets = [group]
 
-        if show_all:
-            resp_s = client.get(src_url)
-            resp_s.raise_for_status()
-            resp_d = client.get(dst_url)
-            resp_d.raise_for_status()
-            all_sources = resp_s.json().get("items", [])
-            all_dests = resp_d.json().get("items", [])
-            sources = []
-            for s in all_sources:
-                if s.get("disabled"):
-                    continue
-                status = s.get("status", {})
-                health = status.get("health", "?") if isinstance(status, dict) else "?"
-                sources.append({
-                    "kind": "source",
-                    "id": s.get("id", "?"),
-                    "type": s.get("type", "?"),
-                    "health": health,
-                })
-            dests = []
-            for d in all_dests:
-                if d.get("disabled"):
-                    continue
-                status = d.get("status", {})
-                health = status.get("health", "?") if isinstance(status, dict) else "?"
-                dests.append({
-                    "kind": "destination",
-                    "id": d.get("id", "?"),
-                    "type": d.get("type", "?"),
-                    "health": health,
-                })
-            combined = sources + dests
-            click.echo(format_output(combined, table=use_table))
-            return
+        results = [
+            check_group(client, g, [n for n in all_nodes if n["group"] == g], node_detail=by_node)
+            for g in targets
+        ]
 
-        src_problems = _check_items(client, src_url, "source")
-        dst_problems = _check_items(client, dst_url, "destination")
+        for res in results:
+            for w in res["warnings"]:
+                click.echo(f"Warning: {w}", err=True)
 
-        if not src_problems and not dst_problems:
-            click.echo(f"All sources and destinations in group '{g}' are healthy.")
-            return
+        unhealthy = [row for res in results for row in res["unhealthy"]]
 
-        results = []
-        for p in src_problems:
-            p["kind"] = "source"
-            results.append(p)
-        for p in dst_problems:
-            p["kind"] = "destination"
-            results.append(p)
-
-        if use_table:
+        if as_summary:
+            payload = [{k: v for k, v in res.items() if k != "items"} for res in results]
+            out = payload if all_groups else payload[0]
+            if use_table:
+                rows = [
+                    {
+                        "group": r["group"], "nodes": r["nodes"],
+                        "healthy": {True: "yes", False: "NO", None: "no data"}[r["healthy"]],
+                        **{f"{short}_{c}": r["summary"][k][c]
+                           for k, short in (("sources", "src"), ("destinations", "dst"))
+                           for c in ("critical", "warning", "healthy", "no_metrics", "disabled")},
+                    }
+                    for r in payload
+                ]
+                click.echo(format_output(rows, table=True))
+            else:
+                click.echo(format_output(out))
+        elif show_all:
+            rows = [row for res in results for row in res["items"]]
+            click.echo(format_output(rows, table=use_table))
+        elif use_table:
+            # A status message is rare; show the column only when one exists.
+            show_message = any(r.get("message") for r in unhealthy)
             table_data = [
                 {
+                    **({"group": r["group"]} if all_groups else {}),
                     "kind": r["kind"],
                     "id": r["id"],
                     "type": r["type"],
                     "health": r["health"],
-                    "message": r.get("message", ""),
+                    "nodes": _affected(r),
+                    **({"message": r.get("message", "")} if show_message else {}),
                 }
-                for r in results
+                for r in unhealthy
             ]
-            click.echo(format_output(table_data, table=True))
+            click.echo(format_output(table_data, table=True) if table_data else "(nothing unhealthy)")
         else:
-            click.echo(format_output(results))
+            click.echo(format_output(unhealthy))
+
+        # One-line verdict per group, on stderr so stdout stays parseable.
+        for res in results:
+            if res["healthy"] is None:
+                continue
+            s, d = res["summary"]["sources"], res["summary"]["destinations"]
+            bad = len(res["unhealthy"])
+            verdict = "all healthy" if not bad else f"{bad} unhealthy"
+            click.echo(
+                f"{res['group']}: {verdict} "
+                f"({s['total'] - s['disabled']} active sources, "
+                f"{d['total'] - d['disabled']} active destinations, {res['nodes']} node(s)).",
+                err=True,
+            )
+
+        if fail_on_unhealthy:
+            if unhealthy:
+                sys.exit(2)
+            if any(res["healthy"] is None for res in results):
+                sys.exit(3)
+    except click.UsageError:
+        raise
     except Exception as e:
         handle_error(e)
 
@@ -146,159 +425,211 @@ def _format_bytes(n: int | float) -> str:
     return f"{n / (1024 ** i):.2f} {units[i]}"
 
 
-def _fetch_all_nodes(client, group=None) -> list[dict]:
-    """Fetch all nodes (edge + stream workers) with enriched health data."""
+def _node_memory(client, wid: str, total_mem: int) -> tuple[int, int, float | None]:
+    """Return (total_mem, free_mem, mem_pct) for a node from its recent metrics.
+
+    The worker list does not carry free memory, so it is read from the node's
+    own metrics endpoint. Any failure degrades to "unknown" rather than raising.
+    """
+    try:
+        metrics = get_node_metrics(client, wid, duration_seconds=300)
+    except Exception:
+        return total_mem, 0, None
+    if not metrics:
+        return total_mem, 0, None
+    latest = metrics[-1]
+    total_mem = latest.get("mem_total_bytes") or total_mem
+    mem_used = latest.get("mem_used_bytes")
+    if mem_used is None or not total_mem or total_mem <= 0:
+        return total_mem, 0, None
+    return total_mem, total_mem - mem_used, mem_used / total_mem * 100
+
+
+def _fetch_all_nodes(client, group=None, with_memory: bool = True) -> list[dict]:
+    """Fetch all nodes (edge + stream workers) with enriched health data.
+
+    ``with_memory=False`` skips the per-node memory lookup for callers that do
+    not report memory, so they never wait on a slow node for it.
+    """
     now = _time.time()
-    all_nodes = []
 
-    for product in ("edge", None):
-        params = {"product": product} if product else {}
-        try:
-            resp = client.get("/api/v1/master/workers", params=params)
-            resp.raise_for_status()
-        except Exception:
+    # One call covers every product: the leader ignores ?product= here.
+    resp = client.get("/api/v1/master/workers")
+    resp.raise_for_status()
+    items = resp.json().get("items", [])
+
+    all_nodes: list[dict] = []
+    need_memory: list[dict] = []
+    seen_ids: set[str] = set()
+    for w in items:
+        wid = w.get("id", "")
+        if wid in seen_ids:
             continue
-        items = resp.json().get("items", [])
-        seen_ids = {n["id"] for n in all_nodes}
-        for w in items:
-            wid = w.get("id", "")
-            if wid in seen_ids:
-                continue
-            grp = w.get("group", "")
-            if group and grp != group:
-                continue
-            info = w.get("info", {})
-            cribl = info.get("cribl", {})
-            hostname = info.get("hostname", wid)
-            disconnected = w.get("disconnected", False)
-            last_msg = w.get("lastMsgTime", 0) / 1000
-            ago = now - last_msg if last_msg > 0 else 0
+        seen_ids.add(wid)
+        grp = w.get("group", "")
+        if group and grp != group:
+            continue
+        info = w.get("info", {})
+        cribl = info.get("cribl", {})
+        hostname = info.get("hostname", wid)
+        disconnected = w.get("disconnected", False)
+        last_msg = w.get("lastMsgTime", 0) / 1000
+        ago = now - last_msg if last_msg > 0 else 0
 
-            if disconnected:
-                hb_status = "DISCONNECTED"
-            elif ago > 86400:
-                hb_status = "MISSED"
-            elif ago > 300:
-                hb_status = "LATE"
-            else:
-                hb_status = "OK"
+        if disconnected:
+            hb_status = "DISCONNECTED"
+        elif ago > 86400:
+            hb_status = "MISSED"
+        elif ago > 300:
+            hb_status = "LATE"
+        else:
+            hb_status = "OK"
 
-            total_disk = info.get("totalDiskSpace", 0)
-            free_disk = info.get("freeDiskSpace", 0)
-            disk_pct = ((total_disk - free_disk) / total_disk * 100) if total_disk > 0 else None
+        total_disk = info.get("totalDiskSpace", 0)
+        free_disk = info.get("freeDiskSpace", 0)
+        disk_pct = ((total_disk - free_disk) / total_disk * 100) if total_disk > 0 else None
 
-            total_mem = info.get("totalmem", 0)
-            free_mem = info.get("freemem")
-            if free_mem is None or free_mem == 0:
-                # freemem not in worker info — fetch from system/metrics
-                try:
-                    metrics = get_node_metrics(client, wid, duration_seconds=300)
-                    if metrics:
-                        latest = metrics[-1]
-                        total_mem = latest.get("mem_total_bytes") or total_mem
-                        mem_used = latest.get("mem_used_bytes")
-                        if mem_used is not None and total_mem and total_mem > 0:
-                            free_mem = total_mem - mem_used
-                            mem_pct = mem_used / total_mem * 100
-                        else:
-                            free_mem = 0
-                            mem_pct = None
-                    else:
-                        free_mem = 0
-                        mem_pct = None
-                except Exception:
-                    free_mem = 0
-                    mem_pct = None
-            else:
-                mem_pct = ((total_mem - free_mem) / total_mem * 100) if total_mem > 0 else None
+        total_mem = info.get("totalmem", 0)
+        free_mem = info.get("freemem")
+        mem_pct = None
+        if free_mem:
+            mem_pct = ((total_mem - free_mem) / total_mem * 100) if total_mem > 0 else None
 
-            all_nodes.append({
-                "id": wid,
-                "hostname": hostname,
-                "group": grp,
-                "status": w.get("status", "?"),
-                "version": cribl.get("version", "?"),
-                "cpus": info.get("cpus", 0),
-                "total_mem": total_mem,
-                "free_mem": free_mem,
-                "mem_pct": round(mem_pct, 1) if mem_pct is not None else None,
-                "total_disk": total_disk,
-                "free_disk": free_disk,
-                "disk_pct": round(disk_pct, 1) if disk_pct is not None else None,
-                "heartbeat": hb_status,
-                "disconnected": disconnected,
-                "platform": info.get("platform", ""),
-            })
+        node = {
+            "id": wid,
+            "hostname": hostname,
+            "group": grp,
+            "status": w.get("status", "?"),
+            "version": cribl.get("version", "?"),
+            "cpus": info.get("cpus", 0),
+            "total_mem": total_mem,
+            "free_mem": free_mem or 0,
+            "mem_pct": round(mem_pct, 1) if mem_pct is not None else None,
+            "total_disk": total_disk,
+            "free_disk": free_disk,
+            "disk_pct": round(disk_pct, 1) if disk_pct is not None else None,
+            "heartbeat": hb_status,
+            "disconnected": disconnected,
+            "platform": info.get("platform", ""),
+        }
+        all_nodes.append(node)
+        if with_memory and not free_mem:
+            need_memory.append(node)
+
+    # freemem is not in the worker list — read it from each node, in parallel
+    # (one slow node used to hold up every node behind it).
+    for node, result, _err in map_concurrent(
+        lambda n: _node_memory(client, n["id"], n["total_mem"]), need_memory
+    ):
+        total_mem, free_mem, mem_pct = result
+        node["total_mem"] = total_mem
+        node["free_mem"] = free_mem
+        node["mem_pct"] = round(mem_pct, 1) if mem_pct is not None else None
     return all_nodes
 
 
-def _fetch_unhealthy_io(client, groups) -> list[dict]:
-    """Fetch unhealthy sources and destinations across groups."""
+def _fetch_unhealthy_io(client, groups, nodes=None) -> list[dict]:
+    """Unhealthy sources and destinations across groups, with nodes and reasons.
+
+    Uses the same check as ``health check``. Only groups with connected nodes
+    are checked: a group nothing is running has no health data to report.
+    """
+    connected = [n for n in (nodes or []) if not n.get("disconnected")]
     results = []
     for g in groups:
         gid = g.get("id", "")
-        gtype = g.get("type", "")
-        if gtype in ("search", "outpost"):
+        if g.get("type", "") in ("search", "outpost"):
             continue
-        for kind, path in [("source", "system/inputs"), ("destination", "system/outputs")]:
-            try:
-                problems = _check_items(client, f"/api/v1/m/{gid}/{path}", kind)
-                for p in problems:
-                    p["group"] = gid
-                    p["kind"] = kind
-                    results.append(p)
-            except Exception:
-                continue
+        group_nodes = [n for n in connected if n.get("group") == gid]
+        if nodes is not None and not group_nodes:
+            continue
+        try:
+            results.extend(check_group(client, gid, group_nodes)["unhealthy"])
+        except Exception:
+            continue
     return results
 
 
-def _fetch_error_summary(client, nodes, limit_per_node) -> list[dict]:
-    """Scan internal logs for errors across nodes."""
-    all_errors: list[dict] = []
-    for node in nodes:
-        node_id = node["id"]
-        hostname = node["hostname"] or node_id
-        try:
-            logs_data = list_worker_logs(client, node_id)
-            log_items = logs_data.get("items", []) if isinstance(logs_data, dict) else []
+def _scan_node_errors(client, node: dict, limit: int, query: str | None = None) -> list[dict]:
+    """Return up to *limit* error-level log entries from one node's cribl.log.
 
-            log_id = "cribl.log"
-            for log in log_items:
-                lid = log.get("id", "") if isinstance(log, dict) else str(log)
-                if lid == "worker/0/cribl.log":
-                    log_id = lid
-                    break
+    With no *query* the search term is "error" and only error/warn/crit/fatal
+    entries are kept; a custom *query* keeps every match.
+    """
+    node_id = node["id"]
+    hostname = node["hostname"] or node_id
+    logs_data = list_worker_logs(client, node_id)
+    log_items = logs_data.get("items", []) if isinstance(logs_data, dict) else []
 
-            data = search_worker_log(client, node_id, log_id, "error", limit_per_node * 3)
-            items = data.get("items", []) if isinstance(data, dict) else []
-            count = 0
-            for result in items:
-                events = result.get("events", []) if isinstance(result, dict) else []
-                for ev in events:
-                    level = ev.get("level", ev.get("severity", ""))
-                    if level not in ("error", "warn", "crit", "fatal"):
-                        continue
-                    if count >= limit_per_node:
-                        break
-                    all_errors.append({
-                        "node": hostname,
-                        "group": node["group"],
-                        "level": level,
-                        "channel": ev.get("channel", ""),
-                        "time": ev.get("time", ev.get("_time", "")),
-                        "message": (ev.get("message", "") or "")[:200],
-                    })
-                    count += 1
-        except Exception as err:
-            all_errors.append({
+    # Prefer worker/0/cribl.log (has more detail), fall back to cribl.log
+    log_id = "cribl.log"
+    for log in log_items:
+        lid = log.get("id", "") if isinstance(log, dict) else str(log)
+        if lid == "worker/0/cribl.log":
+            log_id = lid
+            break
+
+    # Fetch more than the limit so there is room to filter by level
+    data = search_worker_log(client, node_id, log_id, query or "error", limit * 3)
+    items = data.get("items", []) if isinstance(data, dict) else []
+    found: list[dict] = []
+    for result in items:
+        events = result.get("events", []) if isinstance(result, dict) else []
+        for ev in events:
+            if len(found) >= limit:
+                return found
+            level = ev.get("level", ev.get("severity", ""))
+            if not query and level not in ("error", "warn", "crit", "fatal"):
+                continue
+            msg = ev.get("message", ev.get("_raw", "")) or ""
+            found.append({
                 "node": hostname,
+                "group": node["group"],
+                "level": level,
+                "channel": ev.get("channel", ""),
+                "time": ev.get("time", ev.get("_time", ev.get("timestamp", ""))),
+                "message": msg[:200],
+            })
+    return found
+
+
+def scan_errors(client, nodes, limit_per_node, query: str | None = None) -> list[dict]:
+    """Scan internal logs for errors across nodes, concurrently.
+
+    A node that cannot be read contributes one ``fetch_error`` row instead of
+    failing the whole scan.
+    """
+    all_errors: list[dict] = []
+    for node, result, err in map_concurrent(
+        lambda n: _scan_node_errors(client, n, limit_per_node, query), nodes
+    ):
+        if err is not None:
+            all_errors.append({
+                "node": node["hostname"] or node["id"],
                 "group": node["group"],
                 "level": "fetch_error",
                 "channel": "",
                 "time": "",
                 "message": str(err)[:200],
             })
+        else:
+            all_errors.extend(result)
     return all_errors
+
+
+def _fetch_error_summary(client, nodes, limit_per_node) -> list[dict]:
+    """Scan internal logs for errors across nodes."""
+    return scan_errors(client, nodes, limit_per_node)
+
+
+def _version_key(version: str) -> tuple[int, ...]:
+    """Numeric sort key for a Cribl version ("4.10.0-abc123" -> (4, 10, 0)).
+
+    Plain string comparison ranks "4.9.3" above "4.10.0"; unparseable
+    versions sort lowest.
+    """
+    m = re.match(r"\d+(?:\.\d+)*", version or "")
+    return tuple(int(p) for p in m.group(0).split(".")) if m else ()
 
 
 def _build_version_summary(nodes) -> dict:
@@ -307,7 +638,7 @@ def _build_version_summary(nodes) -> dict:
     for n in nodes:
         v = n.get("version", "?")
         by_version.setdefault(v, []).append(n["hostname"])
-    versions_sorted = sorted(by_version.keys(), reverse=True)
+    versions_sorted = sorted(by_version.keys(), key=lambda v: (_version_key(v), v), reverse=True)
     latest = versions_sorted[0] if versions_sorted else "?"
     needs_upgrade = []
     for n in nodes:
@@ -445,6 +776,9 @@ def _format_text_report(report: dict) -> str:
             lines.append(
                 f"  [{item['group']}] {kind_s} {item['id']} ({item['type']})  {item['health']}"
             )
+            if item.get("message"):
+                where = _affected(item)
+                lines.append(f"      {where + ' — ' if where else ''}{item['message'][:110]}")
     else:
         lines.append("  All sources and destinations are healthy.")
 
@@ -658,7 +992,7 @@ def health_report(group, as_json, skip_errors, error_limit):
         healthy_nodes = sum(1 for n in nodes if n["status"] == "healthy" and n["heartbeat"] == "OK")
 
         # 3. Unhealthy sources & destinations
-        unhealthy_io = _fetch_unhealthy_io(client, groups)
+        unhealthy_io = _fetch_unhealthy_io(client, groups, nodes)
         # Enrich IO entries with infra tier
         for io in unhealthy_io:
             meta = group_meta.get(io.get("group", ""), {})
@@ -733,7 +1067,15 @@ def health_report(group, as_json, skip_errors, error_limit):
 # health cpu — per-node CPU spike detection over a time window
 # ---------------------------------------------------------------------------
 
-@health_group.command("cpu", help="Show nodes with CPU spikes over a time window.")
+def _covered(r: dict) -> str:
+    """Render how much of the requested window a node's samples cover."""
+    mins = r.get("covered_minutes") or 0
+    span = f"{mins / 60:.1f}h" if mins >= 120 else f"{mins:g}m"
+    return f"{span} (partial)" if r.get("partial_window") else span
+
+
+@health_group.command("cpu", help="Show nodes with CPU spikes over a time window. Nodes keep limited "
+                      "history (Stream workers ~10 min): check covered_minutes / COVERED for the span actually analysed.")
 @click.option("-g", "--group", default=None, help="Scope to a specific worker group.")
 @click.option("--hours", default=24, type=int, help="Lookback window in hours (default: 24).")
 @click.option("--threshold", default=80, type=int, help="CPU %% threshold to flag (default: 80).")
@@ -743,7 +1085,7 @@ def health_cpu(group, hours, threshold, as_json, use_table):
     """Detect nodes with CPU spikes above a threshold."""
     try:
         client = get_client()
-        nodes = _fetch_all_nodes(client, group)
+        nodes = _fetch_all_nodes(client, group, with_memory=False)
 
         if not nodes:
             click.echo("No nodes found.")
@@ -752,35 +1094,35 @@ def health_cpu(group, hours, threshold, as_json, use_table):
         duration = hours * 3600
         results = []
 
-        for node in nodes:
-            nid = node["id"]
-            hostname = node["hostname"] or nid
-            try:
-                points = get_node_metrics(client, nid, duration_seconds=duration)
-            except Exception:
-                results.append({
-                    "hostname": hostname,
-                    "group": node["group"],
-                    "status": "error",
-                    "samples": 0,
-                    "avg_cpu": None,
-                    "max_cpu": None,
-                    "spikes": 0,
-                    "spike_times": [],
-                })
+        # One request per node, in parallel: a slow node no longer delays the rest.
+        fetched = map_concurrent(
+            lambda n: get_node_metrics(client, n["id"], duration_seconds=duration), nodes
+        )
+        for node, points, err in fetched:
+            hostname = node["hostname"] or node["id"]
+            base = {
+                "hostname": hostname,
+                "group": node["group"],
+                "threshold_pct": threshold,
+                "requested_hours": hours,
+                "from": None,
+                "to": None,
+                "samples": 0,
+                "avg_cpu": None,
+                "max_cpu": None,
+                "spikes": 0,
+                "spike_times": [],
+                "covered_minutes": 0,
+                "partial_window": True,
+            }
+            if err is not None:
+                reason = str(err)[:200] or type(err).__name__
+                if isinstance(err, httpx.TimeoutException):
+                    reason += " (raise the limit with the global --timeout option)"
+                results.append({**base, "status": "error", "error": reason})
                 continue
-
             if not points:
-                results.append({
-                    "hostname": hostname,
-                    "group": node["group"],
-                    "status": "no_data",
-                    "samples": 0,
-                    "avg_cpu": None,
-                    "max_cpu": None,
-                    "spikes": 0,
-                    "spike_times": [],
-                })
+                results.append({**base, "status": "no_data"})
                 continue
 
             cpus = [p["cpu_perc"] for p in points if p.get("cpu_perc") is not None]
@@ -788,17 +1130,27 @@ def health_cpu(group, hours, threshold, as_json, use_table):
 
             avg_cpu = sum(cpus) / len(cpus) if cpus else None
             max_cpu = max(cpus) if cpus else None
+            coverage = metrics_coverage(points, duration)
 
             results.append({
-                "hostname": hostname,
-                "group": node["group"],
+                **base,
                 "status": "spike" if spike_points else "ok",
                 "samples": len(cpus),
                 "avg_cpu": round(avg_cpu, 1) if avg_cpu is not None else None,
                 "max_cpu": round(max_cpu, 1) if max_cpu is not None else None,
                 "spikes": len(spike_points),
                 "spike_times": [p["time"] for p in spike_points[:10]],
+                # How much of the requested window this node really reported.
+                "covered_minutes": coverage["covered_minutes"],
+                "partial_window": coverage["partial"],
+                "from": coverage["from"],
+                "to": coverage["to"],
             })
+
+        # Nodes that answered with less history than was asked for. JSON output
+        # carries this per node (covered_minutes / partial_window); the text
+        # report spells it out below.
+        partial = [r for r in results if r["status"] in ("ok", "spike") and r["partial_window"]]
 
         # Sort: spikes first (descending), then by max_cpu descending
         results.sort(key=lambda r: (r["status"] != "spike", -(r["max_cpu"] or 0)))
@@ -823,13 +1175,14 @@ def health_cpu(group, hours, threshold, as_json, use_table):
         if spiking:
             lines.append("")
             lines.append("--- Nodes Above Threshold " + "-" * 44)
-            hdr = f"  {'HOSTNAME':<38} {'GROUP':<18} {'AVG':>5} {'MAX':>5} {'SPIKES':>6}"
+            hdr = f"  {'HOSTNAME':<38} {'GROUP':<18} {'AVG':>5} {'MAX':>5} {'SPIKES':>6}  COVERED"
             lines.append(hdr)
             for r in spiking:
                 avg_s = f"{r['avg_cpu']:.0f}%" if r["avg_cpu"] is not None else "?"
                 max_s = f"{r['max_cpu']:.0f}%" if r["max_cpu"] is not None else "?"
                 lines.append(
                     f"  {r['hostname']:<38} {r['group']:<18} {avg_s:>5} {max_s:>5} {r['spikes']:>6}"
+                    f"  {_covered(r)}"
                 )
                 if r["spike_times"]:
                     times_str = ", ".join(t[11:19] for t in r["spike_times"][:5])
@@ -843,20 +1196,32 @@ def health_cpu(group, hours, threshold, as_json, use_table):
         if ok_nodes and not use_table:
             lines.append("")
             lines.append("--- All Nodes " + "-" * 56)
-            hdr = f"  {'HOSTNAME':<38} {'GROUP':<18} {'AVG':>5} {'MAX':>5}"
+            hdr = f"  {'HOSTNAME':<38} {'GROUP':<18} {'AVG':>5} {'MAX':>5}  COVERED"
             lines.append(hdr)
             for r in ok_nodes:
                 avg_s = f"{r['avg_cpu']:.0f}%" if r["avg_cpu"] is not None else "?"
                 max_s = f"{r['max_cpu']:.0f}%" if r["max_cpu"] is not None else "?"
                 lines.append(
-                    f"  {r['hostname']:<38} {r['group']:<18} {avg_s:>5} {max_s:>5}"
+                    f"  {r['hostname']:<38} {r['group']:<18} {avg_s:>5} {max_s:>5}  {_covered(r)}"
                 )
+
+        if partial:
+            lines.append("")
+            lines.append(
+                f"  Note: {len(partial)} of {len(results)} node(s) returned less history than the "
+                f"{hours}h requested"
+            )
+            lines.append(
+                "  (see COVERED). Nodes keep a limited metrics history, so their figures"
+            )
+            lines.append("  cover only that shorter span.")
 
         if problem_nodes:
             lines.append("")
             lines.append("--- No Data / Errors " + "-" * 49)
             for r in problem_nodes:
-                lines.append(f"  {r['hostname']:<38} {r['group']:<18} ({r['status']})")
+                reason = f": {r['error']}" if r.get("error") else ""
+                lines.append(f"  {r['hostname']:<38} {r['group']:<18} ({r['status']}{reason})")
 
         lines.append("")
         click.echo("\n".join(lines))

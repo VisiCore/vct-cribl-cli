@@ -13,6 +13,7 @@ from cribl_cli.api.endpoints.system import (
     get_system_logs,
     get_system_settings,
     get_worker_health,
+    list_upgrade_versions,
     reload_system,
     restart_system,
     send_system_diag,
@@ -21,6 +22,19 @@ from cribl_cli.api.endpoints.system import (
 from cribl_cli.output.formatter import format_output
 from cribl_cli.utils.errors import handle_error
 from cribl_cli.utils.group_resolver import resolve_group
+
+
+def _require_yes(yes: bool, action: str) -> None:
+    """Exit unless --yes was passed for a disruptive system action."""
+    if not yes:
+        click.echo(
+            f"WARNING: This will {action}.\nPass --yes to confirm.",
+            err=True,
+        )
+        raise SystemExit(1)
+
+
+_YES_OPT = click.option("--yes", is_flag=True, help="Confirm. Required to proceed.")
 
 
 @click.group("system", help="System information and management.")
@@ -139,8 +153,10 @@ def system_diag_send_cmd():
 
 
 @system_group.command("restart")
-def system_restart_cmd():
+@_YES_OPT
+def system_restart_cmd(yes):
     """Restart the system."""
+    _require_yes(yes, "restart the Cribl leader")
     try:
         client = get_client()
         data = restart_system(client)
@@ -150,8 +166,10 @@ def system_restart_cmd():
 
 
 @system_group.command("reload")
-def system_reload_cmd():
+@_YES_OPT
+def system_reload_cmd(yes):
     """Reload system configuration."""
+    _require_yes(yes, "reload the leader's configuration")
     try:
         client = get_client()
         data = reload_system(client)
@@ -160,12 +178,27 @@ def system_reload_cmd():
         handle_error(e)
 
 
-@system_group.command("upgrade")
-def system_upgrade_cmd():
-    """Upgrade the system."""
+@system_group.command("upgrade-versions")
+@click.option("--table", "use_table", is_flag=True, help="Output as table.")
+def system_upgrade_versions_cmd(use_table):
+    """List the Cribl versions available to upgrade to."""
     try:
         client = get_client()
-        data = upgrade_system(client)
+        data = list_upgrade_versions(client)
+        click.echo(format_output(data, table=use_table))
+    except Exception as e:
+        handle_error(e)
+
+
+@system_group.command("upgrade")
+@click.argument("version")
+@_YES_OPT
+def system_upgrade_cmd(version, yes):
+    """Upgrade the system to VERSION (see `system upgrade-versions`)."""
+    _require_yes(yes, f"start a system upgrade to {version}")
+    try:
+        client = get_client()
+        data = upgrade_system(client, version)
         click.echo(format_output(data))
     except Exception as e:
         handle_error(e)

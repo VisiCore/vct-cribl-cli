@@ -119,17 +119,21 @@ Every command supports these root-level options:
 | `--client-id` | Client ID override |
 | `--client-secret` | Client secret override |
 | `--verbose` | Log HTTP requests to stderr |
-| `--dry-run` | Preview mode — logs request details without sending |
+| `--timeout <seconds>` | Seconds to wait for each API request (default: 30; env `CRIBL_TIMEOUT`). Raise it for slow nodes, e.g. `cribl --timeout 120 health cpu` |
+| `--dry-run` | Preview mode — runs reads, logs the first write and aborts before sending it |
 | `-h, --help` | Show help |
 
 ### Dry-run mode
 
-With `--dry-run`, the CLI logs every API call to stderr as JSON and exits `0` without making any changes:
+With `--dry-run`, the CLI never changes anything. Read requests (GET) are sent as normal — a command needs them to resolve the group or fetch the object it is about to merge into — and each is noted on stderr. The first write (POST/PUT/PATCH/DELETE) is logged to stderr as JSON and the CLI exits `0` without sending it:
 
 ```bash
-cribl --dry-run sources list -g default
-# stderr: {"dry_run": true, "method": "GET", "url": "https://...", "headers": {...}}
+cribl --dry-run sources update my_src '{"description":"x"}' -g default
+# stderr: dry-run: GET https://.../system/inputs/my_src (read, sent)
+# stderr: {"dry_run": true, "method": "PATCH", "url": "https://...", "headers": {...}, "body": {...}}
 ```
+
+A read-only command therefore behaves the same with or without `--dry-run`.
 
 ### Verbose mode
 

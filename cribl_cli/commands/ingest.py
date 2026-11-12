@@ -205,21 +205,21 @@ def ingest_dashboard(hours, as_json, use_table):
         if use_table:
             rows = [
                 {
-                    "source": "Stream",
+                    "product": "Stream",
                     "events_in": _format_count(stream["eventsIn"]),
                     "events_out": _format_count(stream["eventsOut"]),
                     "bytes_in": _format_bytes(stream["bytesIn"]),
                     "bytes_out": _format_bytes(stream["bytesOut"]),
                 },
                 {
-                    "source": "Edge",
+                    "product": "Edge",
                     "events_in": _format_count(edge["eventsIn"]),
                     "events_out": _format_count(edge["eventsOut"]),
                     "bytes_in": _format_bytes(edge["bytesIn"]),
                     "bytes_out": _format_bytes(edge["bytesOut"]),
                 },
                 {
-                    "source": "Search",
+                    "product": "Search",
                     "events_in": _format_count(search["eventsIn"]),
                     "events_out": _format_count(search["eventsOut"]),
                     "bytes_in": _format_bytes(search["bytesIn"]),
@@ -244,8 +244,8 @@ def ingest_dashboard(hours, as_json, use_table):
         lines.append(f"  Bytes Diff:    {_format_bytes(abs(bytes_diff)):>12}  ({_pct_diff(total_bytes_in, total_bytes_out)})")
 
         lines.append("")
-        lines.append("--- Breakdown by Source " + "-" * 37)
-        hdr = f"  {'SOURCE':<12} {'EVENTS IN':>12} {'EVENTS OUT':>12} {'BYTES IN':>12} {'BYTES OUT':>12}"
+        lines.append("--- Breakdown by Product " + "-" * 36)
+        hdr = f"  {'PRODUCT':<12} {'EVENTS IN':>12} {'EVENTS OUT':>12} {'BYTES IN':>12} {'BYTES OUT':>12}"
         lines.append(hdr)
         for label, counters in [("Stream", stream), ("Edge", edge), ("Search", search)]:
             lines.append(
