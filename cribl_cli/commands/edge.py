@@ -25,6 +25,7 @@ from cribl_cli.api.endpoints.edge_nodes import (
     list_node_containers,
     list_node_processes,
     list_worker_logs,
+    metrics_coverage,
     search_worker_log,
 )
 from cribl_cli.output.formatter import format_output
@@ -400,7 +401,12 @@ def edge_heartbeats(fleet, use_table, threshold):
 @click.option("-f", "--fleet", default=None, help="Fleet/group name to filter by.")
 @click.option("--table", "use_table", is_flag=True, help="Output as table.")
 def edge_nodes(fleet, use_table):
-    """List edge nodes (optionally filtered by fleet)."""
+    """List Edge nodes only (optionally filtered by fleet).
+
+    Stream worker nodes are listed by `workers nodes`; `workers nodes --all`
+    lists every connected node. The other `edge` commands that take a NODE
+    (metrics, system-info, file-search, ...) accept any node, Stream or Edge.
+    """
     try:
         client = get_client()
         nodes = list_edge_nodes(client, fleet)
@@ -632,58 +638,10 @@ def edge_errors(fleet, limit, query, use_table):
             click.echo("No nodes found.", err=True)
             return
 
-        all_errors: list[dict] = []
-        for node in nodes:
-            node_id = node["id"]
-            hostname = node["hostname"] or node_id
-            try:
-                # List available logs to find the best cribl.log
-                logs_data = list_worker_logs(client, node_id)
-                log_items = logs_data.get("items", []) if isinstance(logs_data, dict) else []
+        # Imported here: commands.health imports this package's endpoints too.
+        from cribl_cli.commands.health import scan_errors
 
-                # Prefer worker/0/cribl.log (has more detail), fall back to cribl.log
-                log_id = "cribl.log"
-                for log in log_items:
-                    lid = log.get("id", "") if isinstance(log, dict) else str(log)
-                    if lid == "worker/0/cribl.log":
-                        log_id = lid
-                        break
-
-                # Search for errors — fetch more than limit to filter by level
-                filter_str = query or "error"
-                data = search_worker_log(client, node_id, log_id, filter_str, limit * 3)
-                items = data.get("items", []) if isinstance(data, dict) else []
-                count = 0
-                for result in items:
-                    events = result.get("events", []) if isinstance(result, dict) else []
-                    for ev in events:
-                        level = ev.get("level", ev.get("severity", ""))
-                        # When using default filter, only keep error/warn level
-                        if not query and level not in ("error", "warn", "crit", "fatal"):
-                            continue
-                        if count >= limit:
-                            break
-                        msg = ev.get("message", ev.get("_raw", ""))
-                        ts = ev.get("time", ev.get("_time", ev.get("timestamp", "")))
-                        channel = ev.get("channel", "")
-                        all_errors.append({
-                            "node": hostname,
-                            "group": node["group"],
-                            "level": level,
-                            "channel": channel,
-                            "time": ts,
-                            "message": msg[:200] if msg else "",
-                        })
-                        count += 1
-            except Exception as node_err:
-                all_errors.append({
-                    "node": hostname,
-                    "group": node["group"],
-                    "level": "fetch_error",
-                    "channel": "",
-                    "time": "",
-                    "message": str(node_err)[:200],
-                })
+        all_errors = scan_errors(client, nodes, limit, query)
 
         if not all_errors:
             click.echo(f"No errors found across {len(nodes)} node(s).", err=True)
@@ -724,6 +682,15 @@ def edge_metrics(node, duration, summary, use_table):
             click.echo("No metrics data available for this time range.", err=True)
             raise SystemExit(1)
 
+        coverage = metrics_coverage(points, seconds)
+        if coverage["partial"]:
+            click.echo(
+                f'Note: asked for {duration} but "{found["hostname"]}" only returned '
+                f'{coverage["covered_minutes"]:g} min of metrics '
+                f'({coverage["from"]} to {coverage["to"]}). Nodes keep a limited history.',
+                err=True,
+            )
+
         if summary:
             cpus = [p["cpu_perc"] for p in points if p.get("cpu_perc") is not None]
             mems = [p["mem_used_pct"] for p in points if p.get("mem_used_pct") is not None]
@@ -736,6 +703,8 @@ def edge_metrics(node, duration, summary, use_table):
             s = {
                 "hostname": found["hostname"],
                 "duration": duration,
+                "covered_minutes": coverage["covered_minutes"],
+                "partial_window": coverage["partial"],
                 "data_points": len(points),
                 "from": points[0]["time"],
                 "to": points[-1]["time"],

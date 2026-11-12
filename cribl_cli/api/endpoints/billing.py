@@ -86,10 +86,10 @@ def get_invoice(client: httpx.Client, org_id: str, invoice_id: str) -> Any:
 def get_product_usage_breakdown(
     client: httpx.Client, org_id: str, product_slug: str, *,
     starting_on: str, ending_before: str, window: str = "monthly",
-    aggregation_profile: str = "default",
+    aggregation_profile: str | None = None,
 ) -> Any:
     params = _consumption_params(starting_on, ending_before, window)
-    params["aggregationProfile"] = aggregation_profile
+    params["aggregationProfile"] = aggregation_profile or "default"
     resp = client.get(_consumption_url(org_id, f"product-usage-breakdown/{product_slug}"), params=params)
     resp.raise_for_status()
     return resp.json()
@@ -134,10 +134,10 @@ def get_credits_stats(
 def get_credits_timeseries(
     client: httpx.Client, org_id: str, *,
     starting_on: str, ending_before: str, window: str = "monthly",
-    aggregation_profile: str = "default", max_projections: int | None = None,
+    aggregation_profile: str | None = None, max_projections: int | None = None,
 ) -> Any:
     params = _consumption_params(starting_on, ending_before, window)
-    params["aggregationProfile"] = aggregation_profile
+    params["aggregationProfile"] = aggregation_profile or "default"
     if max_projections is not None:
         params["maxProjectionsCount"] = str(max_projections)
     resp = client.get(f"{_BASE}/{org_id}/billing/credits/timeseries", params=params)
@@ -148,10 +148,10 @@ def get_credits_timeseries(
 def get_usage_timeseries(
     client: httpx.Client, org_id: str, *,
     starting_on: str, ending_before: str, window: str = "monthly",
-    aggregation_profile: str = "default",
+    aggregation_profile: str | None = None,
 ) -> Any:
     params = _consumption_params(starting_on, ending_before, window)
-    params["aggregationProfile"] = aggregation_profile
+    params["aggregationProfile"] = aggregation_profile or "default"
     resp = client.get(f"{_BASE}/{org_id}/billing/usage/timeseries", params=params)
     resp.raise_for_status()
     return resp.json()

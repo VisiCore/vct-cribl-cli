@@ -56,18 +56,19 @@ cribl config use <name>                                  # Switch active profile
 Manage worker groups, deploy configs, and spin up Docker workers.
 
 ```bash
-cribl workers list [--table]
+cribl workers list [--type stream|edge|search|outpost] [--table]
 cribl workers get <group_id> [--table]
-cribl workers deploy <group>
+cribl workers deploy <group> --yes
 cribl workers add <group> --token <token> [options]
 cribl workers rm <container_name>
 ```
 
 | Subcommand | Options |
 |---|---|
-| `list` | `--table` |
+| `list` | `--type` (stream, edge, search, outpost), `--table` — lists every group, including fleets |
+| `nodes` | `-g, --group`, `--all` (include Edge nodes), `--table` |
 | `get` | `GROUP_ID`, `--table` |
-| `deploy` | `GROUP` — deploys committed config to workers |
+| `deploy` | `GROUP`, `--yes` (required) — deploys committed config to live workers |
 | `add` | `GROUP`, `--token` (required), `--version`, `--port` (default: 9000), `--name`, `--dry-run`, `--image` (default: "cribl/cribl") |
 | `rm` | `CONTAINER_NAME` — stops and removes Docker container |
 
@@ -124,7 +125,7 @@ cribl destinations delete <dest_id> -g <group>
 Manage pipelines for a worker group.
 
 ```bash
-cribl pipelines list -g <group> [--table]
+cribl pipelines list -g <group> [--no-packs] [--table]
 cribl pipelines get <pipeline_id> -g <group>
 cribl pipelines create '<json>' -g <group>
 cribl pipelines update <pipeline_id> '<json>' -g <group>
@@ -177,7 +178,7 @@ Submit and manage search jobs. All search commands default to the `default_searc
 
 ```bash
 cribl search run -q "dataset=='default_catch_all'" --earliest "-1h" --latest "now" --poll
-cribl search jobs [--table]
+cribl search jobs [-l <n>] [--status <state>] [--full] [--table]
 cribl search results <job_id> [--table]
 cribl search saved [--table]
 cribl search timeline <job_id>
@@ -189,8 +190,8 @@ cribl search job-diag <job_id>
 
 | Subcommand | Options |
 |---|---|
-| `run` | `-q, --query` (required), `--earliest`, `--latest`, `-g, --group`, `--poll` (wait for completion) |
-| `jobs` | `-g, --group`, `--table` |
+| `run` | `-q, --query` (required), `--earliest`, `--latest`, `-g, --group`, `--poll` (wait for completion), `--timeout <seconds>` (with `--poll`; default 0 = no limit) |
+| `jobs` | `-g, --group`, `-l, --limit` (default: 50, newest first; 0 = all), `--status` (e.g. running, failed), `--full` (complete job objects instead of a summary), `--table`. Output is `{items, count, total}` where `total` is the number matched before `--limit` |
 | `results` | `JOB_ID`, `-g, --group`, `--table` |
 | `saved` | `-g, --group`, `--table` |
 | `timeline` | `JOB_ID`, `-g, --group` |
@@ -199,7 +200,7 @@ cribl search job-diag <job_id>
 | `job-metrics` | `JOB_ID`, `-g, --group` |
 | `job-diag` | `JOB_ID`, `-g, --group` |
 
-With `--poll`, the `run` command waits for the job to complete (polling every 2 seconds), then outputs results. The results endpoint returns NDJSON which is parsed into `{meta, items}`.
+With `--poll`, the `run` command waits for the job to complete (polling every 2 seconds), then outputs results. A job that ends `failed` or `canceled`, or that outlives `--timeout`, exits `1`. The results endpoint returns NDJSON which is parsed into `{meta, items}`.
 
 ---
 
@@ -272,7 +273,7 @@ cribl edge heartbeats [-f <fleet>] [--threshold <seconds>] [--table]
 | `errors` | `-f, --fleet`, `-l, --limit` (default: 20), `-q, --query` (default: "error") — scans cribl.log across all nodes for errors |
 | `heartbeats` | `-f, --fleet`, `--threshold` (default: 300s) — checks node health: heartbeat, disk, memory, CPU |
 | `fileinspect` | `NODE`, `PATH` — stat, hashes (MD5/SHA256), head, hexdump. Edge nodes only. |
-| `metrics` | `NODE`, `-d, --duration` (5m\|10m\|15m\|30m\|1h\|4h\|12h\|1d), `--summary` — CPU, memory, disk over time |
+| `metrics` | `NODE`, `-d, --duration` (5m\|10m\|15m\|30m\|1h\|4h\|12h\|1d), `--summary` — CPU, memory, disk over time. Nodes keep a limited history (Stream workers about 10 minutes): if less than the requested window comes back, a note goes to stderr and `--summary` reports `covered_minutes` / `partial_window` |
 | `system-info` | `NODE` — formatted summary: CPU, memory, disk, network, OS |
 | `metadata` | Cribl build, mode, fleet, config version, OS per node; `--raw` adds the node's env vars |
 | `logs` | log files auto-discovered on the node and the processes writing them; read one with `file-search` |
@@ -288,7 +289,7 @@ Manage jobs and collectors.
 ```bash
 cribl jobs list -g <group> [--table]
 cribl jobs get <job_id> -g <group>
-cribl jobs run <collector_id> -g <group>
+cribl jobs run <collector_id> -g <group> [--mode run|preview|discovery]
 cribl jobs cancel <job_id> -g <group>
 cribl jobs pause <job_id> -g <group>
 cribl jobs resume <job_id> -g <group>
@@ -331,9 +332,10 @@ cribl system logs [--limit <n>] [--table]
 cribl system log <log_type> [--table]
 cribl system diag
 cribl system diag-send
-cribl system restart
-cribl system reload
-cribl system upgrade
+cribl system restart --yes
+cribl system reload --yes
+cribl system upgrade-versions
+cribl system upgrade <version> --yes
 ```
 
 ---
@@ -385,8 +387,7 @@ cribl logger set '<json>' -g <group>
 
 ```bash
 cribl profiler get -g <group> [--table]
-cribl profiler start -g <group>
-cribl profiler stop -g <group>
+cribl profiler-captures list|get|create|update|delete -g <group>
 ```
 
 ---
@@ -396,16 +397,16 @@ cribl profiler stop -g <group>
 Health checks, comprehensive reports, and CPU spike detection.
 
 ```bash
-cribl health check -g <group> [--table] [--all]
+cribl health check [-g <group> | --all-groups] [--summary] [--all] [--by-node/--no-by-node] [--fail-on-unhealthy] [--table]
 cribl health report [-g <group>] [--json] [--skip-errors] [--error-limit <n>]
 cribl health cpu [-g <group>] [--hours <n>] [--threshold <pct>] [--json] [--table]
 ```
 
 | Subcommand | Options |
 |---|---|
-| `check` | `-g, --group`, `--table`, `--all` — show unhealthy (or all) sources and destinations |
+| `check` | `-g, --group` or `--all-groups` (every group with connected nodes), `--summary` (counts per group: critical / warning / healthy / no_metrics / disabled), `--all` (every active item), `--by-node/--no-by-node` (which nodes each problem is on; on by default up to 20 nodes), `--fail-on-unhealthy` (exit 2 if unhealthy, 3 if the group has no nodes), `--table`. Output is a JSON list of unhealthy items (`[]` when none) with `nodes_affected` and a `message` giving the reason; a group with no connected nodes is reported as having no health data, never as healthy |
 | `report` | `-g, --group`, `--json`, `--skip-errors`, `--error-limit` (default: 10) — comprehensive report: nodes, capacity alerts, versions, unhealthy IO, config drift, errors |
-| `cpu` | `-g, --group`, `--hours` (default: 24), `--threshold` (default: 80), `--json`, `--table` — per-node CPU spike detection |
+| `cpu` | `-g, --group`, `--hours` (default: 24), `--threshold` (default: 80), `--json`, `--table` — per-node CPU spike detection. Each node reports `covered_minutes` and `partial_window`, because a node may return less history than `--hours` asks for; a node that cannot be read has status `error` with the reason in `error` |
 
 ---
 
@@ -551,11 +552,11 @@ Group-scoped commands also accept `-P, --pack <pack_id>` to target the resource
 | `global-vars` | all | `lib/vars` |
 | `db-connections` | all | `lib/db-connections` |
 | `secrets` | all | `system/secrets` |
-| `credentials` | all | `system/credentials` |
-| `collectors` | all | `collectors` |
+| `encryption-keys` | all | `system/keys` (field-encryption keys are per group) |
+| `collectors` | all | `lib/jobs` (the saved collectors the UI lists; `/collectors` is only the list of collector types) |
 | `conditions` | all | `lib/conditions` |
 | `parquet-schemas` | all | `lib/parquet-schemas` |
-| `protobuf-libs` | all | `lib/protobuf-libs` |
+| `protobuf-libs` | list, get | `lib/protobuf-libraries` |
 | `sds-rules` | all | `lib/sds/rules` |
 | `sds-rulesets` | all | `lib/sds/rulesets` |
 | `appscope` | all | `lib/appscope` |
@@ -565,7 +566,7 @@ Group-scoped commands also accept `-P, --pack <pack_id>` to target the resource
 | `scripts` | list, get, create, delete | `system/scripts` |
 | `executors` | list, get | `executors` |
 | `hmac-functions` | list, get | `lib/hmac` |
-| `functions` | list, get | `system/functions` |
+| `functions` | list, get | `functions` |
 
 ### Global-scoped (no group needed)
 
@@ -576,17 +577,16 @@ Group-scoped commands also accept `-P, --pack <pack_id>` to target the resource
 | `teams` | all | `system/teams` |
 | `policies` | all | `system/policies` |
 | `banners` | all | `system/banners` |
-| `encryption-keys` | all | `system/encryption-keys` |
+| `credentials` | list, get | `system/credentials` (workspace-wide, read-only) |
 | `notification-targets` | all | `system/notification-targets` |
-| `workspaces` | all | `workspaces` |
 | `messages` | list, get, create, delete | `system/messages` |
 | `licenses` | list, get | `system/licenses` |
 | `subscriptions` | list, get, create, update | `system/subscriptions` |
-| `outposts` | list, get | `system/outposts` |
-| `feature-flags` | list, get, update, delete | `system/feature-flags` |
-| `ai-settings` | list, get, update, delete | `system/ai-settings` |
-| `auth-settings` | get, update | `system/auth` (singleton) |
-| `git-settings` | get, update | `system/git-settings` (singleton) |
+| `outposts` | list, get | `master/outposts` |
+| `feature-flags` | list, get | `settings/features` |
+| `ai-settings` | list, get | `ai/settings/features` |
+| `auth-settings` | get, update | `system/settings/auth` (singleton) |
+| `git-settings` | get, update | `system/settings/git-settings` (singleton) |
 
 ### Search-scoped (default group: `default_search`)
 
@@ -604,7 +604,7 @@ Group-scoped commands also accept `-P, --pack <pack_id>` to target the resource
 | `alert-monitors` | all | `alert/monitors` |
 | `usage-groups` | all | `usage-groups` |
 
-### Lake-scoped (use `--lake`)
+### Lake-scoped (use `--lake`; defaults to `default`, the single lake in a Cribl Cloud workspace)
 
 | Command | Operations | API path |
 |---|---|---|

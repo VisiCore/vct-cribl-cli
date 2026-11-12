@@ -62,7 +62,7 @@ def _build_summary(items: list[dict], quota_gb_day: float) -> dict[str, Any]:
     annual_utilization_pct = (projected_annual_gb / annual_quota_gb * 100) if annual_quota_gb > 0 else 0
 
     # Status
-    if annual_utilization_pct > 90:
+    if annual_utilization_pct > 100:
         status = "OVER"
     elif annual_utilization_pct > 70:
         status = "AT RISK"
@@ -150,6 +150,12 @@ def finops_summary(as_json, use_table):
         usage = get_license_usage(client)
         items = usage.get("items", [])
         summary = _build_summary(items, quota)
+
+        if not summary:
+            if as_json:
+                click.echo(_json.dumps({}, indent=2))
+            click.echo("No license usage data returned for this environment.", err=True)
+            return
 
         if as_json:
             click.echo(_json.dumps(summary, indent=2))

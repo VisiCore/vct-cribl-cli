@@ -35,7 +35,7 @@ def logger_get(group, use_table):
 def logger_set(json_config, group):
     try:
         client = get_client()
-        g = resolve_group(client, group)
+        g = resolve_group(client, group, write=True)
         body = parse_json(json_config, "logger config")
         data = set_logger(client, g, body)
         click.echo(format_output(data))

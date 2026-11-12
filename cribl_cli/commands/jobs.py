@@ -55,12 +55,16 @@ def jobs_get(job_id, group, use_table):
 @jobs_group.command("run")
 @click.argument("job_id")
 @click.option("-g", "--group", default=None, help="Worker group.")
-def jobs_run(job_id, group):
-    """Run (trigger) an existing job by its collector config ID."""
+@click.option("--mode", type=click.Choice(["run", "preview", "discovery"]), default="run", show_default=True,
+              help="run = collect and send events; preview = sample without sending; discovery = list what would be collected.")
+def jobs_run(job_id, group, mode):
+    """Start a run of a saved collector. JOB_ID is the collector's id, as
+    listed by `collectors list` / `jobs list-configs`. Prints the new job;
+    follow it with `jobs get <job id>`."""
     try:
         client = get_client()
-        g = resolve_group(client, group)
-        data = run_job(client, g, job_id)
+        g = resolve_group(client, group, write=True)
+        data = run_job(client, g, job_id, mode)
         click.echo(format_output(data))
     except Exception as e:
         handle_error(e)
@@ -73,7 +77,7 @@ def jobs_cancel(job_id, group):
     """Cancel a running job."""
     try:
         client = get_client()
-        g = resolve_group(client, group)
+        g = resolve_group(client, group, write=True)
         data = cancel_job(client, g, job_id)
         click.echo(format_output(data))
     except Exception as e:
@@ -87,7 +91,7 @@ def jobs_pause(job_id, group):
     """Pause a running job."""
     try:
         client = get_client()
-        g = resolve_group(client, group)
+        g = resolve_group(client, group, write=True)
         data = pause_job(client, g, job_id)
         click.echo(format_output(data))
     except Exception as e:
@@ -101,7 +105,7 @@ def jobs_resume(job_id, group):
     """Resume a paused job."""
     try:
         client = get_client()
-        g = resolve_group(client, group)
+        g = resolve_group(client, group, write=True)
         data = resume_job(client, g, job_id)
         click.echo(format_output(data))
     except Exception as e:

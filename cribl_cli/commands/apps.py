@@ -193,12 +193,12 @@ def apps_invoke(app_id, endpoint, method, body, query, raw):
     try:
         client = get_client()
         parsed_body = parse_json(body, "body") if body else None
-        params = {}
+        params = []  # list of pairs: a key may repeat (e.g. two filter= params)
         for item in query:
             if "=" not in item:
                 raise click.BadParameter(f"expected key=value, got {item!r}", param_hint="--query")
             k, v = item.split("=", 1)
-            params[k] = v
+            params.append((k, v))
         resp = invoke_endpoint(client, app_id, endpoint, method=method, body=parsed_body, query=params)
         if raw:
             click.echo(resp.text)

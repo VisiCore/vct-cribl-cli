@@ -21,7 +21,7 @@ from cribl_cli.output.formatter import format_output
 from cribl_cli.utils.errors import handle_error
 from cribl_cli.utils.group_resolver import resolve_group
 from cribl_cli.utils.unwrap import unwrap_item
-from cribl_cli.utils.validation import parse_json
+from cribl_cli.utils.validation import merge_update, parse_json
 
 _EXPORT_MODES = click.Choice(["merge", "merge_safe", "default_only"])
 
@@ -65,7 +65,7 @@ def packs_get(pack_id, group, use_table):
 def packs_create(json_config, group):
     try:
         client = get_client()
-        g = resolve_group(client, group)
+        g = resolve_group(client, group, write=True)
         body = parse_json(json_config, "packs")
         data = create_pack(client, g, body)
         click.echo(format_output(data))
@@ -78,16 +78,19 @@ def packs_create(json_config, group):
 @click.argument("json_config")
 @click.option("-g", "--group", default=None, help="Worker group.")
 def packs_update(pack_id, json_config, group):
+    """Update a pack by merging JSON_CONFIG into it.
+
+    Only the fields you pass change; everything else is kept, including
+    nested keys you did not mention (e.g. '{"conf": {"description": "x"}}'
+    leaves the other conf fields alone). Preview with: cribl --dry-run ...
+    """
     try:
         client = get_client()
-        g = resolve_group(client, group)
+        g = resolve_group(client, group, write=True)
         existing = get_pack(client, g, pack_id)
         existing = unwrap_item(existing)
-        if isinstance(existing, dict):
-            existing.pop("status", None)
-            existing.pop("notifications", None)
         updates = parse_json(json_config, "packs")
-        merged = {**existing, **updates}
+        merged = merge_update(existing, updates)
         data = update_pack(client, g, pack_id, merged)
         click.echo(format_output(data))
     except Exception as e:
@@ -100,7 +103,7 @@ def packs_update(pack_id, json_config, group):
 def packs_delete(pack_id, group):
     try:
         client = get_client()
-        g = resolve_group(client, group)
+        g = resolve_group(client, group, write=True)
         data = delete_pack(client, g, pack_id)
         click.echo(format_output(data))
     except Exception as e:
@@ -138,7 +141,7 @@ def packs_install(source, group, version):
     """Install a pack from a Dispensary pack ID, URL, or .crbl path."""
     try:
         client = get_client()
-        g = resolve_group(client, group)
+        g = resolve_group(client, group, write=True)
         data = install_pack(client, g, source, version)
         click.echo(format_output(data))
     except Exception as e:
@@ -179,7 +182,7 @@ def packs_upgrade(pack_id, source, mode, group):
     """Upgrade a pack from a URL or .crbl path."""
     try:
         client = get_client()
-        g = resolve_group(client, group)
+        g = resolve_group(client, group, write=True)
         data = upgrade_pack(client, g, pack_id, source, mode)
         click.echo(format_output(data))
     except Exception as e:

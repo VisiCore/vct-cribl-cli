@@ -24,7 +24,7 @@ cribl overview summary
 cribl workers list --table
 
 # Deploy committed config to a group
-cribl workers deploy pi
+cribl workers deploy pi --yes
 
 # Spin up a Docker worker
 cribl workers add defaultHybrid --token $AUTH_TOKEN --port 9001
@@ -265,7 +265,7 @@ cribl version deploy -g pi -m "Deploy route changes" --yes
 Preview any command without making changes:
 
 ```bash
-# See what API call would be made
+# See what write would be made (reads still run; the write is not sent)
 cribl --dry-run sources create --type file --id test_src --path /tmp -g pi
 
 # Output (stderr):

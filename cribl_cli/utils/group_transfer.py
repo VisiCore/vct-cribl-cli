@@ -37,7 +37,9 @@ HANDWRITTEN_GENERIC: dict[str, str] = {
 }
 
 # Excluded from a default export; opt in with include_sensitive=True.
-SENSITIVE: frozenset[str] = frozenset({"secrets", "credentials", "certificates"})
+SENSITIVE: frozenset[str] = frozenset(
+    {"secrets", "certificates", "encryption-keys", "private-keys", "secret-folders"}
+)
 
 # Not applicable to edge fleets (Stream-only), skipped when isFleet is True.
 STREAM_ONLY: frozenset[str] = frozenset(
@@ -92,7 +94,7 @@ def _registry_group_configs() -> dict[str, EndpointConfig]:
     return {
         reg.name: reg.endpoint
         for reg in REGISTRY
-        if reg.endpoint.scope == "group" and "list" in reg.operations
+        if reg.endpoint.scope == "group" and "list" in reg.operations and reg.transfer
     }
 
 
@@ -108,7 +110,10 @@ RESOURCE_CONFIGS: dict[str, EndpointConfig] = {
 # (sources/destinations/pipelines/packs) support full CRUD.
 RESOURCE_OPERATIONS: dict[str, frozenset[str]] = {
     **{name: frozenset(ALL_OPS) for name in HANDWRITTEN_GENERIC},
-    **{reg.name: frozenset(reg.operations) for reg in REGISTRY if reg.endpoint.scope == "group"},
+    **{
+        reg.name: frozenset(reg.operations)
+        for reg in REGISTRY if reg.endpoint.scope == "group" and reg.transfer
+    },
 }
 
 
@@ -296,6 +301,11 @@ def _apply_routes(
 ) -> int:
     """Replace the target route table's items with the imported routes (opt-in)."""
     new_items = _items(routes_value)
+    if not new_items:
+        raise ValueError(
+            "refusing to replace the route table: the import payload has no routes "
+            "(missing, empty, or malformed 'routes' resource)"
+        )
     replace_route_table(client, target_id, new_items)
     return len(new_items)
 

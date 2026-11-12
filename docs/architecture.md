@@ -78,11 +78,11 @@ Commands are registered in `cli.py:_register_commands()`:
 ```
 Request
   -> AuthTransport       (injects Bearer token)
-    -> DryRunTransport   (logs and aborts if --dry-run, optional)
+    -> DryRunTransport   (if --dry-run: passes reads through, logs and aborts the first write)
       -> httpx.HTTPTransport (sends request)
 ```
 
-The `CriblCLI` group class in `cli.py` initializes the client before any non-config command runs. Config commands skip auth entirely.
+The root group's callback in `cli.py` (`CriblCLI.init_clients`) initializes the clients before any non-config command runs. Config commands skip auth entirely.
 
 ### API endpoint scopes
 

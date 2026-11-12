@@ -22,6 +22,12 @@ from cribl_cli.utils.group_resolver import resolve_group
 from cribl_cli.utils.validation import parse_json
 
 
+# Source types whose events carry a different __inputId prefix than the type
+# name. The CriblMetrics source has type "criblmetrics" but its events arrive
+# as __inputId=='cribl:CriblMetrics'.
+_INPUT_ID_PREFIX = {"criblmetrics": "cribl"}
+
+
 @click.group("routes", help="Manage the route table.")
 def routes_group():
     pass
@@ -80,7 +86,7 @@ def routes_create(json_config, route_id, input_id, pipeline, output, filter_expr
     """
     try:
         client = get_client()
-        g = resolve_group(client, group)
+        g = resolve_group(client, group, write=True)
 
         if json_config:
             new_route = parse_json(json_config, "route config")
@@ -108,7 +114,9 @@ def routes_create(json_config, route_id, input_id, pipeline, output, filter_expr
             except Exception:
                 src_type = ""
             if src_type:
-                new_route["filter"] = f"__inputId=='{src_type}:{input_id}'"
+                prefix = _INPUT_ID_PREFIX.get(src_type, src_type)
+                new_route["filter"] = f"__inputId=='{prefix}:{input_id}'"
+                click.echo(f"Resolved filter: {new_route['filter']}", err=True)
             else:
                 new_route["filter"] = f"__inputId=='{input_id}'"
                 click.echo(
@@ -146,10 +154,14 @@ def routes_update(route_id, json_config, group):
 
     ROUTE_ID is the id of the route to update.
     JSON_CONFIG is a JSON string of fields to merge into the existing route.
+
+    Routes live in one table document, so the request sent is a PATCH of the
+    whole table with only this route changed; the other routes are sent back
+    exactly as fetched.
     """
     try:
         client = get_client()
-        g = resolve_group(client, group)
+        g = resolve_group(client, group, write=True)
         updates = parse_json(json_config, "route config")
         data = update_route(client, g, route_id, updates)
         click.echo(format_output(data))
@@ -164,7 +176,7 @@ def routes_delete(route_id, group):
     """Remove a route by ID from the route table."""
     try:
         client = get_client()
-        g = resolve_group(client, group)
+        g = resolve_group(client, group, write=True)
         data = delete_route(client, g, route_id)
         click.echo(format_output(data))
     except Exception as e:

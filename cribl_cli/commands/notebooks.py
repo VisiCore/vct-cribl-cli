@@ -24,9 +24,9 @@ def _get_token_identity() -> tuple[str, str]:
     Returns (subject_id, display_name). Falls back to empty strings on failure.
     """
     try:
-        from cribl_cli.config.loader import load_config
+        from cribl_cli.config.loader import config_from_context, load_config
         from cribl_cli.auth.oauth import get_access_token
-        cfg = load_config()
+        cfg = config_from_context() or load_config()
         token = get_access_token(cfg)
         parts = token.split(".")
         if len(parts) < 2:

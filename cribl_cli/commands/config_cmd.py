@@ -9,6 +9,15 @@ from cribl_cli.config.loader import load_rc, save_rc
 from cribl_cli.config.types import ProfileConfig
 
 
+def _load_rc():
+    """load_rc() with a clean JSON error instead of a traceback."""
+    try:
+        return load_rc()
+    except ValueError as exc:
+        click.echo(json.dumps({"error": str(exc)}, indent=2), err=True)
+        raise SystemExit(1)
+
+
 @click.group("config", help="Manage CLI configuration profiles.")
 def config_group():
     pass
@@ -23,7 +32,7 @@ def config_group():
 @click.option("--username", default=None)
 @click.option("--password", default=None)
 def config_set(profile, base_url, auth_type, client_id, client_secret, username, password):
-    rc = load_rc()
+    rc = _load_rc()
     is_new = profile not in rc.profiles
     rc.profiles[profile] = ProfileConfig(
         base_url=base_url.rstrip("/"),
@@ -42,7 +51,7 @@ def config_set(profile, base_url, auth_type, client_id, client_secret, username,
 @config_group.command("show", help="Show profile configuration.")
 @click.option("-p", "--profile", default=None, help="Profile name.")
 def config_show(profile):
-    rc = load_rc()
+    rc = _load_rc()
     name = profile or rc.active_profile
     p = rc.profiles.get(name)
     if not p:
@@ -67,7 +76,7 @@ def config_show(profile):
 @config_group.command("use", help="Switch active profile.")
 @click.argument("profile")
 def config_use(profile):
-    rc = load_rc()
+    rc = _load_rc()
     if profile not in rc.profiles:
         click.echo(json.dumps({"error": f"Profile '{profile}' not found"}, indent=2), err=True)
         raise SystemExit(1)

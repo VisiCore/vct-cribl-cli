@@ -25,14 +25,12 @@ def extract_org_id(base_url: str) -> str:
             "Expected format: https://<orgId>.cribl.cloud"
         )
     subdomain = parts[0]
-    # Strip workspace prefix (e.g. 'main-acme-prod-x1y2z3a' -> 'acme-prod-x1y2z3a')
-    # Workspace prefixes are word chars followed by a dash before the org slug.
-    # Org slugs follow the pattern: <word>-<word>-<alphanum>
-    if "-" in subdomain:
-        # Check if this looks like a workspace-prefixed URL (e.g. main-org-slug-abc123)
-        # by trying to find the org slug portion (adjective-noun-id pattern)
-        import re
-        match = re.match(r'^[a-zA-Z0-9]+?-(.+-[a-zA-Z0-9]{6,})$', subdomain)
-        if match:
-            return match.group(1)
+    # Workspace URLs are '<workspace>-<org slug>', and an org slug is three
+    # dash-separated segments ending in a random id ('acme-prod-x1y2z3a').
+    # So when there are more than three segments the org id is the last three
+    # ('main-acme-prod-x1y2z3a' and 'my-ws-acme-prod-x1y2z3a' both give
+    # 'acme-prod-x1y2z3a'); with three or fewer the subdomain is the org id.
+    segments = subdomain.split("-")
+    if len(segments) > 3 and len(segments[-1]) >= 6:
+        return "-".join(segments[-3:])
     return subdomain

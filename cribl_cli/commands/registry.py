@@ -16,6 +16,9 @@ class CommandRegistration:
     name: str
     endpoint: EndpointConfig
     operations: list[Operation] = field(default_factory=lambda: list(ALL_OPS))
+    # False keeps a group-scoped resource out of `groups export`/`import`: it is
+    # runtime state or a built-in catalog, not configuration to move around.
+    transfer: bool = True
 
 
 REGISTRY: list[CommandRegistration] = [
@@ -28,54 +31,84 @@ REGISTRY: list[CommandRegistration] = [
     CommandRegistration("global-vars", EndpointConfig("group", "lib/vars")),
     CommandRegistration("db-connections", EndpointConfig("group", "lib/database-connections")),
     CommandRegistration("secrets", EndpointConfig("group", "system/secrets")),
-    CommandRegistration("credentials", EndpointConfig("group", "system/credentials")),
-    CommandRegistration("collectors", EndpointConfig("group", "collectors")),
-    CommandRegistration("conditions", EndpointConfig("group", "conditions")),
+    # Credentials are workspace-wide and read-only through this API.
+    CommandRegistration("credentials", EndpointConfig("global", "system/credentials"), ["list", "get"]),
+    # Field-encryption keys are per worker group: /m/{group}/system/keys.
+    CommandRegistration("encryption-keys", EndpointConfig("group", "system/keys")),
+    # Saved collectors live at lib/jobs (what the UI lists under Sources >
+    # Collectors). The /collectors endpoint only lists the collector *types*.
+    CommandRegistration("collectors", EndpointConfig("group", "lib/jobs")),
+    CommandRegistration("conditions", EndpointConfig("group", "conditions"), ["list", "get"]),
     CommandRegistration("parquet-schemas", EndpointConfig("group", "lib/parquet-schemas")),
-    CommandRegistration("protobuf-libs", EndpointConfig("group", "lib/protobuf-libs")),
+    CommandRegistration("protobuf-libs", EndpointConfig("group", "lib/protobuf-libraries"), ["list", "get"]),
     CommandRegistration("sds-rules", EndpointConfig("group", "lib/sds-rules")),
-    CommandRegistration("sds-rulesets", EndpointConfig("group", "lib/sds-rulesets")),
+    CommandRegistration("sds-rulesets", EndpointConfig("group", "lib/sds-rulesets"), ["list", "get", "delete"]),
     CommandRegistration("appscope", EndpointConfig("group", "lib/appscope-configs")),
+    CommandRegistration("subscriptions", EndpointConfig("group", "system/subscriptions")),
+    CommandRegistration("projects", EndpointConfig("group", "system/projects")),
+    CommandRegistration("private-keys", EndpointConfig("group", "system/private-keys")),
+    CommandRegistration("secret-folders", EndpointConfig("group", "system/secret-folders"), ["list", "get", "update", "delete"]),
+    # Group-scoped, not part of a group export (catalogs and runtime state)
+    CommandRegistration("profiler-captures", EndpointConfig("group", "system/profiler"), transfer=False),
+    CommandRegistration("collector-types", EndpointConfig("group", "collectors"), ["list", "get"], transfer=False),
+    CommandRegistration("mdt-devices", EndpointConfig("group", "lib/mdt-devices"), ["list", "get"], transfer=False),
+    CommandRegistration("iometrics", EndpointConfig("group", "system/iometrics"), ["list", "get", "update", "delete"], transfer=False),
     # Group-scoped (limited)
-    CommandRegistration("certificates", EndpointConfig("group", "system/certificates"), ["list", "get", "create", "delete"]),
-    CommandRegistration("samples", EndpointConfig("group", "system/samples"), ["list", "get", "create", "delete"]),
+    CommandRegistration("certificates", EndpointConfig("group", "system/certificates")),
+    CommandRegistration("samples", EndpointConfig("group", "system/samples")),
     CommandRegistration("scripts", EndpointConfig("group", "system/scripts"), ["list", "get", "create", "delete"]),
     CommandRegistration("lookups", EndpointConfig("group", "system/lookups")),
     # packs: hand-written command in commands/packs.py (export, install, upgrade)
     CommandRegistration("executors", EndpointConfig("group", "executors"), ["list", "get"]),
-    CommandRegistration("hmac-functions", EndpointConfig("group", "lib/hmac-functions"), ["list", "get"]),
-    CommandRegistration("functions", EndpointConfig("group", "system/functions"), ["list", "get"]),
+    CommandRegistration("hmac-functions", EndpointConfig("group", "lib/hmac-functions")),
+    CommandRegistration("functions", EndpointConfig("group", "functions"), ["list", "get"]),
     # Global-scoped (full CRUD)
     CommandRegistration("users", EndpointConfig("global", "system/users")),
     CommandRegistration("roles", EndpointConfig("global", "system/roles")),
     CommandRegistration("teams", EndpointConfig("global", "system/teams")),
     CommandRegistration("policies", EndpointConfig("global", "system/policies")),
     CommandRegistration("banners", EndpointConfig("global", "system/banners")),
-    CommandRegistration("encryption-keys", EndpointConfig("global", "system/encryption-keys")),
     CommandRegistration("notification-targets", EndpointConfig("global", "notification-targets")),
-    CommandRegistration("workspaces", EndpointConfig("global", "workspaces")),
+    CommandRegistration("provisioning-tokens", EndpointConfig("global", "system/provisioning-tokens")),
+    CommandRegistration("secret-stores", EndpointConfig("global", "system/secret-stores")),
+    CommandRegistration("dsd-connections", EndpointConfig("global", "system/dsd/connections")),
+    CommandRegistration("lakehouse-config-profiles", EndpointConfig("global", "products/lakehouse_engine_metrics/config-profiles")),
+    CommandRegistration("lakehouse-dataset-access", EndpointConfig("global", "products/lakehouse_engine_metrics/dataset-access")),
+    CommandRegistration("lakehouse-monitors", EndpointConfig("global", "products/lakehouse_engine_metrics/monitors")),
+    CommandRegistration("lakehouse-shared-configs", EndpointConfig("global", "products/lakehouse_engine_metrics/shared-configs")),
     # Global-scoped (limited)
+    CommandRegistration("mcp-servers", EndpointConfig("global", "ai/settings/mcp/servers"), ["list", "get", "create", "delete"]),
+    CommandRegistration("processes", EndpointConfig("global", "system/processes"), ["list", "get"]),
     CommandRegistration("messages", EndpointConfig("global", "system/messages"), ["list", "get", "create", "delete"]),
     CommandRegistration("licenses", EndpointConfig("global", "system/licenses"), ["list", "get"]),
-    CommandRegistration("subscriptions", EndpointConfig("global", "system/subscriptions"), ["list", "get", "create", "update"]),
-    CommandRegistration("outposts", EndpointConfig("global", "system/outposts"), ["list", "get"]),
+    CommandRegistration("outposts", EndpointConfig("global", "master/outposts"), ["list", "get"]),
     # alerts: hand-written command in commands/alerts.py (filters saved searches to scheduled ones)
-    CommandRegistration("feature-flags", EndpointConfig("global", "system/feature-flags"), ["list", "get", "update", "delete"]),
-    CommandRegistration("ai-settings", EndpointConfig("global", "system/ai-settings"), ["list", "get", "update", "delete"]),
-    CommandRegistration("auth-settings", EndpointConfig("global", "system/auth", singleton=True), ["get", "update"]),
-    CommandRegistration("git-settings", EndpointConfig("global", "system/git-settings", singleton=True), ["get", "update"]),
+    CommandRegistration("feature-flags", EndpointConfig("global", "settings/features"), ["list", "get"]),
+    CommandRegistration("ai-settings", EndpointConfig("global", "ai/settings/features"), ["list", "get"]),
+    CommandRegistration("auth-settings", EndpointConfig("global", "system/settings/auth", singleton=True), ["get", "update"]),
+    CommandRegistration("git-settings", EndpointConfig("global", "system/settings/git-settings", singleton=True), ["get", "update"]),
     # Search-scoped
     CommandRegistration("macros", EndpointConfig("search", "macros")),
     CommandRegistration("dataset-providers", EndpointConfig("search", "dataset-providers")),
     CommandRegistration("dashboard-categories", EndpointConfig("search", "dashboard-categories")),
-    CommandRegistration("trust-policies", EndpointConfig("search", "trust-policies")),
+    CommandRegistration("trust-policies", EndpointConfig("search", "trust-policies"), ["list", "get"]),
     CommandRegistration("datatypes", EndpointConfig("search", "datatypes")),
     CommandRegistration("datasets", EndpointConfig("search", "datasets")),
-    CommandRegistration("dashboards", EndpointConfig("search", "dashboards"), ["list", "get", "create", "delete"]),
+    CommandRegistration("dashboards", EndpointConfig("search", "dashboards")),
     CommandRegistration("saved-searches", EndpointConfig("search", "saved")),
     CommandRegistration("notifications", EndpointConfig("group", "notifications")),
-    CommandRegistration("alert-monitors", EndpointConfig("group", "alert/monitors")),
+    # Alerting lives in the search group, outside its /search/ path.
+    CommandRegistration("alert-monitors", EndpointConfig("searchgroup", "alert/monitors")),
+    CommandRegistration("alert-silences", EndpointConfig("searchgroup", "alert/silences")),
+    CommandRegistration("alert-history", EndpointConfig("searchgroup", "alert/history"), ["list", "get"]),
     CommandRegistration("usage-groups", EndpointConfig("search", "usage-groups")),
+    CommandRegistration("notebook-templates", EndpointConfig("search", "notebook-templates")),
+    CommandRegistration("dataset-provider-types", EndpointConfig("search", "dataset-provider-types"), ["list", "get"]),
+    CommandRegistration("dataset-rulesets", EndpointConfig("search", "local_search/dataset-rulesets")),
+    CommandRegistration("datatype-rulesets", EndpointConfig("search", "local_search/datatype-rulesets")),
+    CommandRegistration("local-search-engines", EndpointConfig("search", "local_search/engines")),
+    CommandRegistration("local-search-sources", EndpointConfig("search", "local_search/sources")),
+    CommandRegistration("federated-search-engines", EndpointConfig("search", "federated_search/engines"), ["list", "get", "update"]),
     # Lake-scoped
     CommandRegistration("lake-datasets", EndpointConfig("lake", "datasets")),
     CommandRegistration("storage-locations", EndpointConfig("lake", "storage-locations")),

@@ -8,20 +8,20 @@ import httpx
 
 def get_kms_config(client: httpx.Client, group: str) -> Any:
     """Get KMS configuration for a worker group."""
-    resp = client.get(f"/api/v1/m/{group}/system/kms")
+    resp = client.get(f"/api/v1/m/{group}/security/kms/config")
     resp.raise_for_status()
     return resp.json()
 
 
 def update_kms_config(client: httpx.Client, group: str, data: dict[str, Any]) -> Any:
     """Update KMS configuration for a worker group."""
-    resp = client.patch(f"/api/v1/m/{group}/system/kms", json=data)
+    resp = client.patch(f"/api/v1/m/{group}/security/kms/config", json=data)
     resp.raise_for_status()
     return resp.json()
 
 
 def get_kms_health(client: httpx.Client, group: str) -> Any:
     """Get KMS health status for a worker group."""
-    resp = client.get(f"/api/v1/m/{group}/system/kms/health")
+    resp = client.get(f"/api/v1/m/{group}/security/kms/health")
     resp.raise_for_status()
     return resp.json()

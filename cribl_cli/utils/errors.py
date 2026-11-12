@@ -29,6 +29,8 @@ def _extract_http_error_detail(err: Exception) -> dict | None:
         if isinstance(err, httpx.HTTPStatusError) and err.response is not None:
             try:
                 body = err.response.json()
+                if not isinstance(body, dict):
+                    return {"status": err.response.status_code, "detail": body}
                 # Cribl API often nests a JSON string inside "message"
                 msg = body.get("message", "")
                 if isinstance(msg, str):
@@ -46,6 +48,14 @@ def _extract_http_error_detail(err: Exception) -> dict | None:
     return None
 
 
+def _is_timeout(err: Exception) -> bool:
+    try:
+        import httpx
+        return isinstance(err, httpx.TimeoutException)
+    except ImportError:
+        return False
+
+
 def handle_error(err: Exception) -> None:
     if isinstance(err, DryRunAbort):
         sys.exit(0)
@@ -56,6 +66,12 @@ def handle_error(err: Exception) -> None:
             payload["detail"] = err.detail
     elif isinstance(err, AuthenticationError):
         payload = {"error": str(err), "type": "AuthenticationError"}
+    elif _is_timeout(err):
+        payload = {
+            "error": str(err) or "Request timed out",
+            "hint": "The API did not answer in time. Raise the limit with the global "
+                    "--timeout option (cribl --timeout 120 ...) or CRIBL_TIMEOUT.",
+        }
     else:
         detail = _extract_http_error_detail(err)
         if detail:

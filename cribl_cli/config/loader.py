@@ -15,9 +15,22 @@ RC_PATH = Path.home() / ".criblrc"
 def load_rc(path: Path | None = None) -> CriblRc:
     rc_file = path or RC_PATH
     try:
-        raw = json.loads(rc_file.read_text())
-    except (FileNotFoundError, json.JSONDecodeError):
+        text = rc_file.read_text()
+    except FileNotFoundError:
         return CriblRc()
+    # A file that exists but cannot be parsed is an error, not "no profiles":
+    # treating it as empty would let the next `config set` overwrite it and
+    # lose every saved profile.
+    try:
+        raw = json.loads(text)
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            f"{rc_file} is not valid JSON ({exc}). Fix or remove it; it has been left untouched."
+        ) from exc
+    if not isinstance(raw, dict):
+        raise ValueError(
+            f"{rc_file} must contain a JSON object. Fix or remove it; it has been left untouched."
+        )
 
     profiles: dict[str, ProfileConfig] = {}
     for name, data in raw.get("profiles", {}).items():
@@ -53,6 +66,23 @@ def save_rc(rc: CriblRc, path: Path | None = None) -> None:
     data = {"profiles": profiles_raw, "activeProfile": rc.active_profile}
     rc_file.write_text(json.dumps(data, indent=2) + "\n")
     rc_file.chmod(0o600)
+
+
+def config_from_context() -> CriblConfig | None:
+    """Return the config the running command was started with, if any.
+
+    The root CLI group resolves the profile once (honouring -p/--profile and
+    the --base-url/--client-id overrides) and stores it on the Click context.
+    Commands that need the config should read it from here rather than calling
+    ``load_config()`` with no arguments, which would ignore those flags.
+    """
+    import click
+
+    ctx = click.get_current_context(silent=True)
+    if ctx is None:
+        return None
+    obj = ctx.find_root().obj
+    return obj.get("_config") if isinstance(obj, dict) else None
 
 
 def load_config(

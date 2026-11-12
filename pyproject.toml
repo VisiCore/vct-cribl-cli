@@ -28,6 +28,9 @@ dev = [
 [tool.setuptools.packages.find]
 include = ["cribl_cli*"]
 
+[tool.setuptools.package-data]
+cribl_cli = ["data/*.json"]
+
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

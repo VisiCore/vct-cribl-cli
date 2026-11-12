@@ -65,7 +65,7 @@ cribl --base-url https://your-org.cribl.cloud --client-id ... --client-secret ..
 cribl <command> <subcommand> [options]
 ```
 
-### Hand-written commands (26)
+### Hand-written commands (29)
 
 | Command | Description |
 |---|---|
@@ -85,7 +85,7 @@ cribl <command> <subcommand> [options]
 | `kms` | KMS key management |
 | `preview` | Pipeline preview |
 | `logger` | Logger configuration |
-| `profiler` | Profiler management |
+| `profiler` | Profiler status (captures: `profiler-captures`) |
 | `health` | Health checks, reports, and CPU spike detection |
 | `overview` | Environment summary |
 | `alerts` | Alerts (scheduled saved searches) |
@@ -95,18 +95,25 @@ cribl <command> <subcommand> [options]
 | `billing` | Billing usage and cost tracking |
 | `finops` | FinOps consumption tracking and dashboards |
 | `license-usage` | Daily license throughput metrics |
+| `groups` | Export and import a whole worker group's or fleet's config |
+| `api` | Call any API endpoint with the CLI's auth (JSON or file body, upload, save to file) |
+| `api-spec` | Search the bundled API reference and see which endpoints have a command |
 
 <details>
-<summary><strong>Factory-generated commands (52)</strong> — standard CRUD (list, get, create, update, delete)</summary>
+<summary><strong>Factory-generated commands (76)</strong> — standard CRUD (list, get, create, update, delete)</summary>
 
-`ai-settings`, `alert-monitors`, `appscope`, `auth-settings`, `banners`, `certificates`, `collectors`,
-`conditions`, `credentials`, `dashboard-categories`, `dashboards`, `dataset-providers`, `datasets`, `datatypes`,
-`db-connections`, `encryption-keys`, `event-breakers`, `executors`, `feature-flags`, `functions`, `git-settings`,
-`global-vars`, `grok`, `hmac-functions`, `lake-datasets`, `licenses`, `lookups`, `macros`,
-`messages`, `notification-targets`, `notifications`, `outposts`, `parquet-schemas`, `parsers`, `policies`,
-`protobuf-libs`, `regex`, `roles`, `samples`, `saved-searches`, `schemas`, `scripts`,
-`sds-rules`, `sds-rulesets`, `secrets`, `storage-locations`, `subscriptions`, `teams`, `trust-policies`,
-`usage-groups`, `users`, `workspaces`
+`ai-settings`, `alert-history`, `alert-monitors`, `alert-silences`, `appscope`, `auth-settings`, `banners`,
+`certificates`, `collector-types`, `collectors`, `conditions`, `credentials`, `dashboard-categories`,
+`dashboards`, `dataset-provider-types`, `dataset-providers`, `dataset-rulesets`, `datasets`, `datatype-
+rulesets`, `datatypes`, `db-connections`, `dsd-connections`, `encryption-keys`, `event-breakers`, `executors`,
+`feature-flags`, `federated-search-engines`, `functions`, `git-settings`, `global-vars`, `grok`, `hmac-
+functions`, `iometrics`, `lake-datasets`, `lakehouse-config-profiles`, `lakehouse-dataset-access`, `lakehouse-
+monitors`, `lakehouse-shared-configs`, `licenses`, `local-search-engines`, `local-search-sources`, `lookups`,
+`macros`, `mcp-servers`, `mdt-devices`, `messages`, `notebook-templates`, `notification-targets`,
+`notifications`, `outposts`, `parquet-schemas`, `parsers`, `policies`, `private-keys`, `processes`, `profiler-
+captures`, `projects`, `protobuf-libs`, `provisioning-tokens`, `regex`, `roles`, `samples`, `saved-searches`,
+`schemas`, `scripts`, `sds-rules`, `sds-rulesets`, `secret-folders`, `secret-stores`, `secrets`, `storage-
+locations`, `subscriptions`, `teams`, `trust-policies`, `usage-groups`, `users`
 
 </details>
 
@@ -116,8 +123,8 @@ cribl <command> <subcommand> [options]
 # List all worker groups
 cribl workers list
 
-# Deploy config to a group
-cribl workers deploy pi
+# Deploy config to a group (--yes is required)
+cribl workers deploy pi --yes
 
 # List sources for a group
 cribl sources list -g defaultHybrid --table
@@ -152,8 +159,8 @@ cribl ingest dashboard
 # FinOps consumption tracking
 cribl finops consumption
 
-# Dry-run mode (preview API calls without sending)
-cribl --dry-run sources list -g default
+# Dry-run mode (reads run; the first write is printed and aborted)
+cribl --dry-run sources update my_src '{"description":"x"}' -g default
 ```
 
 ### Output formats
