@@ -153,8 +153,9 @@ def _row(op: dict, covered: set[tuple[str, str]]) -> dict:
         "path": op["path"],
         "tag": op["tag"],
         "summary": op["summary"],
-        # True when a dedicated command already calls this endpoint.
-        "has_command": (op["method"], normalize(op["path"])) in covered,
+        # True when a dedicated command already calls this endpoint. False does
+        # not mean unsupported: every endpoint is reachable through `call`.
+        "dedicated_command": (op["method"], normalize(op["path"])) in covered,
         "call": f"cribl api {op['method']} {op['path']}",
     }
 
@@ -173,6 +174,10 @@ def api_spec_search(words, method, tag, missing, limit, use_table):
     Each result includes the `cribl api` call to make. Paths are relative to the
     API root; add `-g <group>` to that call for anything inside a worker group,
     fleet or search group.
+
+    `dedicated_command` says whether a purpose-built command (such as
+    `cribl pipelines list`) already wraps the endpoint. When it is false the
+    endpoint is still fully usable: run the `call` shown.
 
     \b
     Examples:
@@ -194,13 +199,13 @@ def api_spec_search(words, method, tag, missing, limit, use_table):
             if not all(n in hay for n in needles):
                 continue
             row = _row(op, covered)
-            if missing and row["has_command"]:
+            if missing and row["dedicated_command"]:
                 continue
             rows.append(row)
         matched = len(rows)
         if limit:
             rows = rows[:limit]
-        cols = ["method", "path", "tag", "has_command", "summary"] if use_table else None
+        cols = ["method", "path", "tag", "dedicated_command", "summary"] if use_table else None
         click.echo(format_output({"items": rows, "count": len(rows), "total": matched},
                                  table=use_table, columns=cols))
         if len(rows) < matched:

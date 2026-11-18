@@ -10,6 +10,7 @@ from cribl_cli.api.client import get_client
 from cribl_cli.api.endpoints.version import commit_version
 from cribl_cli.api.endpoints.workers import deploy_group
 from cribl_cli.output.formatter import format_output
+from cribl_cli.utils.confirm import require_yes
 from cribl_cli.utils.errors import handle_error
 from cribl_cli.utils.group_resolver import resolve_group
 from cribl_cli.utils.group_transfer import (
@@ -89,12 +90,8 @@ def groups_import(group, in_path, with_routes, with_packs, with_lookups, commit_
         client = get_client()
         target = resolve_group(client, group)
 
-        if deploy and not yes:
-            click.echo(
-                "WARNING: --deploy commits and pushes config to live workers. Pass --yes to confirm.",
-                err=True,
-            )
-            sys.exit(1)
+        if deploy:
+            require_yes(yes, "--deploy commits and pushes config to live workers. Pass --yes to confirm.")
 
         report = apply(
             client, target, payload,

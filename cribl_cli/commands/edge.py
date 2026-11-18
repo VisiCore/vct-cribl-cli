@@ -665,7 +665,14 @@ DUR_MAP = {
 @click.option("--summary", is_flag=True, help="Show min/max/avg summary.")
 @click.option("--table", "use_table", is_flag=True, help="Output as table.")
 def edge_metrics(node, duration, summary, use_table):
-    """Get historical metrics (CPU, memory, disk, load) for a node."""
+    """CPU, memory, disk and load history for one node (Stream worker or Edge).
+
+    NODE is a hostname or node id from `workers nodes --all`. Add --summary for
+    min/max/avg over the window. Nodes keep a limited history (Stream workers
+    about 10 minutes), so check covered_minutes for the span actually returned.
+
+    Also available as `cribl metrics node`.
+    """
     try:
         client = get_client()
         found = _require_node(client, node)

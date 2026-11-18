@@ -1,7 +1,6 @@
 """Version control commands for Cribl configuration."""
 from __future__ import annotations
 
-import sys
 
 import click
 
@@ -18,6 +17,7 @@ from cribl_cli.api.endpoints.version import (
 )
 from cribl_cli.api.endpoints.workers import deploy_group
 from cribl_cli.output.formatter import format_output
+from cribl_cli.utils.confirm import require_yes
 from cribl_cli.utils.errors import handle_error
 from cribl_cli.utils.group_resolver import resolve_group
 
@@ -151,13 +151,11 @@ def version_deploy(group, message, yes):
     CRITICAL SAFETY: This pushes config to live workers. You MUST pass --yes
     to confirm. Without --yes the command prints a warning and exits.
     """
-    if not yes:
-        click.echo(
-            "WARNING: This will commit and deploy configuration to live workers.\n"
-            "Pass --yes to confirm deployment, or preview with: cribl --dry-run version deploy ... --yes",
-            err=True,
-        )
-        sys.exit(1)
+    require_yes(
+        yes,
+        "This will commit and deploy configuration to live workers.\n"
+        "Pass --yes to confirm deployment, or preview with: cribl --dry-run version deploy ...",
+    )
 
     try:
         client = get_client()

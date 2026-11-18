@@ -141,6 +141,22 @@ users
   to save a binary response, `-q k=v` (repeatable) for query parameters, and the
   global `--dry-run` to preview a write. Paths are written as in the API
   reference, relative to the API root; `-g` puts them under `/m/<group>/`.
+- Lookup files: `lookups download <id> -g <group> [-o FILE]` returns the file as
+  stored, and `lookups upload FILE -g <group> [--id ID]` creates the lookup or
+  replaces its file (staged; commit and deploy afterwards). The generated
+  `lookups create/update` only touch metadata.
+- Metrics: use `metrics query` (server-side aggregation, about a second) for
+  throughput and health numbers, and `metrics node NODE --summary` (same command
+  as `edge metrics`) for one node's CPU, memory, disk and load. `metrics get`
+  dumps the whole raw store (hundreds of MB) and ignores its filters on the
+  leader — avoid it.
+- `--fields` is a global option but is accepted after the subcommand too
+  (`cribl sources list --fields id,type`).
+- `--yes` is not needed under `--dry-run`; use `require_yes()` from
+  `utils/confirm.py` for any new command that changes live systems.
+- In `api-spec` output, `dedicated_command: false` means only that no
+  purpose-built command wraps the endpoint; it is still callable with the `call`
+  shown.
 - `cribl_cli/data/api_paths.json` is the API reference in compact form (refresh
   with `scripts/update_api_paths.py` after a Cribl upgrade). `tests/unit/
   test_api_coverage.py` fails if a command calls a path that is not in it, so

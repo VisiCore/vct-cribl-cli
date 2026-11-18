@@ -978,3 +978,152 @@ def test_jobs_run_starts_a_job_from_the_saved_collector():
     assert client.get.call_args.args[0] == "/api/v1/m/g/lib/jobs/c1"
     assert client.post.call_args.args[0] == "/api/v1/m/g/jobs"
     assert client.post.call_args.kwargs["json"] == {"id": "c1", "type": "collection", "run": {"mode": "preview"}}
+
+
+# ---------------------------------------------------------------------------
+# Lookup file transfer
+# ---------------------------------------------------------------------------
+
+def _http(status=200, json_data=None, content=b""):
+    resp = MagicMock(spec=httpx.Response)
+    resp.status_code = status
+    resp.json.return_value = json_data if json_data is not None else {}
+    resp.content = content
+    resp.raise_for_status.return_value = None
+    return resp
+
+
+def test_lookup_download_asks_for_the_raw_file():
+    from cribl_cli.api.endpoints.lookups import download_lookup
+
+    client = _client()
+    client.get.return_value = _http(content=b"a,b\n1,2\n")
+    assert download_lookup(client, "default", "hosts.csv") == b"a,b\n1,2\n"
+    args, kwargs = client.get.call_args
+    assert args[0] == "/api/v1/m/default/system/lookups/hosts.csv/content"
+    # Without raw=true the API returns JSON rows, not the file.
+    assert kwargs["params"] == {"raw": "true"}
+
+
+def test_lookup_upload_creates_when_missing():
+    from cribl_cli.api.endpoints.lookups import upload_lookup
+
+    client = _client()
+    client.get.return_value = _http(status=404)
+    client.put.return_value = _http(json_data={"filename": "hosts.abc.tmp", "rows": 1, "size": 8})
+    client.post.return_value = _http(json_data={"items": [{"id": "hosts.csv"}]})
+
+    result = upload_lookup(client, "default", "hosts.csv", b"a,b\n1,2\n")
+
+    put_args, put_kwargs = client.put.call_args
+    assert put_args[0] == "/api/v1/m/default/system/lookups"
+    assert put_kwargs["params"] == {"filename": "hosts.csv"}
+    assert put_kwargs["content"] == b"a,b\n1,2\n"
+    assert put_kwargs["headers"]["Content-Type"] == "text/csv"
+    assert client.post.call_args.kwargs["json"] == {"id": "hosts.csv", "fileInfo": {"filename": "hosts.abc.tmp"}}
+    client.patch.assert_not_called()
+    assert result["action"] == "created"
+
+
+def test_lookup_upload_replaces_file_and_keeps_other_fields():
+    from cribl_cli.api.endpoints.lookups import upload_lookup
+
+    client = _client()
+    client.get.return_value = _http(json_data={"items": [
+        {"id": "hosts.csv", "description": "keep me", "size": 5, "status": {"x": 1}},
+    ]})
+    client.put.return_value = _http(json_data={"filename": "hosts.def.tmp"})
+    client.patch.return_value = _http(json_data={"items": [{"id": "hosts.csv"}]})
+
+    result = upload_lookup(client, "default", "hosts.csv", b"x")
+
+    args, kwargs = client.patch.call_args
+    assert args[0] == "/api/v1/m/default/system/lookups/hosts.csv"
+    assert kwargs["json"]["description"] == "keep me"
+    assert kwargs["json"]["fileInfo"] == {"filename": "hosts.def.tmp"}
+    assert "status" not in kwargs["json"]
+    client.post.assert_not_called()
+    assert result["action"] == "updated"
+
+
+def test_lookups_group_has_file_commands():
+    result = _invoke(["lookups", "--help"])
+    assert "download" in result.output and "upload" in result.output
+
+
+# ---------------------------------------------------------------------------
+# --fields after the subcommand, --yes under --dry-run, metrics
+# ---------------------------------------------------------------------------
+
+def test_fields_is_hoisted_from_after_the_subcommand():
+    from cribl_cli.cli import _hoist_fields
+
+    assert _hoist_fields(["sources", "list", "--fields", "id,type", "-g", "x"]) == [
+        "--fields", "id,type", "sources", "list", "-g", "x"]
+    assert _hoist_fields(["sources", "list", "--fields=id"]) == ["--fields=id", "sources", "list"]
+    # Already global, and anything after a bare -- is left alone.
+    assert _hoist_fields(["--fields", "id", "sources", "list"]) == ["--fields", "id", "sources", "list"]
+    assert _hoist_fields(["api", "GET", "/x", "--", "--fields", "id"]) == ["api", "GET", "/x", "--", "--fields", "id"]
+
+
+def test_fields_after_subcommand_filters_output():
+    with patch("cribl_cli.commands.workers.get_client"), \
+         patch("cribl_cli.commands.workers.list_worker_groups",
+               return_value=[{"id": "g1", "workerCount": 2, "description": "d"}]):
+        result = _invoke(["workers", "list", "--fields", "id"])
+    assert result.exit_code == 0, result.output
+    assert '"id": "g1"' in result.output and "workerCount" not in result.output
+
+
+@pytest.mark.parametrize("args", [
+    ["workers", "deploy", "g1"],
+    ["system", "restart"],
+])
+def test_confirmation_required_without_dry_run(args):
+    result = _invoke(args)
+    assert result.exit_code == 1
+    assert "--yes" in result.output
+
+
+def test_dry_run_does_not_need_yes():
+    with patch("cribl_cli.commands.workers.get_client"), \
+         patch("cribl_cli.commands.workers.deploy_group", return_value={"ok": True}) as deploy:
+        result = _invoke(["--dry-run", "workers", "deploy", "g1"])
+    assert result.exit_code == 0, result.output
+    deploy.assert_called_once()
+
+
+def test_metrics_query_builds_documented_body():
+    from cribl_cli.api.endpoints.metrics import build_metrics_query
+
+    assert build_metrics_query(['sum("x").as("y")'], where="a==1", split_by=["input"],
+                               earliest_seconds=3600) == {
+        "aggs": {"aggregations": ['sum("x").as("y")'], "cumulative": True, "splitBys": ["input"]},
+        "earliest": "3600s",
+        "where": "a==1",
+    }
+    windowed = build_metrics_query(["max(\"x\")"], window_seconds=300)
+    assert windowed["aggs"] == {"aggregations": ["max(\"x\")"], "timeWindowSeconds": 300}
+
+
+def test_metrics_durations():
+    from cribl_cli.commands.metrics import parse_window
+
+    assert [parse_window(v) for v in ("15m", "1h", "900s", "1d", "-15m", "60")] == [900, 3600, 900, 86400, 900, 60]
+    with pytest.raises(Exception):
+        parse_window("soon")
+
+
+def test_metrics_get_uses_documented_parameter_names():
+    from cribl_cli.api.endpoints.metrics import get_metrics
+
+    client = _client()
+    client.get.return_value = _http()
+    get_metrics(client, name="health.inputs", filter_expr="__input=='a'", earliest="-5m", buckets=1)
+    assert client.get.call_args.kwargs["params"] == {
+        "metricNameFilter": "health.inputs", "filterExpr": "__input=='a'", "earliest": "-5m", "numBuckets": 1}
+
+
+def test_node_metrics_is_reachable_under_metrics():
+    result = _invoke(["metrics", "node", "--help"])
+    assert result.exit_code == 0 and "--summary" in result.output

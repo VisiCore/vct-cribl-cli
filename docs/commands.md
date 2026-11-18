@@ -63,6 +63,10 @@ cribl workers add <group> --token <token> [options]
 cribl workers rm <container_name>
 ```
 
+Commands that require `--yes` (`workers deploy`, `version deploy`,
+`system restart|reload|upgrade`, `groups import --deploy`) do not need it under
+`--dry-run`, where nothing is sent.
+
 | Subcommand | Options |
 |---|---|
 | `list` | `--type` (stream, edge, search, outpost), `--table` — lists every group, including fleets |
@@ -258,7 +262,7 @@ cribl edge kube-logs <node> <container-id> [--table]
 cribl edge fileinspect <node> <path>
 cribl edge node-ls <node> <path> [--stats] [--table]
 cribl edge file-search <node> <path> -q <query> [-l <limit>]
-cribl edge metrics <node> [-d <duration>] [--summary] [--table]
+cribl edge metrics <node> [-d <duration>] [--summary] [--table]   # also: cribl metrics node
 ```
 
 ### Log scanning
@@ -343,7 +347,28 @@ cribl system upgrade <version> --yes
 ## metrics
 
 ```bash
-cribl metrics get [--filter <expr>] [--table]
+cribl metrics query -a <aggregation> [-a ...] [-w <where>] [-s <dimension> ...] [-e <earliest>] [--window <len>] [--table]
+cribl metrics node <node> [-d <duration>] [--summary] [--table]
+cribl metrics get [--name <regex>] [--filter <expr>] [-e <earliest>] [--latest <t>] [--buckets <n>] [-o <file>]
+```
+
+- `metrics query` aggregates on the leader and answers in about a second. `-a` is
+  an aggregation such as `sum("total.in_events").as("events_in")` (`sum`, `max`,
+  `min`, `avg`); `-w` filters on dimensions (`__worker_group=="default"`,
+  `has_no_dimensions`); `-s` groups by a dimension (`input`, `output`,
+  `__worker_group`); `-e` is how far back (`15m`, `1h`, `1d`); `--window 5m`
+  returns one row per time window instead of one total. Output is
+  `{"items": [...], "count": N}`.
+- `metrics node` is the same command as `edge metrics`: CPU, memory, disk and
+  load history for any connected node, Stream worker or Edge.
+- `metrics get` dumps the raw metrics store. It returns every series and can be
+  hundreds of megabytes; save it with `-o` and raise `--timeout`. Prefer
+  `metrics query`.
+
+```bash
+cribl metrics query -a 'sum("total.in_events").as("events_in")' -w '__worker_group=="default"' -s input -e 1h
+cribl metrics query -a 'sum("total.out_bytes").as("bytes_out")' -w has_no_dimensions -e 1h --window 5m
+cribl metrics node my-worker-1 --summary
 ```
 
 ---
@@ -610,6 +635,19 @@ Group-scoped commands also accept `-P, --pack <pack_id>` to target the resource
 |---|---|---|
 | `lake-datasets` | all | `datasets` |
 | `storage-locations` | all | `storage-locations` |
+
+### Lookup files
+
+`lookups` has two extra subcommands for the file itself (the CRUD commands only
+handle the lookup's metadata):
+
+```bash
+cribl lookups download <id> [-g <group>] [-o <file>]     # the file as stored; stdout without -o
+cribl lookups upload <file> [--id <id>] -g <group>       # create, or replace the file if it exists
+```
+
+`upload` stages the file and attaches it to the lookup; commit and deploy
+afterwards. Use `-g default_search` for Cribl Search lookups.
 
 ### Factory command options
 

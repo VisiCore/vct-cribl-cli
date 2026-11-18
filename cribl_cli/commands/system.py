@@ -20,18 +20,14 @@ from cribl_cli.api.endpoints.system import (
     upgrade_system,
 )
 from cribl_cli.output.formatter import format_output
+from cribl_cli.utils.confirm import require_yes
 from cribl_cli.utils.errors import handle_error
 from cribl_cli.utils.group_resolver import resolve_group
 
 
 def _require_yes(yes: bool, action: str) -> None:
     """Exit unless --yes was passed for a disruptive system action."""
-    if not yes:
-        click.echo(
-            f"WARNING: This will {action}.\nPass --yes to confirm.",
-            err=True,
-        )
-        raise SystemExit(1)
+    require_yes(yes, f"This will {action}.\nPass --yes to confirm, or preview with --dry-run.")
 
 
 _YES_OPT = click.option("--yes", is_flag=True, help="Confirm. Required to proceed.")

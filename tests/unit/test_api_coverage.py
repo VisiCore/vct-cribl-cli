@@ -185,10 +185,10 @@ def test_api_spec_search_matches_all_words_and_gives_the_call():
 def test_api_spec_search_filters_and_reports_commands():
     covered = json.loads(_spec(["search", "--tag", "pipelines", "--method", "GET", "--limit", "0"]).stdout)
     assert covered["items"] and all(r["tag"] == "pipelines" and r["method"] == "GET" for r in covered["items"])
-    assert any(r["has_command"] for r in covered["items"])
+    assert any(r["dedicated_command"] for r in covered["items"])
 
     missing = json.loads(_spec(["search", "--missing", "--limit", "0"]).stdout)
-    assert missing["items"] and not any(r["has_command"] for r in missing["items"])
+    assert missing["items"] and not any(r["dedicated_command"] for r in missing["items"])
 
 
 def test_api_spec_search_limit_notes_truncation():

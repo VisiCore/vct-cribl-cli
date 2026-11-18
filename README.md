@@ -81,7 +81,7 @@ cribl <command> <subcommand> [options]
 | `jobs` | Job management |
 | `version` | Version and deployment management |
 | `system` | System settings |
-| `metrics` | Metrics queries |
+| `metrics` | Aggregated metric queries, one node's CPU/memory history, raw store dump |
 | `kms` | KMS key management |
 | `preview` | Pipeline preview |
 | `logger` | Logger configuration |
@@ -158,6 +158,16 @@ cribl ingest dashboard
 
 # FinOps consumption tracking
 cribl finops consumption
+
+# Download and upload a lookup file
+cribl lookups download hosts.csv -g default -o hosts.csv
+cribl lookups upload hosts.csv -g default
+
+# Events in per source over the last hour
+cribl metrics query -a 'sum("total.in_events").as("events_in")' -w '__worker_group=="default"' -s input -e 1h
+
+# Only the fields you need
+cribl sources list -g default --fields id,type
 
 # Dry-run mode (reads run; the first write is printed and aborted)
 cribl --dry-run sources update my_src '{"description":"x"}' -g default

@@ -12,6 +12,7 @@ from cribl_cli.api.endpoints.workers import (
 )
 from cribl_cli.config.loader import config_from_context, load_config
 from cribl_cli.output.formatter import format_output
+from cribl_cli.utils.confirm import require_yes
 from cribl_cli.utils.errors import handle_error
 
 
@@ -96,13 +97,11 @@ def workers_get(group_id, use_table):
 @click.argument("group")
 @click.option("--yes", is_flag=True, help="Confirm deployment. Required to proceed.")
 def workers_deploy(group, yes):
-    if not yes:
-        click.echo(
-            f"WARNING: This will deploy configuration to live workers in '{group}'.\n"
-            "Pass --yes to confirm deployment, or preview with: cribl --dry-run workers deploy ... --yes",
-            err=True,
-        )
-        raise SystemExit(1)
+    require_yes(
+        yes,
+        f"This will deploy configuration to live workers in '{group}'.\n"
+        f"Pass --yes to confirm deployment, or preview with: cribl --dry-run workers deploy {group}",
+    )
     try:
         client = get_client()
         data = deploy_group(client, group)
