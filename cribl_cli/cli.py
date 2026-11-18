@@ -17,9 +17,39 @@ from cribl_cli.api.client import (
 from cribl_cli.config.loader import load_config
 
 
+def _hoist_fields(args: list[str]) -> list[str]:
+    """Move ``--fields`` to the front so it works after the subcommand too.
+
+    ``--fields`` is a global option, but it reads naturally at the end
+    (``cribl sources list --fields id,type``). Nothing after a bare ``--`` is
+    touched.
+    """
+    head: list[str] = []
+    rest: list[str] = []
+    i = 0
+    while i < len(args):
+        arg = args[i]
+        if arg == "--":
+            rest.extend(args[i:])
+            break
+        if arg == "--fields" and i + 1 < len(args):
+            head.extend(args[i:i + 2])
+            i += 2
+            continue
+        if arg.startswith("--fields="):
+            head.append(arg)
+        else:
+            rest.append(arg)
+        i += 1
+    return head + rest
+
+
 class CriblCLI(click.Group):
     """Root Click group. Its callback initialises the API clients before
     every command except ``config`` (which must work without credentials)."""
+
+    def parse_args(self, ctx: click.Context, args: list[str]) -> list[str]:
+        return super().parse_args(ctx, _hoist_fields(args))
 
     @staticmethod
     def init_clients(ctx: click.Context) -> None:
@@ -60,7 +90,8 @@ class CriblCLI(click.Group):
     "--timeout", type=click.FloatRange(min=1), default=None, envvar="CRIBL_TIMEOUT",
     help=f"Seconds to wait for each API request (default: {DEFAULT_TIMEOUT:g}; env CRIBL_TIMEOUT).",
 )
-@click.option("--fields", default=None, help="Comma-separated list of fields to include in output.")
+@click.option("--fields", default=None,
+              help="Comma-separated list of fields to include in output (accepted before or after the command).")
 @click.pass_context
 def cli(ctx: click.Context, **kwargs: Any) -> None:
     """Cribl CLI — command-line interface for the Cribl Cloud REST API."""
@@ -119,6 +150,11 @@ def _register_commands() -> None:
 
     for reg in REGISTRY:
         register_crud_command(cli, reg)
+
+    # File transfer for lookups needs more than CRUD; it joins the generated group.
+    from cribl_cli.commands.lookups import attach as attach_lookup_files
+
+    attach_lookup_files(cli.commands["lookups"])
 
 
 _register_commands()

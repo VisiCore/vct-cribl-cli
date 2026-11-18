@@ -1075,7 +1075,8 @@ def _covered(r: dict) -> str:
 
 
 @health_group.command("cpu", help="Show nodes with CPU spikes over a time window. Nodes keep limited "
-                      "history (Stream workers ~10 min): check covered_minutes / COVERED for the span actually analysed.")
+                      "history (often ~10 min): check covered_minutes / COVERED for the span actually analysed. "
+                      "For one node's CPU, memory, disk and load min/max/avg use `metrics node NODE --summary`.")
 @click.option("-g", "--group", default=None, help="Scope to a specific worker group.")
 @click.option("--hours", default=24, type=int, help="Lookback window in hours (default: 24).")
 @click.option("--threshold", default=80, type=int, help="CPU %% threshold to flag (default: 80).")
